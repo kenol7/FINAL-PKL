@@ -1,5 +1,5 @@
 const API = {
-  endpointregist: "https://smataco.my.id/dev/unez/CariRumahAja/api/registration.php?mode=POST",
+  endpointregist: "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=POST",
   endpointlogin: "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=GET"
 };
 

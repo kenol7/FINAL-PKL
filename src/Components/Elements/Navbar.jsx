@@ -3,8 +3,6 @@ import { Link, useLocation } from "react-router-dom"; // ✅ pakai useLocation
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
-import HalamanLogin from "../../Pages/HalamanLogin";
-import HalamanRegister from "../../Pages/HalamanRegister";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
