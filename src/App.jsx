@@ -6,6 +6,7 @@ import { LoadingProvider } from "./Context/Loader";
 import GlobalLoader from "./Context/GlobalLoader";
 import { HalamanKSB, HalamanLKS, HalamanLogin, HalamanRegister, HalamanVerif, Halamansk, HalamanDetail } from "./Pages/HalamanUtama";
 import Home from "./Pages/Home.jsx";
+import Beli from "./Pages/Beli.jsx";
 import "./App.css";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/katasandibaru" element={<HalamanKSB />} />
           <Route path="/verifikasikode" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
+          <Route path="/beli" element={<Beli />} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>

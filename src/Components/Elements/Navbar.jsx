@@ -3,10 +3,12 @@ import { Link, useLocation } from "react-router-dom"; // ✅ pakai useLocation
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
+import { HalamanLogin,HalamanRegister,HalamanLKS } from "../../Pages/HalamanUtama";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
+  const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation(); // ✅ ambil path sekarang
 
@@ -17,6 +19,14 @@ export default function Navbar() {
   const toggleDaftarPopup = () => {
     setShowDaftarPopup(!showDaftarPopup);
   };
+    const toggleLKSPopup = () => {
+    setShowLKSPopup(!showLKSPopup);
+  };
+  const routelks = () => {
+    toggleLoginPopup(),
+    toggleLKSPopup()
+  }
+
 
   // helper function buat ngecek active
   const isActive = (path) =>
@@ -150,7 +160,7 @@ export default function Navbar() {
             onClick={toggleLoginPopup}
             className="absolute inset-0 bg-black opacity-30"
           />
-          <HalamanLogin />
+          <HalamanLogin close={toggleLoginPopup} routelks={routelks}/>
         </div>
       )}
       {showDaftarPopup && (
@@ -159,7 +169,16 @@ export default function Navbar() {
             onClick={toggleDaftarPopup}
             className="absolute inset-0 bg-black opacity-30"
           />
-          <HalamanRegister />
+          <HalamanRegister close= {toggleDaftarPopup} />
+        </div>
+      )}
+      {showLKSPopup && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            onClick={toggleLKSPopup}
+            className="absolute inset-0 bg-black/35 backdrop-blur-md"
+          />
+          <HalamanLKS close={toggleLKSPopup}/>
         </div>
       )}
     </>
