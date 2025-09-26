@@ -26,6 +26,7 @@ const FrameData = [
   { id: 3, url: Frame3, duration: 5, alt: "Frame 3," },
 ];
 
+
 export default function Home() {
   const [rumahTerdekat, setrumahTerdekat] = useState([]);
   const [slider, setSlider] = useState(null);
@@ -59,6 +60,7 @@ export default function Home() {
         setrumahTerdekat(response);
         // console.log(rumahTerdekat.length);
       });
+
   };
   const textLocation = async () => {
     if (navigator.geolocation) {
@@ -122,7 +124,7 @@ export default function Home() {
     });
     setSlider(newSlider);
 
-    const interval = setInterval(() => {
+    const interval =setInterval(() => {
       newSlider.next();
     }, 5000);
 
@@ -131,7 +133,7 @@ export default function Home() {
       newSlider.destroy();
     };
   }, []);
-
+  
   useEffect(() => {
     const newSliderFitur = new KeenSlider(sliderFiturRef.current, {
       mode: "free-snap",
