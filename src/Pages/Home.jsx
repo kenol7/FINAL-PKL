@@ -26,39 +26,6 @@ const FrameData = [
   { id: 3, url: Frame3, duration: 5, alt: "Frame 3," },
 ];
 
-// const cardData = [
-//   {
-//     title: "Perumahan Griya 1",
-//     location: "Jakarta Timur",
-//     price: "Rp 2.589.500",
-//     size: "LT 97m² | LB 78m² | L1",
-//   },
-//   {
-//     title: "Perumahan Griya 2",
-//     location: "Jakarta Barat",
-//     price: "Rp 2.100.000",
-//     size: "LT 90m² | LB 75m² | L2",
-//   },
-//   {
-//     title: "Perumahan Griya 3",
-//     location: "Jakarta Utara",
-//     price: "Rp 3.000.000",
-//     size: "LT 100m² | LB 85m² | L1",
-//   },
-//   {
-//     title: "Perumahan Griya 4",
-//     location: "Jakarta Selatan",
-//     price: "Rp 2.750.000",
-//     size: "LT 120m² | LB 90m² | L2",
-//   },
-//   {
-//     title: "Perumahan Griya 5",
-//     location: "Jakarta Timur",
-//     price: "Rp 2.300.000",
-//     size: "LT 110m² | LB 95m² | L1",
-//   },
-// ];
-
 export default function Home() {
   const [rumahTerdekat, setrumahTerdekat] = useState([]);
   const [slider, setSlider] = useState(null);
@@ -92,19 +59,6 @@ export default function Home() {
         setrumahTerdekat(response);
         // console.log(rumahTerdekat.length);
       });
-
-    // const xmlhttp = new XMLHttpRequest();
-    // xmlhttp.onreadystatechange = function () {
-    //   if (this.readyState == 4 && this.status == 200) {
-    //     console.log("hore==" + this);
-    //   }
-    //   xmlhttp.open(
-    //     "GET",
-    //     ApiContribution + "?latitude=" + lat + "&longitude=" + lng + "&page=1",
-    //     true
-    //   );
-    //   xmlhttp.send();
-    // };
   };
   const textLocation = async () => {
     if (navigator.geolocation) {
@@ -168,7 +122,14 @@ export default function Home() {
     });
     setSlider(newSlider);
 
-    return () => newSlider.destroy();
+    const interval = setInterval(() => {
+      newSlider.next();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      newSlider.destroy();
+    };
   }, []);
 
   useEffect(() => {

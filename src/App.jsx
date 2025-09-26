@@ -14,7 +14,7 @@ function App() {
       <BrowserRouter>
         <GlobalLoader />
         <Routes>
-          <Route path="/" element={<HalamanLogin />} />
+          <Route path="/" element={<Home />} />
           <Route path="/kpr" element={<KprPage />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/profile" element={<Profile />} />
