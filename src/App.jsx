@@ -26,7 +26,7 @@ function App() {
           <Route path="/verifikasikode" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
           <Route path="/beli" element={<Beli />} />
-          <Route path="/detailrumah" element={<HalamanDetail />} />
+          <Route path="/detailrumah/:refid" element={<HalamanDetail />} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>

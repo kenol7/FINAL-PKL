@@ -19,6 +19,8 @@ import Footer from "../Components/Elements/Footer";
 import Frame1 from "../assets/frame1.png";
 import Frame2 from "../assets/frame2.png";
 import Frame3 from "../assets/frame3.png";
+import { Pointer } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const FrameData = [
   { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
@@ -43,12 +45,17 @@ export default function Home() {
   const [longitude, setLongitude] = useState(null);
   const [city, setCity] = useState(null);
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+  const navigate = useNavigate();
   let ApiContribution =
     "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&latitude=-6.208763&longitude=106.845599";
   //?latitude=-6.3474679&longitude=106.8246569&page=1
 
   const endpointImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
+
+    const handledetail = (ref_id) => {
+      navigate('/detailrumah/'+ref_id)
+    }
 
   const GetData = async (lat, lng) => {
     await fetch(
@@ -230,9 +237,9 @@ export default function Home() {
                 ref={swiperContainerRef}
               >
                 {rumahTerdekat.map((item, index) => (
-                  <SwiperSlide key={index}>
-                    <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl relative overflow-hidden shadow-lg">
-                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
+                  <SwiperSlide key={index} onClick={() => handledetail (item.ref_id)} style={{cursor:Pointer}}>
+                    <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl relative overflow-hidden shadow-lg" >
+                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]" >
                         {" "}
                         {item.ref_id}
                       </h3>

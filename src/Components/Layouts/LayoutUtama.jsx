@@ -9,9 +9,6 @@ import Footer from "../Elements/Footer";
 const LoginLayout = (props) => {
   const { title, children, height = "640px", onBack } = props;
 
-
-
-
   return (
     <div
       className="bg-[#549AF8] w-[406px] rounded-lg shadow-lg flex flex-col items-center px-8 pt-5 pb-8 relative"

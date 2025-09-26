@@ -3,6 +3,7 @@ import axios from "axios";
 import Sidebar from "../Components/Elements/Sidebar";
 import Navbar from "../Components/Elements/Navbar";
 import Footer from "../Components/Elements/Footer";
+import { useNavigate } from "react-router-dom";
 
 //DINIKIN 9 CARD UDAH BENER TAPI DIBIKIN SCROLL KEATAS CARDNYA JADI UTK BAGIAN SIDEBAR NYA STAY DAN YG CARD NYA YG SCROLL KEATAS CARD 9 TO 6 KALAU DI SCROLL
 
@@ -12,6 +13,11 @@ export default function KprPage() {
   const [loading, setLoading] = useState(true);
   const [itemsPerPage, setItemsPerPage] = useState(9);
 
+
+  const navigate = useNavigate();
+  const handledetail = (ref_id) => {
+    navigate('/detailrumah/' + ref_id)
+  }
   const endPoint =
     "https://smataco.my.id/dev/unez/CariRumahAja/api/contribution.php?mode=latest";
   const endpointImage =
@@ -84,6 +90,8 @@ export default function KprPage() {
                 <div
                   key={i}
                   className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30"
+                  
+                  onClick={() => handledetail (item.ref_id)}
                 >
                   <div className="rounded-xl overflow-hidden relative">
                     {/* Image */}
