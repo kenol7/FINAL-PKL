@@ -15,7 +15,6 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [kataSandi, setKataSandi] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleEmailChange = (newValue) => {
     setEmail(newValue);
@@ -101,7 +100,7 @@ const Login = () => {
           <label className="font-jakarta text-sm mb-1">Kata Sandi</label>
           <div className="relative w-full">
             <Input
-              type={showPassword ? "text" : "password"}
+              type="password"
               className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
               name="kata_sandi"
               onChange={handleKataSandiChange}
@@ -109,8 +108,6 @@ const Login = () => {
             <button
               type="button"
               className="absolute inset-y-0 right-2 flex items-center"
-              onClick={() => setShowPassword(!showPassword)}
-              
             >
               <img
                 src="/Component 2.png"

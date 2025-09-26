@@ -9,7 +9,7 @@ const DetailRumah = () => {
 
             <div className="w-full h-[606px] overflow-hidden bg-gray-200 rounded-lg shadow-md mt-[19px] mb-[96px]">
                 <div className="flex items-center justify-center bg-gray-200 h-full">
-                    <img src="/src/assets/profile.jpg" alt="fotorumah" />
+                    <img src="/src/assets/fotorumah.jpg" alt="fotorumah" />
                 </div>
             </div>
         </div>

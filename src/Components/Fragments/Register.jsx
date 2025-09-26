@@ -3,7 +3,6 @@ import Input from "../Elements/Input";
 import Button from "../Elements/Button";
 import { useNavigate } from 'react-router-dom';
 import API from "../../Config/Endpoint";
-import { HalamanVerif } from '../../Pages/HalamanUtama';
 
 
 const Register = () => {
@@ -63,42 +62,36 @@ const Register = () => {
 
         setShowPopup(false);
         const payload = {
-            name: namaLengkap,
+            nama_lengkap: namaLengkap,
             email: email,
-            phone: nomorTelepon,
-            password: kataSandi,
-            mode : 'POST'
+            nomer_telepon: nomorTelepon,
+            kata_sandi: kataSandi
         };
         console.log(JSON.stringify(payload))
         // console.log("Payload yang dikirim ke API:", payload);
 
-        // fetch(endPoint, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(payload)
-        // })
-        //     .then(res => res.json())
-        //     .then(response => {
-        //         console.log(response)
-        //         // if (response.success) {
-        //         //     alert(`Pendaftaran berhasil! Halo, ${namaLengkap}`);
-        //         //     // setShowuptrue(false)
-        //         //     navigate('/login')
-        //         // } else {
-        //         //     alert(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
-        //         // }
-        //     })
-        //     .catch(error => {
-        //         console.error("Error saat fetch:", error);
-        //         alert("Terjadi kesalahan pada jaringan. Silakan coba lagi.");
-        //     });
+        fetch(endPoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(response => {
+                if (response.success) {
+                    alert(`Pendaftaran berhasil! Halo, ${namaLengkap}`);
+                    // setShowuptrue(false)
+                    navigate('/login')
+                } else {
+                    alert(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
+                }
+            })
+            .catch(error => {
+                console.error("Error saat fetch:", error);
+                alert("Terjadi kesalahan pada jaringan. Silakan coba lagi.");
+            });
     };
-
-    const kodeotp = () => {
-        navigate ('/verifikasikode/4567/0852516253535')
-    }
 
     return (
         <>
@@ -192,7 +185,7 @@ const Register = () => {
                         Daftar
                     </Button>
                 </div>
-                <Button onClick={() => kodeotp()}>pindah halaman otp</Button>
+
             </form>
 
             {showPopup && (
@@ -226,7 +219,6 @@ const Register = () => {
 
                         <div className="flex gap-[73px] mt-[24px]">
                             <Button onClick={() => confirmSubmit()}>Iya</Button>
-
                         </div>
                     </div>
                 </div>

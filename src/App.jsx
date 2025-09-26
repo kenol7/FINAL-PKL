@@ -14,7 +14,7 @@ function App() {
       <BrowserRouter>
         <GlobalLoader />
         <Routes>
-          <Route path="/" element={<HalamanLogin />} />
+          <Route path="/" element={<Home />} />
           <Route path="/kpr" element={<KprPage />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/profile" element={<Profile />} />
@@ -22,9 +22,8 @@ function App() {
           <Route path="/register" element={<HalamanRegister />} />
           <Route path="/lupakatasandi" element={<HalamanLKS />} />
           <Route path="/katasandibaru" element={<HalamanKSB />} />
-          <Route path="/verifikasikode/:var" element={<HalamanVerif />} /> 
+          <Route path="/verifikasikode" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
-          <Route path="/detailrumah" element={<HalamanDetail />} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>

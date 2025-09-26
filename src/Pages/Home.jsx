@@ -21,43 +21,10 @@ import Frame2 from "../assets/frame2.png";
 import Frame3 from "../assets/frame3.png";
 
 const FrameData = [
-  { id: 1, url: Frame1, alt: "Frame 1" },
-  { id: 2, url: Frame2, alt: "Frame 2" },
-  { id: 3, url: Frame3, alt: "Frame 3" },
+  { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
+  { id: 2, url: Frame2, duration: 5, alt: "Frame 2," },
+  { id: 3, url: Frame3, duration: 5, alt: "Frame 3," },
 ];
-
-// const cardData = [
-//   {
-//     title: "Perumahan Griya 1",
-//     location: "Jakarta Timur",
-//     price: "Rp 2.589.500",
-//     size: "LT 97m² | LB 78m² | L1",
-//   },
-//   {
-//     title: "Perumahan Griya 2",
-//     location: "Jakarta Barat",
-//     price: "Rp 2.100.000",
-//     size: "LT 90m² | LB 75m² | L2",
-//   },
-//   {
-//     title: "Perumahan Griya 3",
-//     location: "Jakarta Utara",
-//     price: "Rp 3.000.000",
-//     size: "LT 100m² | LB 85m² | L1",
-//   },
-//   {
-//     title: "Perumahan Griya 4",
-//     location: "Jakarta Selatan",
-//     price: "Rp 2.750.000",
-//     size: "LT 120m² | LB 90m² | L2",
-//   },
-//   {
-//     title: "Perumahan Griya 5",
-//     location: "Jakarta Timur",
-//     price: "Rp 2.300.000",
-//     size: "LT 110m² | LB 95m² | L1",
-//   },
-// ];
 
 export default function Home() {
   const [rumahTerdekat, setrumahTerdekat] = useState([]);
@@ -92,19 +59,6 @@ export default function Home() {
         setrumahTerdekat(response);
         // console.log(rumahTerdekat.length);
       });
-
-    // const xmlhttp = new XMLHttpRequest();
-    // xmlhttp.onreadystatechange = function () {
-    //   if (this.readyState == 4 && this.status == 200) {
-    //     console.log("hore==" + this);
-    //   }
-    //   xmlhttp.open(
-    //     "GET",
-    //     ApiContribution + "?latitude=" + lat + "&longitude=" + lng + "&page=1",
-    //     true
-    //   );
-    //   xmlhttp.send();
-    // };
   };
   const textLocation = async () => {
     if (navigator.geolocation) {
@@ -168,7 +122,14 @@ export default function Home() {
     });
     setSlider(newSlider);
 
-    return () => newSlider.destroy();
+    const interval = setInterval(() => {
+      newSlider.next();
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      newSlider.destroy();
+    };
   }, []);
 
   useEffect(() => {
@@ -269,7 +230,10 @@ export default function Home() {
                 {rumahTerdekat.map((item, index) => (
                   <SwiperSlide key={index}>
                     <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl relative overflow-hidden shadow-lg">
-                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]"> {item.ref_id}</h3>
+                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
+                        {" "}
+                        {item.ref_id}
+                      </h3>
                       <img
                         src={endpointImage}
                         alt={item.cluster_apart_name}

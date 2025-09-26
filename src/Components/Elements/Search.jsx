@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function Search() {  
+export default function Search() {
   
   const provinces = ["Jakarta", "Jawa Timur", "Jawa Barat", "Yogyakarta"];
   const [selectedProvince, setSelectedProvince] = useState("Provinsi");

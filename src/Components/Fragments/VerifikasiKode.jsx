@@ -1,17 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
 import Button from '../Elements/Button';
-import { HalamanVerif } from '../../Pages/HalamanUtama';
 
 const OTPInput = () => {
-
-    const kode = HalamanVerif();
-    const {kodeotp,phone} = useParams();
     const [otp, setOtp] = useState(new Array(4).fill(""));
     const inputRefs = useRef([]);
     const [count, setCount] = useState(120)
 
-    
     const handleChange = (element, index) => {
         if (isNaN(element.value)) return false;
 
@@ -45,18 +39,17 @@ const OTPInput = () => {
         inputRefs.current[lastFilledIndex]?.focus();
     };
 
-    
+
     useEffect(() => {
-        console.log(kodeotp+'='+phone)
-       const intervalId = setInterval(()=> {
-            setCount(prevCount => prevCount-1)
-       },1000)
-       if(count!=0) {
-            return ()=> clearInterval(intervalId)
-            
-       } else {
-        clearInterval(intervalId)
-       }
+        const intervalId = setInterval(() => {
+            setCount(prevCount => prevCount - 1)
+        }, 1000)
+        if (count != 0) {
+            return () => clearInterval(intervalId)
+
+        } else {
+            clearInterval(intervalId)
+        }
     }, [count])
 
     return (
