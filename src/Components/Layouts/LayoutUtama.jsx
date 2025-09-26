@@ -1,11 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import SK from "../Fragments/SK";
 import Logo from "../../assets/logo.png";
 import DetailRumah from "../Fragments/DetailRumah";
 import Footer from "../Elements/Footer";
 
+
+
 const LoginLayout = (props) => {
   const { title, children, height = "640px", onBack } = props;
+
+
+
 
   return (
     <div
@@ -116,6 +121,12 @@ const VerifLayout = (props) => {
 };
 
 const DetailLayout = () => {
+  const location = useLocation
+    const isActive = (path) =>
+    location.pathname === path
+      ? "text-gray-700 font-semibold"
+      : "text-gray-700";
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="shadow">
@@ -133,22 +144,22 @@ const DetailLayout = () => {
 
             <ul className="lg:flex md:flex hidden gap-5 items-center text-gray-700">
               <li>
-                <a href="chatbot" className="hover:text-gray-900">
+                <a href="chatbot" className={`hover:text-gray-900 ${isActive("/chatbot")}`}>
                   Chatbot
                 </a>
               </li>
               <li>
-                <a href="" className="hover:text-gray-900">
+                <a href="" className={`hover:text-gray-900 ${isActive("/beli")}`}>
                   Beli Rumah
                 </a>
               </li>
               <li>
-                <a href="/kpr" className="hover:text-gray-900">
+                <a href="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
                   Hitung KPR
                 </a>
               </li>
               <li>
-                <a href="" className="hover:text-gray-900">
+                <a href="" className={`hover:text-gray-900 ${isActive("/profile")}`}>
                   Profile
                 </a>
               </li>
