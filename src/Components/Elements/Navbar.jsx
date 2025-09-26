@@ -169,7 +169,7 @@ export default function Navbar() {
             onClick={toggleDaftarPopup}
             className="absolute inset-0 bg-black opacity-30"
           />
-          <HalamanRegister />
+          <HalamanRegister close= {toggleDaftarPopup} />
         </div>
       )}
       {showLKSPopup && (
