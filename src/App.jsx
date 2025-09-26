@@ -15,7 +15,7 @@ function App() {
       <BrowserRouter>
         <GlobalLoader />
         <Routes>
-          <Route path="/" element={<HalamanDetail />} />
+          <Route path="/" element={<Home />} />
           <Route path="/kpr" element={<KprPage />} />
           <Route path="/chatbot" element={<ChatBot />} />
           <Route path="/profile" element={<Profile />} />
@@ -26,6 +26,7 @@ function App() {
           <Route path="/verifikasikode" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
           <Route path="/beli" element={<Beli />} />
+          <Route path="/detailrumah" element={<HalamanDetail />} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>
