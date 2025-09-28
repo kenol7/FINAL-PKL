@@ -11,9 +11,9 @@ const Register = () => {
     const [isChecked, setIsChecked] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
-    const [showPopuptrue, setShowuptrue] = useState (false)
+    const [showPopuptrue, setShowuptrue] = useState(false)
 
-    const endPoint = API.endpointlogin
+    const endPoint = API.endpointregist
 
     const [namaLengkap, setNamaLengkap] = useState('')
     const [email, setEmail] = useState('')
@@ -59,30 +59,26 @@ const Register = () => {
     };
 
     function confirmSubmit() {
-
         setShowPopup(false);
+
         const payload = {
-            nama_lengkap: namaLengkap,
+            name: namaLengkap,
             email: email,
-            nomer_telepon: nomorTelepon,
-            kata_sandi: kataSandi
+            phone: nomorTelepon,
+            password: kataSandi,
+            mode: 'POST',
+            action: 'register'
         };
-        console.log(JSON.stringify(payload))
-        // console.log("Payload yang dikirim ke API:", payload);
 
         fetch(endPoint, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
             .then(res => res.json())
             .then(response => {
-                if (response.success) {
-                    alert(`Pendaftaran berhasil! Halo, ${namaLengkap}`);
-                    // setShowuptrue(false)
-                    navigate('/login')
+                if (response.status === "success") {
+                    navigate("/verifikasikode", { state: { otp: response.kode, phone: nomorTelepon } });
                 } else {
                     alert(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
                 }
@@ -91,12 +87,11 @@ const Register = () => {
                 console.error("Error saat fetch:", error);
                 alert("Terjadi kesalahan pada jaringan. Silakan coba lagi.");
             });
-    };
-
+    }
     return (
         <>
             <form
-                className={`w-full flex flex-col items-center gap-6 transition-all duration-200 ${showPopup,showPopuptrue ? "blur-sm" : ""}`}
+                className={`w-full flex flex-col items-center gap-6 transition-all duration-200 ${showPopup, showPopuptrue ? "blur-sm" : ""}`}
                 method='POST'
                 onSubmit={handleSubmit}
 
@@ -205,24 +200,28 @@ const Register = () => {
                 </div>
             )}
 
-            
+
             {showPopuptrue && (
-                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                <div className="fixed inset-0 flex items-center justify-center z-50">
                     <div
                         className="bg-[#EBEDF0] w-[533px] h-[186px] rounded-[20px] shadow-lg flex flex-col items-center px-8 pt-5 pb-8 relative animate-[popup_0.2s_ease-out]"
                     >
                         <h1 className="font-jakarta text-base text-center">
-                            “Selamat! Akun anda sudah berhasil dibuat nih. <br/>
-                            Silahkan kembali masuk untuk menggunakan <br/>
+                            “Selamat! Akun anda sudah berhasil dibuat nih. <br />
+                            Silahkan kembali masuk untuk menggunakan <br />
                             layanan kami”
                         </h1>
 
                         <div className="flex gap-[73px] mt-[24px]">
-                            <Button onClick={() => confirmSubmit()}>Iya</Button>
+                            <Button onClick={() => {
+                                setShowuptrue(false);
+                                setShowPopup(false);
+                                confirmSubmit();
+                            }}>Iya</Button>
                         </div>
                     </div>
-                </div>
-                
+                </div >
+
             )}
 
         </>

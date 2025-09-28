@@ -79,6 +79,8 @@ const Halamansk = () => {
 };
 
 const HalamanVerif = () => {
+// const location = useLocation();
+//   const { otp, phone } = location.state || {};
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
       <div className="absolute inset-0 bg-white blur-sm"></div>

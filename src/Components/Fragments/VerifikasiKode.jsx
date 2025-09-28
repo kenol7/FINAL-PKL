@@ -1,82 +1,102 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Button from '../Elements/Button';
+import { useLocation, useNavigate } from 'react-router-dom';
+import Button from "../Elements/Button";
 
 const OTPInput = () => {
-    const [otp, setOtp] = useState(new Array(4).fill(""));
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { otp: otpFromAPI, phone } = location.state || {};
+    const length = 4;
+    const [otp, setOtp] = useState(new Array(length).fill(""));
     const inputRefs = useRef([]);
-    const [count, setCount] = useState(120)
+    const [count, setCount] = useState(120);
+    const [isResendAllowed, setIsResendAllowed] = useState(false);
 
-    const handleChange = (element, index) => {
-        if (isNaN(element.value)) return false;
+    useEffect(() => {
+        if (otpFromAPI) {
+            const digits = otpFromAPI.toString().slice(0, length).split('');
+            const newOtp = new Array(length).fill("");
+            digits.forEach((d, i) => { if (!isNaN(d)) newOtp[i] = d; });
+            setOtp(newOtp);
 
-        setOtp([...otp.map((data, idx) => (idx === index ? element.value : data))]);
-
-        if (element.value !== "" && index < 5) {
-            inputRefs.current[index + 1].focus();
+            const focusIndex = Math.min(digits.length, length - 1);
+            setTimeout(() => inputRefs.current[focusIndex]?.focus(), 50);
         }
+        console.log("OTP dari API:", otpFromAPI);
+    }, [otpFromAPI]);
+
+    const handleChange = (target, index) => {
+        const val = target.value;
+        if (val && isNaN(val)) return;
+        const newOtp = [...otp];
+        newOtp[index] = val.slice(-1);
+        setOtp(newOtp);
+        if (val !== "" && index < length - 1) inputRefs.current[index + 1]?.focus();
     };
 
     const handleKeyDown = (e, index) => {
-        if (e.key === "Backspace" && index > 0 && otp[index] === "") {
-            inputRefs.current[index - 1].focus();
+        if (e.key === "Backspace") {
+            if (otp[index] === "" && index > 0) inputRefs.current[index - 1]?.focus();
+            else { const newOtp = [...otp]; newOtp[index] = ""; setOtp(newOtp); }
         }
     };
 
     const handlePaste = (e) => {
         e.preventDefault();
-        const pasteData = e.clipboardData.getData("text").slice(0, 4).split('');
-
-        const newOtp = [...otp];
-        pasteData.forEach((char, index) => {
-            if (!isNaN(char)) {
-                newOtp[index] = char;
-            }
-        });
-
+        const pasteData = e.clipboardData.getData("text").replace(/\s/g, '').slice(0, length).split('');
+        if (!pasteData.length) return;
+        const newOtp = new Array(length).fill("");
+        pasteData.forEach((char, idx) => { if (!isNaN(char)) newOtp[idx] = char; });
         setOtp(newOtp);
-
-        const lastFilledIndex = pasteData.length > 0 ? Math.min(pasteData.length - 1, 5) : 0;
-        inputRefs.current[lastFilledIndex]?.focus();
+        setTimeout(() => inputRefs.current[Math.min(pasteData.length, length - 1)]?.focus(), 50);
     };
 
-
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            setCount(prevCount => prevCount - 1)
-        }, 1000)
-        if (count != 0) {
-            return () => clearInterval(intervalId)
+        if (count <= 0) return setIsResendAllowed(true);
+        const intervalId = setInterval(() => setCount(prev => prev - 1), 1000);
+        return () => clearInterval(intervalId);
+    }, [count]);
 
+    const handleSubmit = () => {
+        const code = otp.join('').trim();
+        if (code === otpFromAPI?.toString().trim()) {
+            navigate('/home');
         } else {
-            clearInterval(intervalId)
+            setOtp(new Array(length).fill(""));
+            inputRefs.current[0]?.focus();
+            alert('Kode OTP salah, silakan coba lagi');
         }
-    }, [count])
+    };
+
+    const handleResend = () => {
+        if (!isResendAllowed) return;
+        setCount(120);
+        setIsResendAllowed(false);
+    };
 
     return (
-        <div className="flex flex-col items-center justify-center w-full mt-15 gap-4">
-            <p className="text-black font-jakarta text-sm text-center mb-6 opacity-90 max-w-xs">
-                Lihat kotak masuk email kamu dan masukkan kode verifikasinya.
-            </p>
-
-            <div className="flex justify-center space-x-3 mb-12">
+        <div className="flex flex-col items-center mt-15 gap-4">
+            <p className="text-center mb-6">Masukkan kode verifikasi yang dikirim ke nomor {phone}</p>
+            <div className="flex space-x-3 mb-12 ">
                 {otp.map((data, index) => (
                     <input
                         key={index}
-                        ref={(input) => (inputRefs.current[index] = input)}
+                        ref={(el) => (inputRefs.current[index] = el)}
                         type="text"
                         maxLength="1"
                         value={data}
                         onChange={(e) => handleChange(e.target, index)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
                         onPaste={handlePaste}
-                        className="w-12 h-12 text-center text-xl font-bold bg-white border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition shadow-sm"
+                        className="w-12 h-12 text-center text-xl font-bold border bg-amber-50 rounded-lg focus:border-blue-500"
                     />
                 ))}
             </div>
-            <label> {count} detik </label>
-            <Button className="text-center mx-auto mt-10">
-                Lanjut
-            </Button>
+            <label>{count > 0 ? `${count} detik` : 'Kirim ulang sekarang'}</label>
+            <div className="flex gap-4 mt-6">
+                <Button onClick={handleSubmit}>Lanjut</Button>
+                <Button onClick={handleResend} disabled={!isResendAllowed}>Kirim Ulang</Button>
+            </div>
         </div>
     );
 };

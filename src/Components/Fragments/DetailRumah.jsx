@@ -15,10 +15,10 @@ const DetailRumah = () => {
     let paramRefId = ''
 
 
-    const GetParams = () => {
+    // const GetParams = () => {
 
 
-    }
+    // }
     useEffect(() => {
         const path = window.location.pathname;
         const segments = path.split('/');
@@ -35,7 +35,7 @@ const DetailRumah = () => {
                 {detail.map(item => (
                     <div className="mt-[19px] mb-[96px]">
                         <div className="flex items-center justify-between w-full font-jakarta text-xs">
-                            <button className="px-3 p-3 h-8 rounded-md bg-[#F4D77B] hover:bg-[#E7C555] transition flex items-center justify-center mr-4 " onClick={() => navigate("/kpr")}>
+                            <button className="px-3 p-3 h-8 rounded-md bg-[#F4D77B] hover:bg-[#E7C555] transition flex items-center justify-center mr-4 " onClick={() => navigate("/")}>
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     className="h-5 w-5"
@@ -60,7 +60,7 @@ const DetailRumah = () => {
                         <div className="mt-[21px] flex items-center justify-between w-full ">
                             <div className="font-jakarta">
                                 <h1 className="text-2xl font-bold">{item.cluster_apart_name}</h1>
-                                <h3 className="text-sm">Jakarta</h3>
+                                <h3 className="text-sm">{item.city}</h3>
                             </div>
                             <div>
                                 <div className="bg-[#E7C555] rounded-2xl w-[244px] h-[45px] flex items-center justify-center text-center text-2xl text-semibold ">
@@ -83,12 +83,12 @@ const DetailRumah = () => {
                                 </div>
                                 <div className="border-l h-6"></div>
                                 <div className="flex flex-col text-center">
-                                    <span className="font-semibold text-xl">107m²</span>
+                                    <span className="font-semibold text-xl">{item.square_building}m²</span>
                                     <span className="text-gray-600 text-xs">L.Bangunan</span>
                                 </div>
                                 <div className="border-l h-6"></div>
                                 <div className="flex flex-col text-center">
-                                    <span className="font-semibold text-xl">1</span>
+                                    <span className="font-semibold text-xl">{item.property_floor}</span>
                                     <span className="text-gray-600 text-xs">Lantai</span>
                                 </div>
                                 <div className="border-l h-6"></div>
