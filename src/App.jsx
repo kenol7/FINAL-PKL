@@ -21,7 +21,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<HalamanLogin />} />
           <Route path="/register" element={<HalamanRegister />} />
-          <Route path="/lupakatasandi" element={<HalamanLKS />} />
+          {/* <Route path="/lupakatasandi" element={<HalamanLKS />} /> */}
           <Route path="/katasandibaru" element={<HalamanKSB />} />
           <Route path="/verifikasikode" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
