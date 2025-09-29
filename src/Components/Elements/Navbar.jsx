@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // ✅ pakai useLocation
+import { Link, useLocation } from "react-router-dom"; 
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -7,15 +7,14 @@ import {
   HalamanLogin,
   HalamanRegister,
   HalamanLKS,
-} from "../../Pages/HalamanUtama";
+} from "../../pages/HalamanUtama";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation(); // ✅ ambil path sekarang
-
+  const location = useLocation(); 
   const toggleLoginPopup = () => {
     setShowLoginPopup(!showLoginPopup);
   };
