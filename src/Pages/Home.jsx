@@ -21,13 +21,13 @@ import Frame2 from "../assets/frame2.png";
 import Frame3 from "../assets/frame3.png";
 import { Pointer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {Link} from "react-router-dom";
 
 const FrameData = [
   { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
   { id: 2, url: Frame2, duration: 5, alt: "Frame 2," },
   { id: 3, url: Frame3, duration: 5, alt: "Frame 3," },
 ];
-
 
 export default function Home() {
   const [rumahTerdekat, setrumahTerdekat] = useState([]);
@@ -44,7 +44,7 @@ export default function Home() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [city, setCity] = useState(null);
-  const [nama_lengkap, setNama_lengkap] = useState ('')
+  const [nama_lengkap, setNama_lengkap] = useState("");
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
   const navigate = useNavigate();
 
@@ -55,9 +55,9 @@ export default function Home() {
   const endpointImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
-    const handledetail = (ref_id) => {
-      navigate('/detailrumah/'+ref_id)
-    }
+  const handledetail = (ref_id) => {
+    navigate("/detailrumah/" + ref_id);
+  };
 
   const GetData = async (lat, lng) => {
     await fetch(
@@ -69,7 +69,6 @@ export default function Home() {
         setrumahTerdekat(response);
         // console.log(rumahTerdekat.length);
       });
-
   };
   const textLocation = async () => {
     if (navigator.geolocation) {
@@ -102,7 +101,7 @@ export default function Home() {
     // );
   };
   useEffect(() => {
-    setNama_lengkap(localStorage.getItem('auth_fullname'))
+    setNama_lengkap(localStorage.getItem("auth_fullname"));
     textLocation();
   }, []);
 
@@ -134,7 +133,7 @@ export default function Home() {
     });
     setSlider(newSlider);
 
-    const interval =setInterval(() => {
+    const interval = setInterval(() => {
       newSlider.next();
     }, 5000);
 
@@ -143,7 +142,7 @@ export default function Home() {
       newSlider.destroy();
     };
   }, []);
-  
+
   useEffect(() => {
     const newSliderFitur = new KeenSlider(sliderFiturRef.current, {
       mode: "free-snap",
@@ -240,9 +239,13 @@ export default function Home() {
                 ref={swiperContainerRef}
               >
                 {rumahTerdekat.map((item, index) => (
-                  <SwiperSlide key={index} onClick={() => handledetail (item.ref_id)} style={{cursor:Pointer}}>
-                    <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl relative overflow-hidden shadow-lg" >
-                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]" >
+                  <SwiperSlide
+                    key={index}
+                    onClick={() => handledetail(item.ref_id)}
+                    style={{ cursor: Pointer }}
+                  >
+                    <div className="xl:w-[468px] lg:w-[400px] md:w-[400px] h-auto rounded-xl relative overflow-hidden shadow-lg">
+                      <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
                         {" "}
                         {item.ref_id}
                       </h3>
@@ -299,9 +302,12 @@ export default function Home() {
                 <h3 className="xl:text-3xl lg:text-3xl text-xl xl:w-[600px] w-auto">
                   Mau cari rekomendasi rumah yang cepat sesuai konsepmu?
                 </h3>
-                <a className="bg-blue-400 font-medium px-20 py-2.5 rounded-xl shadow-md cursor-pointer">
+                <Link
+                  to="/chatbot"
+                  className="bg-blue-400 font-medium px-20 py-2.5 rounded-xl shadow-md cursor-pointer"
+                >
                   CHATBOT
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -314,9 +320,12 @@ export default function Home() {
                 <h3 className="xl:text-3xl lg:text-3xl text-xl xl:w-[600px] w-auto">
                   Mau hitung KPR rumah yang cepat dan sesuai?
                 </h3>
-                <a className="bg-blue-400 font-medium px-20 py-2.5 rounded-xl shadow-md cursor-pointer">
+                <Link
+                  to="/kpr"
+                  className="bg-blue-400 font-medium px-20 py-2.5 rounded-xl shadow-md cursor-pointer"
+                >
                   KALKULATOR KPR
-                </a>
+                </Link>
               </div>
             </div>
             <div>
@@ -335,9 +344,12 @@ export default function Home() {
                   <h3 className="text-xl">
                     Mau cari rekomendasi rumah yang cepat sesuai konsepmu?
                   </h3>
-                  <a className="bg-blue-400 font-medium px-12 py-3 md:px-20 md:py-2.5 rounded-xl shadow-md cursor-pointer">
+                  <Link
+                    to="/chatbot"
+                    className="bg-blue-400 font-medium px-12 py-3 md:px-20 md:py-2.5 rounded-xl shadow-md cursor-pointer"
+                  >
                     CHATBOT
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -348,9 +360,12 @@ export default function Home() {
                   <h3 className="text-xl">
                     Mau hitung KPR rumah yang cepat dan sesuai?
                   </h3>
-                  <a className="bg-blue-400 font-medium px-12 py-3 md:px-20 md:py-2.5 rounded-xl shadow-md cursor-pointer">
+                  <Link
+                    to="/kpr"
+                    className="bg-blue-400 font-medium px-12 py-3 md:px-20 md:py-2.5 rounded-xl shadow-md cursor-pointer"
+                  >
                     KALKULATOR KPR
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

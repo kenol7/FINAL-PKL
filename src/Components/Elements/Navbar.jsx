@@ -14,7 +14,8 @@ export default function Navbar() {
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation(); 
+  const location = useLocation(); // ✅ ambil path sekarang
+
   const toggleLoginPopup = () => {
     setShowLoginPopup(!showLoginPopup);
   };
@@ -66,6 +67,11 @@ export default function Navbar() {
                 className={`hover:text-gray-500 ${isActive("/beli")}`}
               >
                 Beli Rumah
+              </Link>
+            </li>
+            <li>
+              <Link to="" className={`hover:text-gray-500 ${isActive("")}`}>
+                Jual Rumah
               </Link>
             </li>
             <li>
@@ -131,6 +137,9 @@ export default function Navbar() {
           >
             Beli Rumah
           </Link>
+          <Link to="" className={`hover:text-gray-900 ${isActive("")}`}>
+            Jual Rumah
+          </Link>
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
             Hitung KPR
           </Link>
@@ -184,4 +193,4 @@ export default function Navbar() {
       )}
     </>
   );
-}
+};

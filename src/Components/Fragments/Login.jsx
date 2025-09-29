@@ -7,7 +7,7 @@ import { auth, googleProvider } from "../../Firebase/config";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 
-const Login = ({ route }) => {
+const Login = () => {
   // const endPoint = `${API.endpointlogin}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(kataSandi)}`;
 
   const [loading, setLoading] = useState(false);
@@ -15,6 +15,7 @@ const Login = ({ route }) => {
 
   const [email, setEmail] = useState("");
   const [kataSandi, setKataSandi] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleEmailChange = (newValue) => {
     setEmail(newValue);
@@ -59,6 +60,10 @@ const Login = ({ route }) => {
 
       if (response.status === "success") {
         alert(`Hello, ${response.user.nama_lengkap}`);
+        localStorage.setItem("auth_phone", response.user.phoneReal);
+        localStorage.setItem("auth_email",response.user.email);
+        localStorage.setItem("auth_fullname",response.user.namaLengkap);
+        localStorage.setItem("tipe_time", Date.now());
       } else {
         alert(response.message || "Password atau Email Salah");
         setEmail("");
@@ -100,7 +105,7 @@ const Login = ({ route }) => {
           <label className="font-jakarta text-sm mb-1">Kata Sandi</label>
           <div className="relative w-full">
             <Input
-              type="password"
+              type={showPassword ? "text" : "password"}
               className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
               name="kata_sandi"
               onChange={handleKataSandiChange}
@@ -108,6 +113,7 @@ const Login = ({ route }) => {
             <button
               type="button"
               className="absolute inset-y-0 right-2 flex items-center"
+              onClick={() => setShowPassword(!showPassword)}
             >
               <img
                 src="/Component 2.png"
@@ -121,7 +127,7 @@ const Login = ({ route }) => {
         <button
           type="button"
           className="text-xs text-black mt-6 hover:underline"
-          onClick={route}
+          onClick={() => navigate("/lupakatasandi")}
         >
           Lupa Kata Sandi?
         </button>
