@@ -14,7 +14,7 @@ import { VerifLayout } from "../Components/Layouts/LayoutUtama";
 const HalamanKSB = () => {
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0 bg-white blur-sm"></div>
+      <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <KSBLayout title="Kata Sandi Baru">
           <KataSandiBaru />
@@ -27,7 +27,7 @@ const HalamanKSB = () => {
 const HalamanLKS = ({ close }) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0 bg-white blur-sm"></div>
+      <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <LKSLayout title="Lupa Kata Sandi" onBack={close}>
           <LupaKataSandi />
@@ -40,7 +40,7 @@ const HalamanLKS = ({ close }) => {
 const HalamanLogin = ({ close, routeLKS }) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0 bg-white blur-sm"></div>
+      <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <LoginLayout title="Masuk" onBack={close}>
           <Login route={routeLKS} />
@@ -53,7 +53,7 @@ const HalamanLogin = ({ close, routeLKS }) => {
 const HalamanRegister = ({ close }) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0 bg-white blur-sm"></div>
+      <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <RegisterLayout title={"Daftar"} onBack={close}>
           <Register />
@@ -67,7 +67,7 @@ const Halamansk = () => {
   return (
     <div>
       <div className="relative min-h-screen flex items-center justify-center ">
-        <div className="absolute inset-0 bg-white blur-sm"></div>
+        <div className="absolute inset-0  blur-sm"></div>
         <div className="relative z-10">
           <SKLayout>
             <SK />
@@ -83,7 +83,7 @@ const HalamanVerif = () => {
 //   const { otp, phone } = location.state || {};
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0 bg-white blur-sm"></div>
+      <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <VerifLayout title="Verifikasi Kode">
           <OTPInput />

@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; // ✅ pakai useLocation
+import { Link, useLocation } from "react-router-dom"; 
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
-import { HalamanLogin,HalamanRegister,HalamanLKS } from "../../Pages/HalamanUtama";
+import {
+  HalamanLogin,
+  HalamanRegister,
+  HalamanLKS,
+} from "../../pages/HalamanUtama";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation(); // ✅ ambil path sekarang
-
+  const location = useLocation(); 
   const toggleLoginPopup = () => {
     setShowLoginPopup(!showLoginPopup);
   };
@@ -19,14 +22,12 @@ export default function Navbar() {
   const toggleDaftarPopup = () => {
     setShowDaftarPopup(!showDaftarPopup);
   };
-    const toggleLKSPopup = () => {
+  const toggleLKSPopup = () => {
     setShowLKSPopup(!showLKSPopup);
   };
   const routelks = () => {
-    toggleLoginPopup(),
-    toggleLKSPopup()
-  }
-
+    toggleLoginPopup(), toggleLKSPopup();
+  };
 
   // helper function buat ngecek active
   const isActive = (path) =>
@@ -158,18 +159,18 @@ export default function Navbar() {
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
             onClick={toggleLoginPopup}
-            className="absolute inset-0 bg-black opacity-30"
+            className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLogin close={toggleLoginPopup} routelks={routelks}/>
+          <HalamanLogin close={toggleLoginPopup} routeLKS={routelks} />
         </div>
       )}
       {showDaftarPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
             onClick={toggleDaftarPopup}
-            className="absolute inset-0 bg-black opacity-30"
+            className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanRegister close= {toggleDaftarPopup} />
+          <HalamanRegister close={toggleDaftarPopup} />
         </div>
       )}
       {showLKSPopup && (
@@ -178,7 +179,7 @@ export default function Navbar() {
             onClick={toggleLKSPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLKS close={toggleLKSPopup}/>
+          <HalamanLKS close={toggleLKSPopup} />
         </div>
       )}
     </>

@@ -7,7 +7,7 @@ import { auth, googleProvider } from "../../Firebase/config";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 
-const Login = () => {
+const Login = ({ route }) => {
   // const endPoint = `${API.endpointlogin}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(kataSandi)}`;
 
   const [loading, setLoading] = useState(false);
@@ -121,7 +121,7 @@ const Login = () => {
         <button
           type="button"
           className="text-xs text-black mt-6 hover:underline"
-          onClick={() => navigate("/lupakatasandi")}
+          onClick={route}
         >
           Lupa Kata Sandi?
         </button>
