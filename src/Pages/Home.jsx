@@ -44,8 +44,10 @@ export default function Home() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [city, setCity] = useState(null);
+  const [nama_lengkap, setNama_lengkap] = useState ('')
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
   const navigate = useNavigate();
+
   let ApiContribution =
     "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&latitude=-6.208763&longitude=106.845599";
   //?latitude=-6.3474679&longitude=106.8246569&page=1
@@ -100,6 +102,7 @@ export default function Home() {
     // );
   };
   useEffect(() => {
+    setNama_lengkap(localStorage.getItem('auth_fullname'))
     textLocation();
   }, []);
 
@@ -193,7 +196,7 @@ export default function Home() {
             <div className="w-1 h-1 md:block hidden" />
             <div className="">
               <h3 className="font-semibold xl:text-2xl lg:text-2xl md:text-2xl text-lg">
-                Rumah Terdekat
+                Rumah Terdekat {nama_lengkap}
               </h3>
               <h3 className="flex xl:justify-center lg:justify-center md:justify-center justify-normal gap-1">
                 {city}

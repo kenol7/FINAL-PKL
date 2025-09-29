@@ -19,7 +19,7 @@ const Register = () => {
     const [email, setEmail] = useState('')
     const [nomorTelepon, setNomorTelepon] = useState('')
     const [kataSandi, setKataSandi] = useState('')
-
+    
 
     const handleNamaLengkapChange = (newValue) => {
         setNamaLengkap(newValue)
@@ -58,10 +58,11 @@ const Register = () => {
         setShowPopup(true);
     };
 
+
     function confirmSubmit() {
         setShowPopup(false);
 
-        const payload = {
+        let payload = {
             name: namaLengkap,
             email: email,
             phone: nomorTelepon,
@@ -70,19 +71,20 @@ const Register = () => {
             action: 'register'
         };
 
-        fetch(endPoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(res => res.json())
-            .then(response => {
-                if (response.status === "success") {
-                    navigate("/verifikasikode", { state: { otp: response.kode, phone: nomorTelepon } });
-                } else {
-                    alert(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
-                }
+            fetch(endPoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
+                .then(res => res.json())
+                .then(response => {
+                    console.log(response)
+                   if (response.status === "success") {
+                            navigate("/verifikasikode/"+ response.kode + "/" + response.name + "/" +response.email);
+                        } else {
+                            alert(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
+                        }
+                    })
             .catch(error => {
                 console.error("Error saat fetch:", error);
                 alert("Terjadi kesalahan pada jaringan. Silakan coba lagi.");

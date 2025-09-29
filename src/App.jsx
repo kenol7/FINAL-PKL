@@ -23,7 +23,7 @@ function App() {
           <Route path="/register" element={<HalamanRegister />} />
           <Route path="/lupakatasandi" element={<HalamanLKS />} />
           <Route path="/katasandibaru" element={<HalamanKSB />} />
-          <Route path="/verifikasikode" element={<HalamanVerif />} />
+          <Route path="/verifikasikode/:code/:name/:email" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
           <Route path="/beli" element={<Beli />} />
           <Route path="/detailrumah/:refid" element={<HalamanDetail />} />

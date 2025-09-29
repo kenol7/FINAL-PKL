@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from "../Elements/Button";
+import API from '../../Config/Endpoint';
 
 const OTPInput = () => {
     const location = useLocation();
@@ -11,19 +12,49 @@ const OTPInput = () => {
     const inputRefs = useRef([]);
     const [count, setCount] = useState(120);
     const [isResendAllowed, setIsResendAllowed] = useState(false);
+    const [otpReal,setOtpReal] = useState('')
+    const [phoneReal,setPhoneReal] = useState('')
+    const [namaLengkap,setNamaLengkap] = useState('')
+    const [email, setEmail] = useState('')
 
-    useEffect(() => {
-        if (otpFromAPI) {
-            const digits = otpFromAPI.toString().slice(0, length).split('');
-            const newOtp = new Array(length).fill("");
-            digits.forEach((d, i) => { if (!isNaN(d)) newOtp[i] = d; });
-            setOtp(newOtp);
+    let paramCode = ''
 
-            const focusIndex = Math.min(digits.length, length - 1);
-            setTimeout(() => inputRefs.current[focusIndex]?.focus(), 50);
+    useEffect(()=> {
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        paramCode = segments[2];
+        setNamaLengkap(segments[3])
+        setEmail(segments[4])
+        let payload = {
+            kode : paramCode,
+            action : 'decrypt'
         }
-        console.log("OTP dari API:", otpFromAPI);
-    }, [otpFromAPI]);
+        fetch (API.endpointregist,{
+            method: 'POST',
+            headers : {
+                'Content-Type' : 'application/json'
+            },
+            body : JSON.stringify(payload)
+        })
+        .then(res=>res.json())
+        .then(response=> {
+            setOtpReal(response.otp)
+            setPhoneReal(response.nomer_telepon)
+        })
+    },[])
+
+    // useEffect(() => {
+    //     if (otpFromAPI) {
+    //         const digits = otpFromAPI.toString().slice(0, length).split('');
+    //         const newOtp = new Array(length).fill("");
+    //         digits.forEach((d, i) => { if (!isNaN(d)) newOtp[i] = d; });
+    //         setOtp(newOtp);
+
+    //         const focusIndex = Math.min(digits.length, length - 1);
+    //         setTimeout(() => inputRefs.current[focusIndex]?.focus(), 50);
+    //     }
+    //     console.log("OTP dari API:", otpFromAPI);
+    // }, [otpFromAPI]);
 
     const handleChange = (target, index) => {
         const val = target.value;
@@ -59,8 +90,16 @@ const OTPInput = () => {
 
     const handleSubmit = () => {
         const code = otp.join('').trim();
-        if (code === otpFromAPI?.toString().trim()) {
-            navigate('/home');
+        
+        console.log(code + ' = ' + otpReal + "=" + namaLengkap)
+
+        if (code === otpReal) {
+            localStorage.setItem('auth_phone',phoneReal)
+            localStorage.setItem('auth_email',email)
+            localStorage.setItem('auth_fullname',namaLengkap)
+            
+      
+            navigate('/');
         } else {
             setOtp(new Array(length).fill(""));
             inputRefs.current[0]?.focus();
