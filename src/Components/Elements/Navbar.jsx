@@ -7,7 +7,7 @@ import {
   HalamanLogin,
   HalamanRegister,
   HalamanLKS,
-} from "../../pages/HalamanUtama";
+} from "../../Pages/HalamanUtama";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
