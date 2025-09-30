@@ -1,20 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Ditambahkan: Impor axios yang hilang
-
-// Import komponen UI
+import axios from "axios"; 
 import Search from "../Components/Elements/Search";
 import Footer from "../Components/Elements/Footer";
 import Navbar from "../Components/Elements/Navbar";
+import { Link, useNavigate } from "react-router-dom";
 
-// --- Konstanta ---
 const API_ENDPOINT = "https://smataco.my.id/dev/unez/CariRumahAja/api/contribution.php?mode=latest";
 const IMAGE_BASE_URL = "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
-// --- Komponen Pendukung ---
-
-/**
- * Komponen untuk menampilkan efek shimmer saat loading.
- */
 const SkeletonCard = () => (
   <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
     <div className="h-[200px] bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
@@ -32,8 +25,8 @@ const SkeletonCard = () => (
 /**
  * Komponen untuk menampilkan satu kartu properti.
  */
-const PropertyCard = ({ item }) => (
-  <div className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30">
+const PropertyCard = ({ item,onClick }) => (
+  <div className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30" onClick={onClick}>
     <div className="rounded-xl overflow-hidden relative">
       <div className="w-full h-[200px] bg-gray-300 flex items-center justify-center">
         <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
@@ -81,7 +74,11 @@ export default function Beli() {
   const [dataRumah, setDataRumah] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [itemsPerPage] = useState(12); // Jumlah kartu sudah 12
+  const [itemsPerPage] = useState(12);
+  const Navigate = useNavigate();
+  const handledetail = (ref_id) => {
+    Navigate("/detailrumah/" + ref_id);
+  }
 
   // Fetch data dari API saat komponen pertama kali dimuat
   useEffect(() => {
@@ -89,13 +86,12 @@ export default function Beli() {
     axios
       .get(API_ENDPOINT)
       .then((res) => {
-        // Menangani berbagai kemungkinan format respons API
         if (Array.isArray(res.data)) {
           setDataRumah(res.data);
         } else if (res.data && Array.isArray(res.data.data)) {
           setDataRumah(res.data.data);
         } else {
-          setDataRumah([]); // Set ke array kosong jika data tidak valid
+          setDataRumah([]); 
         }
       })
       .catch((err) => {
@@ -171,7 +167,7 @@ export default function Beli() {
               style={{ maxHeight: "calc(105vh - 200px)" }}
             >
               {currentData.map((item) => (
-                <PropertyCard key={item.ref_id} item={item} />
+                <PropertyCard key={item.ref_id} item={item} onClick={() => handledetail(item.ref_id)} />
               ))}
             </div>
 

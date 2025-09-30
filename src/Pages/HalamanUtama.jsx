@@ -43,7 +43,7 @@ const HalamanLogin = ({ close, routeLKS }) => {
       <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <LoginLayout title="Masuk" onBack={close}>
-          <Login route={routeLKS} />
+          <Login route={routeLKS} onClose={close}/>
         </LoginLayout>
       </div>
     </div>

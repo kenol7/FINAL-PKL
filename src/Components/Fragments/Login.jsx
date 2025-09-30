@@ -7,7 +7,7 @@ import { auth, googleProvider } from "../../Firebase/config";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 
-const Login = () => {
+const Login = ({route,onClose}) => {
   // const endPoint = `${API.endpointlogin}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(kataSandi)}`;
 
   const [loading, setLoading] = useState(false);
@@ -60,10 +60,12 @@ const Login = () => {
 
       if (response.status === "success") {
         alert(`Hello, ${response.user.nama_lengkap}`);
-        localStorage.setItem("auth_phone", response.user.phoneReal);
+        localStorage.setItem("auth_phone", response.user.nomer_telepon);
         localStorage.setItem("auth_email",response.user.email);
-        localStorage.setItem("auth_fullname",response.user.namaLengkap);
-        localStorage.setItem("tipe_time", Date.now());
+        localStorage.setItem("auth_fullname",response.user.nama_lengkap);
+        localStorage.setItem("tipe_time", new Date().toISOString());
+        window.dispatchEvent(new Event("storage"))
+        onClose();
       } else {
         alert(response.message || "Password atau Email Salah");
         setEmail("");
@@ -127,7 +129,8 @@ const Login = () => {
         <button
           type="button"
           className="text-xs text-black mt-6 hover:underline"
-          onClick={() => navigate("/lupakatasandi")}
+          onClick={route}
+
         >
           Lupa Kata Sandi?
         </button>

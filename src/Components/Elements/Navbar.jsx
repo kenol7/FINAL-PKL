@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom"; 
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -14,23 +14,37 @@ export default function Navbar() {
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation(); // ✅ ambil path sekarang
+  const [user, setUser] = useState(null); // ✅ state user
+  const location = useLocation();
 
-  const toggleLoginPopup = () => {
-    setShowLoginPopup(!showLoginPopup);
-  };
+  useEffect(() => {
+    const updateUser = () => {
+      if (localStorage.getItem("auth_fullname")) {
+        setUser("Profile");
+      } else {
+        setUser(null);
+      }
+    };
 
-  const toggleDaftarPopup = () => {
-    setShowDaftarPopup(!showDaftarPopup);
-  };
-  const toggleLKSPopup = () => {
-    setShowLKSPopup(!showLKSPopup);
-  };
+    // cek pertama kali
+    updateUser();
+
+    // kalau ada perubahan localStorage
+    window.addEventListener("storage", updateUser);
+
+    return () => {
+      window.removeEventListener("storage", updateUser);
+    };
+  }, []);
+
+  const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
+  const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
+  const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
   const routelks = () => {
-    toggleLoginPopup(), toggleLKSPopup();
+    toggleLoginPopup();
+    toggleLKSPopup();
   };
 
-  // helper function buat ngecek active
   const isActive = (path) =>
     location.pathname === path
       ? "text-gray-700 font-semibold"
@@ -82,25 +96,40 @@ export default function Navbar() {
                 Hitung KPR
               </Link>
             </li>
-            <li>
-              <Link
-                to=""
-                onClick={toggleLoginPopup}
-                className={`hover:text-gray-500 ${isActive("/login")}`}
-              >
-                Masuk
-              </Link>
-            </li>
-            <div className="bg-black w-0.5 h-7" />
-            <li>
-              <Link
-                to=""
-                onClick={toggleDaftarPopup}
-                className={`hover:text-gray-500 ${isActive("/register")}`}
-              >
-                Daftar
-              </Link>
-            </li>
+
+            {/* ✅ kalau ada user tampilkan profile, kalau tidak tampilkan login/register */}
+            {user ? (
+              <li>
+                <Link
+                  to="/profile"
+                  className={`hover:text-gray-500 ${isActive("/profile")}`}
+                >
+                  {user}
+                </Link>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <Link
+                    to=""
+                    onClick={toggleLoginPopup}
+                    className={`hover:text-gray-500 ${isActive("/login")}`}
+                  >
+                    Masuk
+                  </Link>
+                </li>
+                <div className="bg-black w-0.5 h-7" />
+                <li>
+                  <Link
+                    to=""
+                    onClick={toggleDaftarPopup}
+                    className={`hover:text-gray-500 ${isActive("/register")}`}
+                  >
+                    Daftar
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </nav>
@@ -143,27 +172,38 @@ export default function Navbar() {
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
             Hitung KPR
           </Link>
-          <div className="flex gap-5">
+
+          {/* ✅ Mobile juga cek login */}
+          {user ? (
             <Link
-              to=""
-              onClick={toggleLoginPopup}
-              className={`hover:text-gray-900 ${isActive("/login")}`}
+              to="/profile"
+              className={`hover:text-gray-900 ${isActive("/profile")}`}
             >
-              Masuk
+              {user}
             </Link>
-            <div className="bg-black w-0.5 h-7" />
-            <Link
-              to=""
-              onClick={toggleDaftarPopup}
-              className={`hover:text-gray-900 ${isActive("/register")}`}
-            >
-              Daftar
-            </Link>
-          </div>
+          ) : (
+            <div className="flex gap-5">
+              <Link
+                to=""
+                onClick={toggleLoginPopup}
+                className={`hover:text-gray-900 ${isActive("/login")}`}
+              >
+                Masuk
+              </Link>
+              <div className="bg-black w-0.5 h-7" />
+              <Link
+                to=""
+                onClick={toggleDaftarPopup}
+                className={`hover:text-gray-900 ${isActive("/register")}`}
+              >
+                Daftar
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Login Pop Up */}
+      {/* Popups */}
       {showLoginPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -193,4 +233,4 @@ export default function Navbar() {
       )}
     </>
   );
-};
+}
