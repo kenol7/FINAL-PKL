@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import ProfileImage from "../../assets/profile.jpg";
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -7,15 +8,20 @@ import {
   HalamanLogin,
   HalamanRegister,
   HalamanLKS,
+  HalamanVerif,
 } from "../../Pages/HalamanUtama";
 
 export default function Navbar() {
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
+  const [showVerifPopup, setShowVerifPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null); // ✅ state user
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+
+  const toggleDropdown = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     const updateUser = () => {
@@ -40,9 +46,14 @@ export default function Navbar() {
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
   const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
+  const toggleVerifPopup = () => setShowVerifPopup(!showVerifPopup);
   const routelks = () => {
     toggleLoginPopup();
     toggleLKSPopup();
+  };
+  const routeverif = () => {
+    toggleLKSPopup();
+    toggleVerifPopup();
   };
 
   const isActive = (path) =>
@@ -100,12 +111,41 @@ export default function Navbar() {
             {/* ✅ kalau ada user tampilkan profile, kalau tidak tampilkan login/register */}
             {user ? (
               <li>
-                <Link
-                  to="/profile"
-                  className={`hover:text-gray-500 ${isActive("/profile")}`}
-                >
-                  {user}
-                </Link>
+                <div className="relative">
+                  <div
+                    className="flex items-center cursor-pointer"
+                    onClick={toggleDropdown}
+                  >
+                    <img
+                      src={ProfileImage}
+                      alt="Profile"
+                      className="rounded-full w-8"
+                    />
+                  </div>
+
+                  {isOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200">
+                      <ul className="py-2">
+                        <li>
+                          <Link
+                            to="/profile"
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <a
+                            href="/logout"
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Logout
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </li>
             ) : (
               <>
@@ -175,12 +215,41 @@ export default function Navbar() {
 
           {/* ✅ Mobile juga cek login */}
           {user ? (
-            <Link
-              to="/profile"
-              className={`hover:text-gray-900 ${isActive("/profile")}`}
-            >
-              {user}
-            </Link>
+            <div className="relative">
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={toggleDropdown}
+              >
+                <img
+                  src={ProfileImage}
+                  alt="Profile"
+                  className="rounded-full w-8"
+                />
+              </div>
+
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200">
+                  <ul className="py-2">
+                    <li>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <a
+                        href="/logout"
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      >
+                        Logout
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="flex gap-5">
               <Link
@@ -228,7 +297,16 @@ export default function Navbar() {
             onClick={toggleLKSPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLKS close={toggleLKSPopup} />
+          <HalamanLKS close={toggleLKSPopup} routeverif={routeverif} />
+        </div>
+      )}
+      {showVerifPopup && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            onClick={toggleVerifPopup}
+            className="absolute inset-0 bg-black/35 backdrop-blur-md"
+          />
+          <HalamanVerif close={toggleVerifPopup} />
         </div>
       )}
     </>
