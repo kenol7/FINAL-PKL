@@ -1,15 +1,38 @@
 import Button from "../Elements/Button";
 import Input from "../Elements/Input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../Firebase/config";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 
-const Login = ({route,onClose}) => {
-  // const endPoint = `${API.endpointlogin}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(kataSandi)}`;
+const ToastAlert = ({ message, type, isVisible, onClose }) => {
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000); 
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
 
+  if (!isVisible) return null;
+
+  const bgColor = type === "error" ? "bg-red-100 border-red-500 text-red-700" : "bg-green-100 border-green-500 text-green-700";
+
+  return (
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md p-4 rounded-lg shadow-lg border-l-4 ${bgColor} transition-all duration-300 ease-in-out`}
+      role="alert"
+    >
+      <p className="font-bold">{type === "error" ? "Error" : "Success"}</p>
+      <p>{message}</p>
+    </div>
+  );
+};
+
+const Login = ({ route, onClose }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -17,12 +40,18 @@ const Login = ({route,onClose}) => {
   const [kataSandi, setKataSandi] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleEmailChange = (newValue) => {
-    setEmail(newValue);
+  const [toast, setToast] = useState({ message: "", type: "error", visible: false });
+
+  const showToast = (message, type = "error") => {
+    setToast({ message, type, visible: true });
   };
-  const handleKataSandiChange = (newValue) => {
-    setKataSandi(newValue);
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, visible: false }));
   };
+
+  const handleEmailChange = (newValue) => setEmail(newValue);
+  const handleKataSandiChange = (newValue) => setKataSandi(newValue);
 
   async function signIn() {
     setLoading(true);
@@ -34,7 +63,7 @@ const Login = ({route,onClose}) => {
       }, 1000);
     } catch (error) {
       console.error("Error login Google:", error.code, error.message);
-      alert(`Login gagal: ${error.code}`);
+      showToast(`Login gagal: ${error.code}`);
       setLoading(false);
     }
   }
@@ -43,7 +72,7 @@ const Login = ({route,onClose}) => {
     event.preventDefault();
 
     if (!email || !kataSandi) {
-      alert("Isi email dan password dulu");
+      showToast("Isi email dan password dulu");
       return;
     }
 
@@ -51,34 +80,41 @@ const Login = ({route,onClose}) => {
     url.searchParams.set("email", email);
     url.searchParams.set("password", kataSandi);
 
-    console.log("Request URL:", url.toString());
-
     try {
       const res = await fetch(url.toString(), { method: "GET" });
       const response = await res.json();
-      console.log("Response:", response);
 
       if (response.status === "success") {
-        alert(`Hello, ${response.user.nama_lengkap}`);
+        showToast(`Hello, ${response.user.nama_lengkap}`, "success");
         localStorage.setItem("auth_phone", response.user.nomer_telepon);
-        localStorage.setItem("auth_email",response.user.email);
-        localStorage.setItem("auth_fullname",response.user.nama_lengkap);
+        localStorage.setItem("auth_email", response.user.email);
+        localStorage.setItem("auth_fullname", response.user.nama_lengkap);
         localStorage.setItem("tipe_time", new Date().toISOString());
-        window.dispatchEvent(new Event("storage"))
-        onClose();
+        window.dispatchEvent(new Event("storage"));
+        setTimeout(() => {
+          onClose();
+        }, 1500); 
       } else {
-        alert(response.message || "Password atau Email Salah");
+        showToast(response.message || "Password atau Email Salah");
         setEmail("");
         setKataSandi("");
       }
     } catch (err) {
       console.error("Error login:", err);
-      alert("Terjadi kesalahan koneksi");
+      showToast("Terjadi kesalahan koneksi");
     }
   };
 
   return (
     <>
+      {/* Toast Alert */}
+      <ToastAlert
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={hideToast}
+      />
+
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-50 z-50">
           <ThreeCircles
@@ -93,7 +129,6 @@ const Login = ({route,onClose}) => {
 
       <form
         className="w-full flex flex-col items-center gap-6 mt-15"
-        method="POST"
         onSubmit={checkLogin}
       >
         <Input
@@ -130,7 +165,6 @@ const Login = ({route,onClose}) => {
           type="button"
           className="text-xs text-black mt-6 hover:underline"
           onClick={route}
-
         >
           Lupa Kata Sandi?
         </button>
