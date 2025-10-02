@@ -10,6 +10,7 @@ import { LoginLayout } from "../Components/Layouts/LayoutUtama";
 import { RegisterLayout } from "../Components/Layouts/LayoutUtama";
 import { LKSLayout } from "../Components/Layouts/LayoutUtama";
 import { VerifLayout } from "../Components/Layouts/LayoutUtama";
+import { Juallayout } from "../Components/Layouts/LayoutUtama";
 
 const HalamanKSB = () => {
   return (
@@ -97,6 +98,10 @@ const HalamanDetail = () => {
   return <DetailLayout />;
 };
 
+const HalamanJual = () => {
+  return <Juallayout/>;
+};
+
 export {
   HalamanKSB,
   HalamanLKS,
@@ -105,4 +110,5 @@ export {
   HalamanVerif,
   Halamansk,
   HalamanDetail,
+  HalamanJual,
 };

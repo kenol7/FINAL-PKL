@@ -4,7 +4,7 @@ import ChatBot from "./Pages/Chatbot.jsx";
 import Profile from "./Pages/Profile.jsx";
 import { LoadingProvider } from "./Context/Loader";
 import GlobalLoader from "./Context/GlobalLoader";
-import { HalamanKSB, HalamanLKS, HalamanLogin, HalamanRegister, HalamanVerif, Halamansk, HalamanDetail } from "./Pages/HalamanUtama";
+import { HalamanKSB, HalamanLKS, HalamanLogin, HalamanRegister, HalamanVerif, Halamansk, HalamanDetail, HalamanJual} from "./Pages/HalamanUtama";
 import Home from "./Pages/Home.jsx";
 import Beli from "./Pages/Beli.jsx";
 import "./App.css";
@@ -23,6 +23,7 @@ function App() {
           <Route path="/register" element={<HalamanRegister />} />
           {/* <Route path="/lupakatasandi" element={<HalamanLKS />} /> */}
           <Route path="/katasandibaru" element={<HalamanKSB />} />
+          <Route path="/jualrumah" element={<HalamanJual />} />
           <Route path="/verifikasikode/:code/:name/:email" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
           <Route path="/beli" element={<Beli />} />
