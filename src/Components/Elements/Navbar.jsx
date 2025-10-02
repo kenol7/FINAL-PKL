@@ -23,6 +23,17 @@ export default function Navbar() {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
+  const handleLogout = () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_fullname");
+    localStorage.removeItem("auth_email");
+    localStorage.removeItem("auth_phone");
+    setUser(null);
+    window.location.href = "/";
+  };
+
+
+
   useEffect(() => {
     const updateUser = () => {
       if (localStorage.getItem("auth_fullname")) {
@@ -124,7 +135,7 @@ export default function Navbar() {
                   </div>
 
                   {isOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200">
+                    <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
                       <ul className="py-2">
                         <li>
                           <Link
@@ -136,8 +147,8 @@ export default function Navbar() {
                         </li>
                         <li>
                           <a
-                            href="/logout"
-                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                            onClick={handleLogout}
+                            className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                           >
                             Logout
                           </a>
@@ -240,8 +251,8 @@ export default function Navbar() {
                     </li>
                     <li>
                       <a
-                        href="/logout"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        onClick={handleLogout}
+                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
                       >
                         Logout
                       </a>
