@@ -97,7 +97,7 @@ const OTPInput = () => {
             localStorage.setItem('auth_phone',phoneReal)
             localStorage.setItem('auth_email',email)
             localStorage.setItem('auth_fullname',namaLengkap)
-            
+            localStorage.setItem('tipe_time',Date.now())
       
             navigate('/');
         } else {
