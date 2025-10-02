@@ -95,7 +95,7 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link to="" className={`hover:text-gray-500 ${isActive("")}`}>
+              <Link to="/jualrumah" className={`hover:text-gray-500 ${isActive("")}`}>
                 Jual Rumah
               </Link>
             </li>
@@ -206,7 +206,7 @@ export default function Navbar() {
           >
             Beli Rumah
           </Link>
-          <Link to="" className={`hover:text-gray-900 ${isActive("")}`}>
+          <Link to="/jualrumah" className={`hover:text-gray-900 ${isActive("")}`}>
             Jual Rumah
           </Link>
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
