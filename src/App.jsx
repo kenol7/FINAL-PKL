@@ -7,6 +7,7 @@ import GlobalLoader from "./Context/GlobalLoader";
 import { HalamanKSB, HalamanLKS, HalamanLogin, HalamanRegister, HalamanVerif, Halamansk, HalamanDetail, HalamanJual} from "./Pages/HalamanUtama";
 import Home from "./Pages/Home.jsx";
 import Beli from "./Pages/Beli.jsx";
+import ProctectedRoute from "./Components/Fragments/ProtectRouter.jsx"
 import "./App.css";
 
 function App() {
@@ -16,9 +17,9 @@ function App() {
         <GlobalLoader />
         <Routes>
           <Route path="/" element={<Home/>} />
-          <Route path="/kpr" element={<KprPage />} />
-          <Route path="/chatbot" element={<ChatBot />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/kpr" element={<ProctectedRoute><KprPage/> </ProctectedRoute>} />
+          <Route path="/chatbot" element={<ProctectedRoute><ChatBot/> </ProctectedRoute>} />
+          <Route path="/profile" element={<ProctectedRoute><Profile/> </ProctectedRoute>} />
           <Route path="/login" element={<HalamanLogin />} />
           <Route path="/register" element={<HalamanRegister />} />
           {/* <Route path="/lupakatasandi" element={<HalamanLKS />} /> */}
@@ -26,8 +27,8 @@ function App() {
           <Route path="/jualrumah" element={<HalamanJual />} />
           <Route path="/verifikasikode/:code/:name/:email" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
-          <Route path="/beli" element={<Beli />} />
-          <Route path="/detailrumah/:refid" element={<HalamanDetail />} />
+          <Route path="/beli" element={<ProctectedRoute><Beli/> </ProctectedRoute>} />
+          <Route path="/detailrumah/:refid" element={<ProctectedRoute><HalamanDetail/> </ProctectedRoute>} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>

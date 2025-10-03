@@ -12,12 +12,13 @@ export default function ProtectedRoute({ children }) {
 
       // Hitung selisih waktu dalam ms
       const diff = now - loginDate;
-      const oneDays = 1 * 24 * 60 * 60 * 1000; 
+      const sevenDays = 1 * 24 * 60 * 60 * 1000;
 
-      if (diff >= oneDays) {1        // Expired → hapus data login
+      if (diff >= sevenDays) {
+        // Expired → hapus data login
         localStorage.clear();
         alert("Sesi login Anda telah kedaluwarsa. Silakan login kembali.");
-        window.location.href = "/"; // redirect manual
+        window.location.href = "/"; 
       }
     }
   }, [loginTime]);
