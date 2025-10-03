@@ -6,23 +6,68 @@ import Jual from "../assets/sale-01.png";
 import Edit from "../assets/edit.png";
 import { Bookmark } from "lucide-react";
 
-export default function Profile() {
+export default function Profile(props) {
+  console.log(localStorage.getItem("auth_phone"));
   const [profile, setProfile] = useState({
-    nama: "Yang Jungwon",
-    lokasi: "Bandung",
-    email: "yangjungwon@gmail.com",
-    phone: "088888888888",
+    nama: localStorage.getItem("auth_fullname"),
+    lokasi: "",
+    email: localStorage.getItem("auth_email"),
+    phone: localStorage.getItem("auth_phone"),
   });
 
+  const [user, setUser] = useState(null);
+  const [city, setCity] = useState(null);
+  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+
+  // useEffect(() => {
+  //   setProfile({
+  //     nama: localStorage.getItem("auth_fullname") || "Yang Jungwon",
+  //     lokasi: [],
+  //     email: localStorage.getItem("auth_email") || "yangjungwon@gmail.com",
+  //     phone: localStorage.getItem("auth_phone") || "088888888888",
+  //   });
+  // }, []);
+
+  const handleLogout = () => {
+    console.log(handleLogout);
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_fullname");
+    localStorage.removeItem("auth_email");
+    localStorage.removeItem("auth_phone");
+    setUser(null);
+    window.location.href = "/";
+  };
+
+  const textLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        // setLatitude(position.coords.latitude);
+        // setLongitude(position.coords.longitude)
+        console.log(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
+        );
+        fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
+        )
+          .then((res) => res.json())
+          .then((response) => {
+            console.log(response);
+            console.log("alamat=" + response.results[0].formatted_address);
+            const city = response.results[0].address_components.find(
+              (component) =>
+                component.types[0].includes("administrative_area_level_2")
+            ).long_name;
+            setProfile((c) => ({ ...c, lokasi: city }));
+          });
+      });
+    }
+  };
   useEffect(() => {
-    setProfile({
-      nama: localStorage.getItem("auth_fullname") || "Yang Jungwon",
-      lokasi: "Bandung", // tidak ada di localStorage → pakai default
-      email: localStorage.getItem("auth_email") || "yangjungwon@gmail.com",
-      phone: localStorage.getItem("auth_phone") || "088888888888",
-    });
+    textLocation();
   }, []);
 
+
+  
   return (
     <section className="min-h-screen">
       <Navbar />
@@ -104,7 +149,10 @@ export default function Profile() {
             <button className="w-28 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow">
               Ubah Data
             </button>
-            <button className="w-28 bg-red-500 px-3 py-2 rounded-lg hover:bg-red-600 transition-all shadow">
+            <button
+              onClick={handleLogout}
+              className="w-28 bg-red-500 px-3 py-2 rounded-lg hover:bg-red-600 transition-all shadow"
+            >
               Logout
             </button>
           </div>
