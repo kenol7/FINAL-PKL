@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import API from "../../Config/Endpoint";
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
-import { useKeenSlider } from "keen-slider/react";
-import Button from "../Elements/Button";
 import { useLoading } from "../../Context/Loader";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const DetailRumah = () => {
     const [favorit, setFavorit] = useState(false);
@@ -26,7 +26,6 @@ const DetailRumah = () => {
             const res = await fetch(API.endpointDetail + "&ref_id=" + refid);
             const response = await res.json();
             setDetail(response);
-            console.log(response)
         } catch (error) {
             console.error("Gagal fetch detail:", error);
         }
@@ -44,6 +43,46 @@ const DetailRumah = () => {
             console.error("Gagal fetch gambar:", error);
         }
     };
+
+    useEffect(() => {
+        if (!detail || !detail.latitude || !detail.longitude) return;
+
+        const lat = parseFloat(detail.latitude);
+        const lng = parseFloat(detail.longitude);
+
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        if (window.propertyMapInstance) {
+            window.propertyMapInstance.setView([lat, lng], 15);
+            return;
+        }
+
+        const map = L.map("property-map", {
+            zoomControl: false,
+            dragging: false,
+            scrollWheelZoom: false,
+            doubleClickZoom: false,
+            touchZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            attributionControl: false,
+        }).setView([lat, lng], 15);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 18,
+        }).addTo(map);
+
+        L.marker([lat, lng]).addTo(map);
+
+        window.propertyMapInstance = map;
+
+        return () => {
+            if (window.propertyMapInstance) {
+                window.propertyMapInstance.remove();
+                delete window.propertyMapInstance;
+            }
+        };
+    }, [detail]);
 
     useEffect(() => {
         if (!sliderRef.current || imageSlider.length === 0) return;
@@ -98,7 +137,6 @@ const DetailRumah = () => {
         }
     }, []);
 
-
     if (!detail) {
         return null;
     }
@@ -141,7 +179,7 @@ const DetailRumah = () => {
                             <h1 className="text-xl md:text-2xl font-bold">{detail.cluster_apart_name}</h1>
                             <h3 className="text-sm text-gray-600">{detail.city}</h3>
                         </div>
-                        <div className="bg-[#E7C555] rounded-2xl w-full md:w-[244px] h-[45px] flex items-center justify-center text-center text-2xl font-semibold">
+                        <div className="bg-[#E7C555] rounded-2xl w-full md:w-[244px] h-[45px] flex items-center justify-center text-center text-lg font-semibold font-jakarta">
                             Rp{" "}
                             {detail.property_price
                                 ? new Intl.NumberFormat("id-ID").format(
@@ -151,7 +189,7 @@ const DetailRumah = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg">
                         <div className="flex flex-wrap gap-4 text-sm font-jakarta justify-center md:justify-start">
                             {[
                                 { label: "L.Tanah", value: `${detail.square_land}m²` },
@@ -161,9 +199,9 @@ const DetailRumah = () => {
                             ].map((stat, idx, arr) => (
                                 <div
                                     key={idx}
-                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1 
-                                            ? "border-r border-gray-900"
-                                            : ""
+                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1
+                                        ? "border-r border-gray-900"
+                                        : ""
                                         }`}
                                 >
                                     <span className="font-semibold text-lg">{stat.value}</span>
@@ -216,7 +254,6 @@ const DetailRumah = () => {
                         <p className="text-sm">{detail.condition_field_name}</p>
                         <p className="text-sm">{detail.allotment_name}</p>
                         <p className="text-sm">{detail.document_name}</p>
-
                     </div>
 
                     <div>
@@ -255,20 +292,35 @@ const DetailRumah = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center ">
-                    <img
-                        src={`${API.endpointImage}/${imageShow}?v=${Math.random() * 2000}`}
-                        alt="fotorumah"
-                        className="w-full h-auto object-cover rounded-xl shadow-md"
-                    />
+                <div className="flex flex-col items-center">
+                    <div className="relative w-full">
+                        <img
+                            src={`${API.endpointImage}/${imageShow}?v=${Math.random() * 2000}`}
+                            alt="fotorumah"
+                            className="w-full h-auto object-cover rounded-xl shadow-md"
+                        />
+
+                        {detail.latitude && detail.longitude ? (
+                            <div
+                                id="property-map"
+                                className="absolute bottom-2 right-2 w-24 h-24 rounded-lg shadow-md z-10"
+                                style={{ backgroundColor: "white", border: "1px solid #ccc" }}
+                            />
+                        ) : (
+                            <div className="absolute bottom-2 right-2 bg-white border border-gray-300 rounded-lg p-2 shadow-md w-24 h-24 flex items-center justify-center text-xs font-jakarta">
+                                Tidak ada lokasi
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex justify-center mt-4 space-x-2">
                         {imageSlider.map((el, i) => (
                             <button
                                 key={i}
                                 onClick={() => ChangeImageShow(el.image)}
                                 className={`px-3 py-1 rounded-full text-sm font-bold ${imageShow === el.image
-                                    ? "bg-[#E7C555] text-white"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                        ? "bg-[#E7C555] text-white"
+                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                             >
                                 {i + 1}

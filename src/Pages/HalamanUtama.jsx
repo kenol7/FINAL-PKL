@@ -11,6 +11,7 @@ import { RegisterLayout } from "../Components/Layouts/LayoutUtama";
 import { LKSLayout } from "../Components/Layouts/LayoutUtama";
 import { VerifLayout } from "../Components/Layouts/LayoutUtama";
 import { Juallayout } from "../Components/Layouts/LayoutUtama";
+import { useParams } from "react-router-dom";
 
 const HalamanKSB = () => {
   return (
@@ -44,20 +45,20 @@ const HalamanLogin = ({ close, routeLKS }) => {
       <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
         <LoginLayout title="Masuk" onBack={close}>
-          <Login route={routeLKS} onClose={close}/>
+          <Login route={routeLKS} onClose={close} />
         </LoginLayout>
       </div>
     </div>
   );
 };
 
-const HalamanRegister = ({ close }) => {
+const HalamanRegister = ({ close, onRegisterSuccess }) => {
   return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
+    <div className="relative min-h-screen flex items-center justify-center">
+      <div className="absolute inset-0 blur-sm"></div>
       <div className="relative z-10">
         <RegisterLayout title={"Daftar"} onBack={close}>
-          <Register />
+          <Register close={close} onRegisterSuccess={onRegisterSuccess} />
         </RegisterLayout>
       </div>
     </div>
@@ -79,15 +80,22 @@ const Halamansk = () => {
   );
 };
 
-const HalamanVerif = () => {
-// const location = useLocation();
-//   const { otp, phone } = location.state || {};
+const HalamanVerif = ({ data, close, onUpdateUser }) => { 
+  const { code, name, email } = useParams();
+  const verifData = data || { kode: code, name, email };
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
+    <div className="relative min-h-screen flex items-center justify-center">
+      <div className="absolute inset-0 blur-sm"></div>
       <div className="relative z-10">
-        <VerifLayout title="Verifikasi Kode">
-          <OTPInput />
+        <VerifLayout>
+          <OTPInput
+            kode={verifData.kode}
+            name={verifData.name}
+            email={verifData.email}
+            close={close} 
+            onUpdateUser={onUpdateUser}
+          />
         </VerifLayout>
       </div>
     </div>
@@ -99,7 +107,7 @@ const HalamanDetail = () => {
 };
 
 const HalamanJual = () => {
-  return <Juallayout/>;
+  return <Juallayout />;
 };
 
 export {

@@ -3,7 +3,33 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Button from "../Elements/Button";
 import API from '../../Config/Endpoint';
 
-const OTPInput = () => {
+const ToastAlert = ({ message, type, isVisible, onClose }) => {
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    const bgColor = type === "error"
+        ? "bg-red-100 border-red-500 text-red-700"
+        : "bg-green-100 border-green-500 text-green-700";
+
+    return (
+        <div
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md p-4 rounded-lg shadow-lg border-l-4 ${bgColor} transition-all duration-300 ease-in-out`}
+            role="alert"
+        >
+            <p className="font-bold">{type === "error" ? "Error" : "Sukses"}</p>
+            <p>{message}</p>
+        </div>
+    );
+};
+const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { otp: otpFromAPI, phone } = location.state || {};
@@ -12,36 +38,42 @@ const OTPInput = () => {
     const inputRefs = useRef([]);
     const [count, setCount] = useState(120);
     const [isResendAllowed, setIsResendAllowed] = useState(false);
-    const [otpReal,setOtpReal] = useState('')
-    const [phoneReal,setPhoneReal] = useState('')
-    const [namaLengkap,setNamaLengkap] = useState('')
-    const [email, setEmail] = useState('')
+    const [otpReal, setOtpReal] = useState('')
+    const [phoneReal, setPhoneReal] = useState('')
+    const [namaLengkap, setNamaLengkap] = useState('')
+    const [userEmail, setUserEmail] = useState('')
 
-    let paramCode = ''
+    const [toast, setToast] = useState({ message: "", type: "success", visible: false });
 
-    useEffect(()=> {
-        const path = window.location.pathname;
-        const segments = path.split('/');
-        paramCode = segments[2];
-        setNamaLengkap(segments[3])
-        setEmail(segments[4])
+    const showToast = (message, type = "success") => {
+        setToast({ message, type, visible: true });
+    };
+
+    const hideToast = () => {
+        setToast(prev => ({ ...prev, visible: false }));
+    };
+
+    useEffect(() => {
+        if (!kode) return;
+
         let payload = {
-            kode : paramCode,
-            action : 'decrypt'
-        }
-        fetch (API.endpointregist,{
+            kode: kode,
+            action: 'decrypt'
+        };
+
+        fetch(API.endpointregist, {
             method: 'POST',
-            headers : {
-                'Content-Type' : 'application/json'
-            },
-            body : JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         })
-        .then(res=>res.json())
-        .then(response=> {
-            setOtpReal(response.otp)
-            setPhoneReal(response.nomer_telepon)
-        })
-    },[])
+            .then(res => res.json())
+            .then(response => {
+                setOtpReal(response.otp);
+                setPhoneReal(response.nomer_telepon);
+                setNamaLengkap(name); // dari props
+                setUserEmail(email);       // dari props
+            });
+    }, [kode, name, email]); // dependensi
 
     // useEffect(() => {
     //     if (otpFromAPI) {
@@ -90,20 +122,29 @@ const OTPInput = () => {
 
     const handleSubmit = () => {
         const code = otp.join('').trim();
-        
-        console.log(code + ' = ' + otpReal + "=" + namaLengkap)
 
         if (code === otpReal) {
-            localStorage.setItem('auth_phone',phoneReal)
-            localStorage.setItem('auth_email',email)
-            localStorage.setItem('auth_fullname',namaLengkap)
-            localStorage.setItem('tipe_time',Date.now())
-      
-            navigate('/');
+            localStorage.setItem('auth_phone', phoneReal);
+            localStorage.setItem('auth_email', userEmail);
+            localStorage.setItem('auth_fullname', namaLengkap);
+            localStorage.setItem('tipe_time', Date.now());
+
+            if (typeof onUpdateUser === 'function') {
+                onUpdateUser();
+            }
+
+            showToast(`Halo, ${namaLengkap} Selamat Datang`, "success");
+
+            setTimeout(() => {
+                if (typeof close === 'function') {
+                    close(); 
+                }
+                navigate('/'); 
+            }, 1000);
         } else {
             setOtp(new Array(length).fill(""));
             inputRefs.current[0]?.focus();
-            alert('Kode OTP salah, silakan coba lagi');
+            showToast('Kode OTP salah, silakan coba lagi.', "error");
         }
     };
 
@@ -114,29 +155,37 @@ const OTPInput = () => {
     };
 
     return (
-        <div className="flex flex-col items-center mt-15 gap-4">
-            <p className="text-center mb-6">Masukkan kode verifikasi yang dikirim ke nomor {phone}</p>
-            <div className="flex space-x-3 mb-12 ">
-                {otp.map((data, index) => (
-                    <input
-                        key={index}
-                        ref={(el) => (inputRefs.current[index] = el)}
-                        type="text"
-                        maxLength="1"
-                        value={data}
-                        onChange={(e) => handleChange(e.target, index)}
-                        onKeyDown={(e) => handleKeyDown(e, index)}
-                        onPaste={handlePaste}
-                        className="w-12 h-12 text-center text-xl font-bold border bg-amber-50 rounded-lg focus:border-blue-500"
-                    />
-                ))}
+        <>
+            <ToastAlert
+                message={toast.message}
+                type={toast.type}
+                isVisible={toast.visible}
+                onClose={hideToast}
+            />
+            <div className="flex flex-col items-center mt-15 gap-4">
+                <p className="text-center mb-6">Masukkan kode verifikasi yang dikirim ke nomor {phone}</p>
+                <div className="flex space-x-3 mb-12 ">
+                    {otp.map((data, index) => (
+                        <input
+                            key={index}
+                            ref={(el) => (inputRefs.current[index] = el)}
+                            type="text"
+                            maxLength="1"
+                            value={data}
+                            onChange={(e) => handleChange(e.target, index)}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
+                            onPaste={handlePaste}
+                            className="w-12 h-12 text-center text-xl font-bold border bg-amber-50 rounded-lg focus:border-blue-500"
+                        />
+                    ))}
+                </div>
+                <label>{count > 0 ? `${count} detik` : 'Kirim ulang sekarang'}</label>
+                <div className="flex gap-4 mt-6">
+                    <Button onClick={handleSubmit}>Lanjut</Button>
+                    <Button onClick={handleResend} disabled={!isResendAllowed}>Kirim Ulang</Button>
+                </div>
             </div>
-            <label>{count > 0 ? `${count} detik` : 'Kirim ulang sekarang'}</label>
-            <div className="flex gap-4 mt-6">
-                <Button onClick={handleSubmit}>Lanjut</Button>
-                <Button onClick={handleResend} disabled={!isResendAllowed}>Kirim Ulang</Button>
-            </div>
-        </div>
+        </>
     );
 };
 

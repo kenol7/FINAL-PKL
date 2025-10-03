@@ -29,7 +29,7 @@ const ToastAlert = ({ message, type, isVisible, onClose }) => {
     );
 };
 
-const Register = () => {
+const Register = ({ onRegisterSuccess, close }) => {
     const navigate = useNavigate();
 
     const [isChecked, setIsChecked] = useState(false);
@@ -109,7 +109,16 @@ const Register = () => {
                 if (response.status === "success") {
                     showToast("Akun berhasil dibuat! Mengalihkan ke verifikasi...", "success");
                     setTimeout(() => {
-                        navigate(`/verifikasikode/${response.kode}/${response.name}/${response.email}`);
+                        if (typeof close === 'function') {
+                            close();
+                        }
+                        if (typeof onRegisterSuccess === 'function') {
+                            onRegisterSuccess({
+                                kode: response.kode,
+                                name: response.name,
+                                email: response.email
+                            });
+                        }
                     }, 1500);
                 } else {
                     showToast(response.message || 'Pendaftaran gagal. Periksa kembali data Anda.');
