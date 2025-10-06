@@ -145,6 +145,17 @@ const Juallayout = () => {
   );
 };
 
+const UbahProfileLayout = (props) => {
+  const { title, children, onBack } = props;
+  return (
+    <LoginLayout height="458px" onBack={onBack}>
+      {title}
+      {children}
+    </LoginLayout>
+  );
+};
+
+
 export {
   LoginLayout,
   KSBLayout,
@@ -154,4 +165,5 @@ export {
   VerifLayout,
   DetailLayout,
   Juallayout,
+  UbahProfileLayout,
 };

@@ -4,6 +4,8 @@ import ProfileImage from "../../assets/profile.jpg";
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
+import { useNavigate } from "react-router-dom";
+
 import {
   HalamanLogin,
   HalamanRegister,
@@ -12,39 +14,45 @@ import {
 } from "../../Pages/HalamanUtama";
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [showVerifPopup, setShowVerifPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // ✅ state user
   const [isOpen, setIsOpen] = useState(false);
-  const [verifData, setVerifData] = useState(null); 
   const location = useLocation();
+  const nameImage = localStorage.getItem("foto_profil");
+  const image =
+    nameImage && nameImage.trim() !== "" && nameImage !== "null"
+      ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${nameImage}`
+      : ProfileImage;
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_fullname");
-    localStorage.removeItem("auth_email");
-    localStorage.removeItem("auth_phone");
+    localStorage.clear();
     setUser(null);
-    window.location.href = "/";
-  };
-
-  const updateUser = () => {
-    if (localStorage.getItem("auth_fullname")) {
-      setUser("Profile");
-    } else {
-      setUser(null);
-    }
+    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
+    navigate("/");
   };
 
   useEffect(() => {
+    const updateUser = () => {
+      if (localStorage.getItem("auth_fullname")) {
+        setUser("Profile");
+      } else {
+        setUser(null);
+      }
+    };
+
+    // cek pertama kali
     updateUser();
 
+    // kalau ada perubahan localStorage
     window.addEventListener("storage", updateUser);
+
     return () => {
       window.removeEventListener("storage", updateUser);
     };
@@ -53,28 +61,14 @@ export default function Navbar() {
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
   const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
-
-  // ✅ Fungsi baru: tutup popup verifikasi & reset data
-  const closeVerifPopup = () => {
-    setVerifData(null);
-    setShowVerifPopup(false);
-  };
-
+  const toggleVerifPopup = () => setShowVerifPopup(!showVerifPopup);
   const routelks = () => {
     toggleLoginPopup();
     toggleLKSPopup();
   };
-
   const routeverif = () => {
     toggleLKSPopup();
-    setShowVerifPopup(true);
-  };
-
-  // ✅ Handle sukses register → buka popup verifikasi dengan data
-  const handleRegisterSuccess = (data) => {
-    setVerifData(data);
-    setShowDaftarPopup(false); // Tutup popup register
-    setShowVerifPopup(true);   // Buka popup verifikasi
+    toggleVerifPopup();
   };
 
   const isActive = (path) =>
@@ -90,12 +84,14 @@ export default function Navbar() {
             <img src={Logo} width="50" height="40" />
           </Link>
 
+          {/* Mobile menu icon */}
           <div className="block md:hidden lg:hidden">
             <div onClick={() => setMenuOpen(true)} aria-label="Open Menu">
               <img src={Menu} width="30" height="30" />
             </div>
           </div>
 
+          {/* Desktop Menu */}
           <ul className="lg:flex md:flex hidden gap-5 items-center">
             <li>
               <Link
@@ -114,7 +110,10 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link to="/jualrumah" className={`hover:text-gray-500 ${isActive("")}`}>
+              <Link
+                to="/jualrumah"
+                className={`hover:text-gray-500 ${isActive("/jualrumah")}`}
+              >
                 Jual Rumah
               </Link>
             </li>
@@ -127,6 +126,7 @@ export default function Navbar() {
               </Link>
             </li>
 
+            {/* ✅ kalau ada user tampilkan profile, kalau tidak tampilkan login/register */}
             {user ? (
               <li>
                 <div className="relative">
@@ -135,9 +135,10 @@ export default function Navbar() {
                     onClick={toggleDropdown}
                   >
                     <img
-                      src={ProfileImage}
+                      src={image}
                       alt="Profile"
                       className="rounded-full w-8"
+                      onError={(e) => (e.currentTarget.src = ProfileImage)}
                     />
                   </div>
 
@@ -192,6 +193,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Overlay */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-40 bg-gray-700 opacity-40 md:fixed lg:hidden"
@@ -199,9 +201,11 @@ export default function Navbar() {
         />
       )}
 
+      {/* Sidebar Mobile */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
-          } lg:hidden`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        } lg:hidden`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
@@ -221,13 +225,17 @@ export default function Navbar() {
           >
             Beli Rumah
           </Link>
-          <Link to="/jualrumah" className={`hover:text-gray-900 ${isActive("")}`}>
+          <Link
+            to="/jualrumah"
+            className={`hover:text-gray-900 ${isActive("/jualrumah")}`}
+          >
             Jual Rumah
           </Link>
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
             Hitung KPR
           </Link>
 
+          {/* ✅ Mobile juga cek login */}
           {user ? (
             <div className="relative">
               <div
@@ -235,9 +243,10 @@ export default function Navbar() {
                 onClick={toggleDropdown}
               >
                 <img
-                  src={ProfileImage}
+                  src={image}
                   alt="Profile"
                   className="rounded-full w-8"
+                  onError={(e) => (e.currentTarget.src = ProfileImage)}
                 />
               </div>
 
@@ -286,6 +295,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Popups */}
       {showLoginPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -295,21 +305,15 @@ export default function Navbar() {
           <HalamanLogin close={toggleLoginPopup} routeLKS={routelks} />
         </div>
       )}
-
       {showDaftarPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
             onClick={toggleDaftarPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          {/* ✅ Tambahkan onRegisterSuccess */}
-          <HalamanRegister
-            close={toggleDaftarPopup}
-            onRegisterSuccess={handleRegisterSuccess}
-          />
+          <HalamanRegister close={toggleDaftarPopup} />
         </div>
       )}
-
       {showLKSPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -319,14 +323,13 @@ export default function Navbar() {
           <HalamanLKS close={toggleLKSPopup} routeverif={routeverif} />
         </div>
       )}
-
       {showVerifPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
-            onClick={closeVerifPopup}
+            onClick={toggleVerifPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanVerif close={closeVerifPopup} data={verifData} onUpdateUser={updateUser}/>
+          <HalamanVerif close={toggleVerifPopup} />
         </div>
       )}
     </>

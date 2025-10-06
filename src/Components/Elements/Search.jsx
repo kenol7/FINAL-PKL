@@ -1,20 +1,88 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import API from "../../Config/Endpoint";
 
 export default function Search() {
-  
-  const provinces = ["Jakarta", "Jawa Timur", "Jawa Barat", "Yogyakarta"];
+  const [dataProvinsi, setDataProvinsi] = useState([]);
+  const [dataKota, setDataKota] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [selectedProvince, setSelectedProvince] = useState("Provinsi");
-
-  const maxPrice = ["100000", "200000", "300000", "400000", "500000"];
-  const [selectedMaxPrice, setSelectedMaxPrice] = useState("Harga Maximal");
-
-  const minPrice = ["100000", "200000", "300000", "400000", "500000"];
-  const [selectedMinPrice, setSelectedMinPrice] = useState("Harga Minimal");
-
-  const [isOpenMinPrice, setIsOpenMinPrice] = useState(false);
-  const [isOpenMaxPrice, setIsOpenMaxPrice] = useState(false);
+  const [selectedCity, setSelectedCity] = useState("Kota");
   const [isOpenProvince, setIsOpenProvince] = useState(false);
+  const [isOpenCity, setIsOpenCity] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const qMin = queryParams.get("minHarga") || "";
+    const qMax = queryParams.get("maxHarga") || "";
+    const qProv = queryParams.get("province") || "Provinsi";
+    const qCity = queryParams.get("city") || "Kota";
+
+    setMinPrice(qMin);
+    setMaxPrice(qMax);
+    setSelectedProvince(qProv);
+    setSelectedCity(qCity);
+  }, [location.search]);
+
+  useEffect(() => {
+    axios
+      .get(API.endpointProvinsi)
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setDataProvinsi(res.data);
+        } else if (res.data.data) {
+          setDataProvinsi(res.data.data);
+        } else {
+          setDataProvinsi([]);
+        }
+      })
+      .catch((err) => console.error("Gagal fetch provinsi:", err));
+  }, []);
+
+  useEffect(() => {
+    if (selectedProvince && selectedProvince !== "Provinsi") {
+      const endPointCity = `${API.endpointKota}&provinsi=${encodeURIComponent(
+        selectedProvince
+      )}`;
+
+      axios
+        .get(endPointCity)
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            setDataKota(res.data);
+          } else if (res.data.data) {
+            setDataKota(res.data.data);
+          } else {
+            setDataKota([]);
+          }
+        })
+        .catch((err) => console.error("Gagal fetch kota:", err));
+    } else {
+      setDataKota([]);
+    }
+  }, [selectedProvince]);
+
+  const handleFilterSubmit = () => {
+    const filterParams = new URLSearchParams({
+      minHarga: minPrice,
+      maxHarga: maxPrice,
+      province: selectedProvince,
+      city: selectedCity,
+    }).toString();
+
+    if (location.pathname === "/beli") {
+      navigate(`/beli?${filterParams}`, { replace: true });
+      setShowFilter(false);
+    } else {
+      navigate(`/beli?${filterParams}`);
+    }
+  };
 
   return (
     <div className="flex justify-center w-full">
@@ -24,6 +92,8 @@ export default function Search() {
             type="text"
             placeholder="Filter Pencarian…"
             className="w-full rounded-full border border-yellow-500 px-6 py-3 pl-20 focus:outline-none focus:ring-2 focus:ring-yellow-700 bg-gray-50 shadow-lg"
+            onClick={() => setShowFilter(!showFilter)}
+            readOnly
           />
           <div
             className="absolute inset-y-0 left-9 flex items-center cursor-pointer"
@@ -52,96 +122,29 @@ export default function Search() {
                 Filter Pencarian
               </h2>
 
-           =
-              <div className="relative w-full">
-                <button
-                  onClick={() => setIsOpenMinPrice(!isOpenMinPrice)}
-                  className="w-full flex justify-between text-black items-center rounded-lg border !border-blue-500 !bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-                >
-                  {selectedMinPrice}
-                  <svg
-                    className={`w-5 h-5 transition-transform ${
-                      isOpenMinPrice ? "rotate-180" : "rotate-0"
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
+              {/* Harga Minimal */}
+              <input
+                type="number"
+                placeholder="Harga Minimal"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-full rounded-lg border border-blue-500 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-lg"
+              />
 
-                {isOpenMinPrice && (
-                  <ul className="absolute z-10 text-black mt-2 w-full rounded-lg border !border-blue-500 !bg-white shadow-lg">
-                    {minPrice.map((item, idx) => (
-                      <li
-                        key={idx}
-                        onClick={() => {
-                          setSelectedMinPrice(item);
-                          setIsOpenMinPrice(false);
-                        }}
-                        className="cursor-pointer px-4 py-2 hover:bg-blue-100"
-                      >
-                        {item}
-                        <div className="border-b border-gray-200 mt-2 last:border-0"></div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              {/* Harga Maksimal */}
+              <input
+                type="number"
+                placeholder="Harga Maksimal"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full rounded-lg border border-blue-500 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-lg"
+              />
 
-            
-              <div className="relative w-full">
-                <button
-                  onClick={() => setIsOpenMaxPrice(!isOpenMaxPrice)}
-                  className="w-full flex justify-between items-center text-black rounded-lg border !border-blue-500 !bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-                >
-                  {selectedMaxPrice}
-                  <svg
-                    className={`w-5 h-5 transition-transform ${
-                      isOpenMaxPrice ? "rotate-180" : "rotate-0"
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {isOpenMaxPrice && (
-                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border !border-blue-500 !bg-white shadow-lg">
-                    {maxPrice.map((item, idx) => (
-                      <li
-                        key={idx}
-                        onClick={() => {
-                          setSelectedMaxPrice(item);
-                          setIsOpenMaxPrice(false);
-                        }}
-                        className="cursor-pointer px-4 py-2 hover:bg-blue-100"
-                      >
-                        {item}
-                        <div className="border-b border-gray-200 mt-2 last:border-0"></div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-
+              {/* Dropdown Provinsi */}
               <div className="relative w-full">
                 <button
                   onClick={() => setIsOpenProvince(!isOpenProvince)}
-                  className="w-full flex justify-between text-black items-center rounded-lg border !border-blue-500 !bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
                 >
                   {selectedProvince}
                   <svg
@@ -162,23 +165,82 @@ export default function Search() {
                 </button>
 
                 {isOpenProvince && (
-                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border !border-blue-500 !bg-white shadow-lg">
-                    {provinces.map((province, idx) => (
-                      <li
-                        key={idx}
-                        onClick={() => {
-                          setSelectedProvince(province);
-                          setIsOpenProvince(false);
-                        }}
-                        className="cursor-pointer px-4 py-2 hover:bg-blue-100"
-                      >
-                        {province}
-                        <div className="border-b border-gray-200 mt-2 last:border-0"></div>
-                      </li>
-                    ))}
+                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
+                    {dataProvinsi.length > 0 ? (
+                      dataProvinsi.map((province, idx) => (
+                        <li
+                          key={idx}
+                          onClick={() => {
+                            setSelectedProvince(province);
+                            setSelectedCity("Kota");
+                            setIsOpenProvince(false);
+                          }}
+                          className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                        >
+                          {province}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2">Data tidak ditemukan</li>
+                    )}
                   </ul>
                 )}
               </div>
+
+              {/* Dropdown Kota */}
+              <div className="relative w-full">
+                <button
+                  onClick={() => setIsOpenCity(!isOpenCity)}
+                  disabled={dataKota.length === 0}
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {selectedCity}
+                  <svg
+                    className={`w-5 h-5 transition-transform ${
+                      isOpenCity ? "rotate-180" : "rotate-0"
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isOpenCity && (
+                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
+                    {dataKota.length > 0 ? (
+                      dataKota.map((city, idx) => (
+                        <li
+                          key={idx}
+                          onClick={() => {
+                            setSelectedCity(city);
+                            setIsOpenCity(false);
+                          }}
+                          className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                        >
+                          {city}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2">Data tidak ditemukan</li>
+                    )}
+                  </ul>
+                )}
+              </div>
+
+              {/* Tombol Terapkan Filter */}
+              <button
+                onClick={handleFilterSubmit}
+                className="w-full mt-4 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Terapkan Filter
+              </button>
             </div>
           </div>
         )}
