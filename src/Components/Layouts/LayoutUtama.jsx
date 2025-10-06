@@ -110,9 +110,9 @@ const SKLayout = () => {
 };
 
 const VerifLayout = (props) => {
-  const { title, children } = props;
+  const { title, children, onBack } = props;
   return (
-    <LoginLayout height="458px">
+    <LoginLayout height="458px" onBack= {onBack}>
       {title}
       {children}
     </LoginLayout>

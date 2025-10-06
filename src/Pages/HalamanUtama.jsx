@@ -91,7 +91,7 @@ const HalamanVerif = ({ data, close, onUpdateUser }) => {
     <div className="relative min-h-screen flex items-center justify-center">
       <div className="absolute inset-0 blur-sm"></div>
       <div className="relative z-10">
-        <VerifLayout title="Verifikasi Kode">
+        <VerifLayout title="Verifikasi Kode" onBack={close}>
           <OTPInput
             kode={verifData.kode}
             name={verifData.name}

@@ -67,6 +67,7 @@ export default function Navbar() {
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
   const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
+  const toggleVerifPopup = () =>  setShowVerifPopup(!showLKSPopup);
 
   const closeVerifPopup = () => {
     setVerifData(null);
