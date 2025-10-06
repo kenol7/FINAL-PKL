@@ -19,9 +19,11 @@ import Footer from "../Components/Elements/Footer";
 import Frame1 from "../assets/frame1.png";
 import Frame2 from "../assets/frame2.png";
 import Frame3 from "../assets/frame3.png";
+import Chatbotimg from "../assets/ChatBot.png"
+import Kprimg from "../assets/HitungKpr.png"
 import { Pointer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const FrameData = [
   { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
@@ -171,7 +173,7 @@ export default function Home() {
                 <img
                   src={frame.url}
                   alt={frame.alt}
-                  className="w-full h-[500px]"
+                  className="w-full h-[500px] object-cover"
                 />
               </div>
             ))}
@@ -295,7 +297,10 @@ export default function Home() {
         <div className="mt-30 mx-10 md:block hidden">
           <div className="flex justify-center xl:gap-14 lg:gap-8 md:gap-2 gap-2">
             <div>
-              <div className="bg-gray-300 xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" />
+              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" 
+                src={Chatbotimg}
+                alt="ChatbotImg"
+              />
             </div>
             <div className="flex justify-center items-center text-center">
               <div className="xl:space-y-20 space-y-8">
@@ -329,7 +334,10 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <div className="bg-gray-300 xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" />
+              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" 
+                src={Kprimg}
+                alt="KPRimg"
+              />
             </div>
           </div>
         </div>
@@ -338,7 +346,10 @@ export default function Home() {
         <div className="md:hidden block mx-5">
           <div className="keen-slider my-10" ref={sliderFiturRef}>
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
-              <div className="bg-gray-300 w-full h-[209px] rounded-2xl" />
+              <img className=" w-[50%] rounded-2xl" 
+                src={Chatbotimg}
+                alt="ChatBotImg"
+              />
               <div className="flex justify-center items-center text-center w-full md:w-auto">
                 <div className="space-y-5 mb-2">
                   <h3 className="text-xl">
@@ -354,7 +365,10 @@ export default function Home() {
               </div>
             </div>
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
-              <div className="bg-gray-300 w-full h-[209px] rounded-2xl" />
+              <img className="w-[50%] rounded-2xl" 
+                src={Kprimg}
+                alt="KprImg"
+              />
               <div className="flex justify-center items-center text-center w-full md:w-auto">
                 <div className="space-y-5 mb-2">
                   <h3 className="text-xl">

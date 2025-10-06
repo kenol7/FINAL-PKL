@@ -12,9 +12,9 @@ export default function ProtectedRoute({ children }) {
 
       // Hitung selisih waktu dalam ms
       const diff = now - loginDate;
-      const sevenDays = 1 * 24 * 60 * 60 * 1000;
+      const oneDays = 1 * 24 * 60 * 60 * 1000;
 
-      if (diff >= sevenDays) {
+      if (diff >= oneDays) {
         // Expired → hapus data login
         localStorage.clear();
         alert("Sesi login Anda telah kedaluwarsa. Silakan login kembali.");

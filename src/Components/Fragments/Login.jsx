@@ -89,6 +89,7 @@ const Login = ({ route, onClose }) => {
         localStorage.setItem("auth_phone", response.user.nomer_telepon);
         localStorage.setItem("auth_email", response.user.email);
         localStorage.setItem("auth_fullname", response.user.nama_lengkap);
+        localStorage.setItem("foto_profil",response.user.image);
         localStorage.setItem("tipe_time", new Date().toISOString());
         window.dispatchEvent(new Event("storage"));
         setTimeout(() => {

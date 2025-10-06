@@ -3,6 +3,7 @@ import LupaKataSandi from "../Components/Fragments/LupaKataSandi";
 import Login from "../Components/Fragments/Login";
 import Register from "../Components/Fragments/Register";
 import SK from "../Components/Fragments/SK";
+import UbahProfile from "../Components/Fragments/UbahProfile";
 import OTPInput from "../Components/Fragments/VerifikasiKode";
 import LKS from "../Components/Fragments/LupaKataSandi";
 import { DetailLayout, SKLayout } from "../Components/Layouts/LayoutUtama";
@@ -13,14 +14,15 @@ import { LKSLayout } from "../Components/Layouts/LayoutUtama";
 import { VerifLayout } from "../Components/Layouts/LayoutUtama";
 import { Juallayout } from "../Components/Layouts/LayoutUtama";
 import { useParams } from "react-router-dom";
+import { UbahProfileLayout } from "../Components/Layouts/LayoutUtama";
 
-const HalamanKSB = () => {
+const HalamanKSB = ({close}) => {
   return (
     <div className="relative min-h-screen flex items-center justify-center ">
       <div className="absolute inset-0  blur-sm"></div>
       <div className="relative z-10">
-        <KSBLayout title="Kata Sandi Baru">
-          <KataSandiBaru />
+        <KSBLayout title="Kata Sandi Baru" onBack={close}>
+          <KataSandiBaru close={close} />
         </KSBLayout>
       </div>
     </div>
@@ -111,6 +113,19 @@ const HalamanJual = () => {
   return <Juallayout />;
 };
 
+const HalamanUbahProfile = ({ close, onUpdate }) => {
+  return (
+    <div className="relative min-h-screen flex items-center justify-center ">
+      <div className="absolute inset-0  blur-sm"></div>
+      <div className="relative z-10">
+        <UbahProfileLayout title={"Ubah Data"} onBack={close}>
+          <UbahProfile onUpdate={onUpdate} />
+        </UbahProfileLayout>
+      </div>
+    </div>
+  );
+};
+
 export {
   HalamanKSB,
   HalamanLKS,
@@ -120,4 +135,5 @@ export {
   Halamansk,
   HalamanDetail,
   HalamanJual,
+  HalamanUbahProfile
 };
