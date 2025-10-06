@@ -4,8 +4,6 @@ import API from "../../Config/Endpoint";
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { useLoading } from "../../Context/Loader";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 const DetailRumah = () => {
     const [favorit, setFavorit] = useState(false);
@@ -16,6 +14,10 @@ const DetailRumah = () => {
     const [imageSlider, setImageSlider] = useState([]);
     const [imageShow, setImageShow] = useState("");
     const sliderRef = useRef(null);
+    const mapRef = useRef(null); 
+    const mapInstanceRef = useRef(null); 
+
+    const map_key = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo"; 
 
     const ChangeImageShow = (imgName) => {
         setImageShow(imgName);
@@ -44,6 +46,49 @@ const DetailRumah = () => {
         }
     };
 
+    const loadGoogleMapsScript = () => {
+        if (window.google && window.google.maps) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${map_key}&libraries=geometry`;
+            script.async = true;
+            script.defer = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    };
+
+    const initMap = (lat, lng) => {
+        if (!window.google || !window.google.maps) {
+            console.warn("Google Maps belum siap");
+            return;
+        }
+
+        const mapOptions = {
+            zoom: 15,
+            center: { lat, lng },
+            mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+            zoomControl: true,
+            streetViewControl: false,
+            fullscreenControl: true,
+            mapTypeControl: false,
+        };
+
+        const map = new window.google.maps.Map(mapRef.current, mapOptions);
+
+        new window.google.maps.Marker({
+            position: { lat, lng },
+            map: map,
+            title: detail?.cluster_apart_name || "Lokasi Properti",
+        });
+
+        mapInstanceRef.current = map;
+    };
+
     useEffect(() => {
         if (!detail || !detail.latitude || !detail.longitude) return;
 
@@ -52,36 +97,18 @@ const DetailRumah = () => {
 
         if (isNaN(lat) || isNaN(lng)) return;
 
-        if (window.propertyMapInstance) {
-            window.propertyMapInstance.setView([lat, lng], 15);
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setCenter({ lat, lng });
             return;
         }
 
-        const map = L.map("property-map", {
-            zoomControl: false,
-            dragging: false,
-            scrollWheelZoom: false,
-            doubleClickZoom: false,
-            touchZoom: false,
-            boxZoom: false,
-            keyboard: false,
-            attributionControl: false,
-        }).setView([lat, lng], 15);
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 18,
-        }).addTo(map);
-
-        L.marker([lat, lng]).addTo(map);
-
-        window.propertyMapInstance = map;
-
-        return () => {
-            if (window.propertyMapInstance) {
-                window.propertyMapInstance.remove();
-                delete window.propertyMapInstance;
-            }
-        };
+        loadGoogleMapsScript()
+            .then(() => {
+                initMap(lat, lng);
+            })
+            .catch((err) => {
+                console.error("Gagal memuat Google Maps:", err);
+            });
     }, [detail]);
 
     useEffect(() => {
@@ -92,23 +119,12 @@ const DetailRumah = () => {
 
         const newSlider = new KeenSlider(sliderRef.current, {
             mode: "snap",
-            slides: {
-                perView: 1,
-                spacing: 10,
-            },
+            slides: { perView: 1, spacing: 10 },
             created(s) {
-                interval = setInterval(() => {
-                    s.next();
-                }, autoplayDuration);
-
-                s.container.addEventListener("mouseover", () => {
-                    clearInterval(interval);
-                });
-
+                interval = setInterval(() => s.next(), autoplayDuration);
+                s.container.addEventListener("mouseover", () => clearInterval(interval));
                 s.container.addEventListener("mouseout", () => {
-                    interval = setInterval(() => {
-                        s.next();
-                    }, autoplayDuration);
+                    interval = setInterval(() => s.next(), autoplayDuration);
                 });
             },
             destroyed() {
@@ -121,6 +137,7 @@ const DetailRumah = () => {
         };
     }, [imageSlider]);
 
+    // Fetch data saat komponen mount
     useEffect(() => {
         const path = window.location.pathname;
         const segments = path.split("/");
@@ -173,7 +190,6 @@ const DetailRumah = () => {
                             {detail.ref_id}
                         </div>
                     </div>
-
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="font-jakarta">
                             <h1 className="text-xl md:text-2xl font-bold">{detail.cluster_apart_name}</h1>
@@ -182,13 +198,10 @@ const DetailRumah = () => {
                         <div className="bg-[#E7C555] rounded-2xl w-full md:w-[244px] h-[45px] flex items-center justify-center text-center text-lg font-semibold font-jakarta">
                             Rp{" "}
                             {detail.property_price
-                                ? new Intl.NumberFormat("id-ID").format(
-                                    detail.property_price.slice(0, -2)
-                                )
+                                ? new Intl.NumberFormat("id-ID").format(detail.property_price)
                                 : "N/A"}
                         </div>
                     </div>
-
                     <div className="flex flex-wrap items-center justify-between gap-4 p-3 rounded-lg">
                         <div className="flex flex-wrap gap-4 text-sm font-jakarta justify-center md:justify-start">
                             {[
@@ -199,10 +212,7 @@ const DetailRumah = () => {
                             ].map((stat, idx, arr) => (
                                 <div
                                     key={idx}
-                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1
-                                        ? "border-r border-gray-900"
-                                        : ""
-                                        }`}
+                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1 ? "border-r border-gray-900" : ""}`}
                                 >
                                     <span className="font-semibold text-lg">{stat.value}</span>
                                     <span className="text-gray-600 text-xs">{stat.label}</span>
@@ -241,12 +251,10 @@ const DetailRumah = () => {
                             <span className="text-xs text-gray-600 mt-1">Favorit</span>
                         </button>
                     </div>
-
                     <div>
                         <h2 className="font-semibold text-xl mb-2">Lokasi</h2>
                         <p className="text-sm">{detail.address}</p>
                     </div>
-
                     <div>
                         <h2 className="font-semibold text-xl mb-2 font-jakarta">Kepemilikan</h2>
                         <p className="text-sm">{detail.contact_name}</p>
@@ -255,20 +263,16 @@ const DetailRumah = () => {
                         <p className="text-sm">{detail.allotment_name}</p>
                         <p className="text-sm">{detail.document_name}</p>
                     </div>
-
                     <div>
-                        <h2 className="font-semibold text-xl mb-2">Detail</h2>
-                        <p className="text-sm">
-                            Tanah & Bangunan <br />
-                            Rumah Tinggal<br />
-                            Sedang Terawat<br />
-                            Lingkungan<br />
-                            Ketahanan Bangunan 50% - 75%<br />
-                            Lalu Lintas Sedang<br />
-                            Bebas Banjir
-                        </p>
+                        <h2 className="font-semibold text-xl mb-2 font-jakarta">Detail</h2>
+                        <p className="text-sm">{detail.asset_category_name}</p>
+                        <p className="text-sm">{detail.asset_type_name}</p>
+                        <p className="text-sm">{detail.condition_building_name}</p>
+                        <p className="text-sm">{detail.class_road_name}</p>
+                        <p className="text-sm">{detail.occupancy_building_name}</p>
+                        <p className="text-sm">{detail.traffic_volume_name}</p>
+                        <p className="text-sm">{detail.possible_flooding_name}</p>
                     </div>
-
                     <div className="flex flex-col md:flex-row md:items-center gap-4 p-4 bg-white rounded-lg">
                         <div className="font-jakarta text-sm text-gray-700 min-w-0">
                             <p>
@@ -299,19 +303,19 @@ const DetailRumah = () => {
                             alt="fotorumah"
                             className="w-full h-auto object-cover rounded-xl shadow-md"
                         />
-
-                        {detail.latitude && detail.longitude ? (
-                            <div
-                                id="property-map"
-                                className="absolute bottom-2 right-2 w-24 h-24 rounded-lg shadow-md z-10"
-                                style={{ backgroundColor: "white", border: "1px solid #ccc" }}
-                            />
-                        ) : (
-                            <div className="absolute bottom-2 right-2 bg-white border border-gray-300 rounded-lg p-2 shadow-md w-24 h-24 flex items-center justify-center text-xs font-jakarta">
-                                Tidak ada lokasi
-                            </div>
-                        )}
                     </div>
+
+                    {detail.latitude && detail.longitude ? (
+                        <div
+                            ref={mapRef}
+                            className="w-full h-52 md:h-60 rounded-lg shadow-md mt-6"
+                            style={{ minHeight: "200px" }}
+                        />
+                    ) : (
+                        <div className="mt-6 bg-gray-100 border border-gray-300 rounded-lg p-4 w-full text-center text-sm text-gray-500">
+                            Lokasi tidak tersedia
+                        </div>
+                    )}
 
                     <div className="flex justify-center mt-4 space-x-2">
                         {imageSlider.map((el, i) => (
@@ -319,8 +323,8 @@ const DetailRumah = () => {
                                 key={i}
                                 onClick={() => ChangeImageShow(el.image)}
                                 className={`px-3 py-1 rounded-full text-sm font-bold ${imageShow === el.image
-                                        ? "bg-[#E7C555] text-white"
-                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    ? "bg-[#E7C555] text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                             >
                                 {i + 1}

@@ -1,12 +1,11 @@
 import Button from "../Elements/Button";
 import Input from "../Elements/Input";
 import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
 import { ThreeCircles } from 'react-loader-spinner'
 
 const KSB = () => {
 
-    // const navigate = useNavigate()
+    
 
     const [showPassword, setShowPassword] = useState(false);
 

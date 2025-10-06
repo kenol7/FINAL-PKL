@@ -19,8 +19,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [verifData, setVerifData] = useState(null); 
+  const [verifData, setVerifData] = useState(null);
   const location = useLocation();
+  const [lupaSandiNomor, setLupaSandiNomor] = useState("");
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -54,27 +55,20 @@ export default function Navbar() {
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
   const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
 
-  // ✅ Fungsi baru: tutup popup verifikasi & reset data
   const closeVerifPopup = () => {
     setVerifData(null);
     setShowVerifPopup(false);
   };
 
-  const routelks = () => {
-    toggleLoginPopup();
-    toggleLKSPopup();
+  const openLksPopup = () => {
+    setShowLoginPopup(false);
+    setShowLKSPopup(true);
   };
 
-  const routeverif = () => {
-    toggleLKSPopup();
-    setShowVerifPopup(true);
-  };
-
-  // ✅ Handle sukses register → buka popup verifikasi dengan data
   const handleRegisterSuccess = (data) => {
     setVerifData(data);
-    setShowDaftarPopup(false); // Tutup popup register
-    setShowVerifPopup(true);   // Buka popup verifikasi
+    setShowDaftarPopup(false);
+    setShowVerifPopup(true);
   };
 
   const isActive = (path) =>
@@ -114,7 +108,7 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link to="/jualrumah" className={`hover:text-gray-500 ${isActive("")}`}>
+              <Link to="/jualrumah" className={`hover:text-gray-500 ${isActive("/jualrumah")}`}>
                 Jual Rumah
               </Link>
             </li>
@@ -221,7 +215,7 @@ export default function Navbar() {
           >
             Beli Rumah
           </Link>
-          <Link to="/jualrumah" className={`hover:text-gray-900 ${isActive("")}`}>
+          <Link to="/jualrumah" className={`hover:text-gray-900 ${isActive("/jualrumah")}`}>
             Jual Rumah
           </Link>
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
@@ -292,7 +286,7 @@ export default function Navbar() {
             onClick={toggleLoginPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLogin close={toggleLoginPopup} routeLKS={routelks} />
+          <HalamanLogin close={toggleLoginPopup} routeLKS={openLksPopup} />
         </div>
       )}
 
@@ -302,7 +296,6 @@ export default function Navbar() {
             onClick={toggleDaftarPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          {/* ✅ Tambahkan onRegisterSuccess */}
           <HalamanRegister
             close={toggleDaftarPopup}
             onRegisterSuccess={handleRegisterSuccess}
@@ -316,7 +309,7 @@ export default function Navbar() {
             onClick={toggleLKSPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLKS close={toggleLKSPopup} routeverif={routeverif} />
+          <HalamanLKS close={toggleLKSPopup} /> 
         </div>
       )}
 
@@ -326,7 +319,7 @@ export default function Navbar() {
             onClick={closeVerifPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanVerif close={closeVerifPopup} data={verifData} onUpdateUser={updateUser}/>
+          <HalamanVerif close={closeVerifPopup} data={verifData} onUpdateUser={updateUser} isForgotPassword={true} />
         </div>
       )}
     </>

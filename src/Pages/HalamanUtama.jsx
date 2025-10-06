@@ -4,6 +4,7 @@ import Login from "../Components/Fragments/Login";
 import Register from "../Components/Fragments/Register";
 import SK from "../Components/Fragments/SK";
 import OTPInput from "../Components/Fragments/VerifikasiKode";
+import LKS from "../Components/Fragments/LupaKataSandi";
 import { DetailLayout, SKLayout } from "../Components/Layouts/LayoutUtama";
 import { KSBLayout } from "../Components/Layouts/LayoutUtama";
 import { LoginLayout } from "../Components/Layouts/LayoutUtama";
@@ -28,11 +29,11 @@ const HalamanKSB = () => {
 
 const HalamanLKS = ({ close }) => {
   return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
+    <div className="relative min-h-screen flex items-center justify-center">
+      <div className="absolute inset-0 blur-sm"></div>
       <div className="relative z-10">
         <LKSLayout title="Lupa Kata Sandi" onBack={close}>
-          <LupaKataSandi />
+          <LKS close={close} /> 
         </LKSLayout>
       </div>
     </div>
@@ -80,7 +81,7 @@ const Halamansk = () => {
   );
 };
 
-const HalamanVerif = ({ data, close, onUpdateUser }) => { 
+const HalamanVerif = ({ data, close, onUpdateUser }) => {
   const { code, name, email } = useParams();
   const verifData = data || { kode: code, name, email };
 
@@ -88,12 +89,12 @@ const HalamanVerif = ({ data, close, onUpdateUser }) => {
     <div className="relative min-h-screen flex items-center justify-center">
       <div className="absolute inset-0 blur-sm"></div>
       <div className="relative z-10">
-        <VerifLayout>
+        <VerifLayout title="Verifikasi Kode">
           <OTPInput
             kode={verifData.kode}
             name={verifData.name}
             email={verifData.email}
-            close={close} 
+            close={close}
             onUpdateUser={onUpdateUser}
           />
         </VerifLayout>

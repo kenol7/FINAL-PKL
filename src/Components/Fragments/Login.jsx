@@ -37,7 +37,7 @@ const Login = ({ route, onClose }) => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
-  const [kataSandi, setKataSandi] = useState("");
+  const [password, setpassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [toast, setToast] = useState({ message: "", type: "error", visible: false });
@@ -51,7 +51,7 @@ const Login = ({ route, onClose }) => {
   };
 
   const handleEmailChange = (newValue) => setEmail(newValue);
-  const handleKataSandiChange = (newValue) => setKataSandi(newValue);
+  const handlepasswordChange = (newValue) => setpassword(newValue);
 
   async function signIn() {
     setLoading(true);
@@ -71,14 +71,14 @@ const Login = ({ route, onClose }) => {
   const checkLogin = async (event) => {
     event.preventDefault();
 
-    if (!email || !kataSandi) {
+    if (!email || !password) {
       showToast("Isi email dan password dulu");
       return;
     }
 
     const url = new URL(API.endpointlogin);
     url.searchParams.set("email", email);
-    url.searchParams.set("password", kataSandi);
+    url.searchParams.set("password", password);
 
     try {
       const res = await fetch(url.toString(), { method: "GET" });
@@ -97,7 +97,7 @@ const Login = ({ route, onClose }) => {
       } else {
         showToast(response.message || "Password atau Email Salah");
         setEmail("");
-        setKataSandi("");
+        setpassword("");
       }
     } catch (err) {
       console.error("Error login:", err);
@@ -145,7 +145,7 @@ const Login = ({ route, onClose }) => {
               type={showPassword ? "text" : "password"}
               className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
               name="kata_sandi"
-              onChange={handleKataSandiChange}
+              onChange={handlepasswordChange}
             />
             <button
               type="button"
