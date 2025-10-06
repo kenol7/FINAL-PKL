@@ -20,11 +20,18 @@ export default function Navbar() {
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [showVerifPopup, setShowVerifPopup] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null); // ✅ state user
+  const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [verifData, setVerifData] = useState(null);
   const location = useLocation();
-  const [lupaSandiNomor, setLupaSandiNomor] = useState("");
+
+  // ✅ State profile tetap dipertahankan
+  const [profile, setProfile] = useState({
+    nama: "",
+    lokasi: "",
+    email: "",
+    phone: "",
+  });
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -35,21 +42,17 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const updateUser = () => {
+    if (localStorage.getItem("auth_fullname")) {
+      setUser("Profile");
+    } else {
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    const updateUser = () => {
-      if (localStorage.getItem("auth_fullname")) {
-        setUser("Profile");
-      } else {
-        setUser(null);
-      }
-    };
-
-    // cek pertama kali
     updateUser();
-
-    // kalau ada perubahan localStorage
     window.addEventListener("storage", updateUser);
-
     return () => {
       window.removeEventListener("storage", updateUser);
     };
@@ -85,13 +88,13 @@ export default function Navbar() {
       <nav className="shadow">
         <div className="flex justify-between items-center px-7 py-2.5">
           <Link to="/">
-            <img src={Logo} width="50" height="40" />
+            <img src={Logo} width="50" height="40" alt="Logo" />
           </Link>
 
           {/* Mobile menu icon */}
           <div className="block md:hidden lg:hidden">
             <div onClick={() => setMenuOpen(true)} aria-label="Open Menu">
-              <img src={Menu} width="30" height="30" />
+              <img src={Menu} width="30" height="30" alt="Menu" />
             </div>
           </div>
 
@@ -127,7 +130,7 @@ export default function Navbar() {
               </Link>
             </li>
 
-            {/* ✅ kalau ada user tampilkan profile, kalau tidak tampilkan login/register */}
+            {/* Profil atau Login/Register */}
             {user ? (
               <li>
                 <div className="relative">
@@ -136,7 +139,7 @@ export default function Navbar() {
                     onClick={toggleDropdown}
                   >
                     <img
-                      src={image}
+                      src={ProfileImage}
                       alt="Profile"
                       className="rounded-full w-8"
                       onError={(e) => (e.currentTarget.src = ProfileImage)}
@@ -194,10 +197,10 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Overlay */}
+      {/* Overlay mobile */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-gray-700 opacity-40 md:fixed lg:hidden"
+          className="fixed inset-0 z-40 bg-gray-700 opacity-40 md:hidden lg:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}
@@ -206,11 +209,11 @@ export default function Navbar() {
       <div
         className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
           menuOpen ? "translate-x-0" : "translate-x-full"
-        } lg:hidden`}
+        } lg:hidden md:block`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
-            <img src={Close} width="40" height="40" />
+            <img src={Close} width="40" height="40" alt="Close" />
           </div>
         </div>
         <div className="flex flex-col space-y-6 p-6 font-medium">
@@ -233,7 +236,7 @@ export default function Navbar() {
             Hitung KPR
           </Link>
 
-          {/* ✅ Mobile juga cek login */}
+          {/* Mobile: Profil atau Login/Register */}
           {user ? (
             <div className="relative">
               <div
@@ -241,7 +244,7 @@ export default function Navbar() {
                 onClick={toggleDropdown}
               >
                 <img
-                  src={image}
+                  src={ProfileImage}
                   alt="Profile"
                   className="rounded-full w-8"
                   onError={(e) => (e.currentTarget.src = ProfileImage)}
@@ -321,7 +324,7 @@ export default function Navbar() {
             onClick={toggleLKSPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLKS close={toggleLKSPopup} /> 
+          <HalamanLKS close={toggleLKSPopup} />
         </div>
       )}
       {showVerifPopup && (
@@ -330,7 +333,12 @@ export default function Navbar() {
             onClick={toggleVerifPopup}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanVerif close={closeVerifPopup} data={verifData} onUpdateUser={updateUser} isForgotPassword={true} />
+          <HalamanVerif
+            close={closeVerifPopup}
+            data={verifData}
+            onUpdateUser={updateUser}
+            isForgotPassword={true}
+          />
         </div>
       )}
     </>
