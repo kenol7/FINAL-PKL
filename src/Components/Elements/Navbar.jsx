@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import ProfileImage from "../../assets/profile.jpg";
+import ProfileImage from "../../assets/profile.jpg"; // fallback jika tidak ada foto
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -25,28 +25,34 @@ export default function Navbar() {
   const [verifData, setVerifData] = useState(null);
   const location = useLocation();
 
-  // ✅ State profile tetap dipertahankan
-  const [profile, setProfile] = useState({
-    nama: "",
-    lokasi: "",
-    email: "",
-    phone: "",
-  });
+  // ✅ State untuk menyimpan URL foto profil
+  const [profileImage, setProfileImage] = useState(ProfileImage);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
-    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
+    setProfileImage(ProfileImage); // reset ke default
     navigate("/");
   };
 
+  // ✅ Fungsi untuk update user & foto profil
   const updateUser = () => {
     if (localStorage.getItem("auth_fullname")) {
       setUser("Profile");
+      // Ambil foto dari localStorage, atau gunakan default
+      const savedImage = localStorage.getItem("foto_profil");
+      if (savedImage) {
+        // Jika ada nama file, bangun URL-nya
+        const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`;
+        setProfileImage(url);
+      } else {
+        setProfileImage(ProfileImage);
+      }
     } else {
       setUser(null);
+      setProfileImage(ProfileImage);
     }
   };
 
@@ -138,8 +144,9 @@ export default function Navbar() {
                     className="flex items-center cursor-pointer"
                     onClick={toggleDropdown}
                   >
+                    {/* ✅ Gunakan profileImage yang diambil dari localStorage */}
                     <img
-                      src={ProfileImage}
+                      src={profileImage}
                       alt="Profile"
                       className="rounded-full w-8"
                       onError={(e) => (e.currentTarget.src = ProfileImage)}
@@ -207,9 +214,8 @@ export default function Navbar() {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        } lg:hidden md:block`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+          } lg:hidden md:block`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
@@ -243,8 +249,9 @@ export default function Navbar() {
                 className="flex items-center cursor-pointer"
                 onClick={toggleDropdown}
               >
+                {/* ✅ Gunakan profileImage */}
                 <img
-                  src={ProfileImage}
+                  src={profileImage}
                   alt="Profile"
                   className="rounded-full w-8"
                   onError={(e) => (e.currentTarget.src = ProfileImage)}

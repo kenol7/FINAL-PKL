@@ -99,7 +99,9 @@ const fotoProfil = profile.profil
       // Handle successful response
       console.log("Image uploaded successfully:", response.data);
       localStorage.setItem("foto_profil", response.data.filename);
-      // Close the popup after successful upload
+
+      window.dispatchEvent(new Event("storage"));
+      
       setProfile((prev) => ({
         ...prev,
         profil: response.data.filename,
@@ -242,13 +244,13 @@ const fotoProfil = profile.profil
           <div className="flex flex-col mt-4 gap-3">
             <div className="flex gap-4">
               <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
+                className="w-auto bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
                 onClick={toggleUbahPopup}
               >
                 Ubah Data
               </button>
               <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
+                className="w-auto bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
                 onClick={toggleUbahPassword}
               >
                 Ubah Password
