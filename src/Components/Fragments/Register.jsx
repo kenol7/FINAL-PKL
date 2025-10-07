@@ -82,9 +82,12 @@ const Register = ({ onRegisterSuccess, close }) => {
             showToast("Anda harus menyetujui Syarat & Ketentuan (S&K).");
             return;
         }
+        if (!nomorTelepon) {
+            showToast("Nomor telepon tidak boleh kosong.");
+            return;
+        }
         setShowPopup(true);
     };
-
     const confirmSubmit = () => {
         setShowPopup(false);
         setShowuptrue(false);
@@ -116,8 +119,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                             onRegisterSuccess({
                                 kode: response.kode,
                                 name: response.name,
-                                email: response.email
+                                email: response.email,
+                                phone: nomorTelepon
                             });
+                            console.log("Kode dari server:", response.kode);
                         }
                     }, 1500);
                 } else {

@@ -1,6 +1,5 @@
 const API = {
-  endpointregist:
-    "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=POST",
+  endpointregist: "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php",
   endpointlogin:
     "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=GET",
   endpointUpdate: "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php",
@@ -15,6 +14,7 @@ const API = {
   endpointFilter:
     "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti",
   endpointImage: "https://smataco.my.id/dev/unez/CariRumahAja/foto",
+  endpointBookmark : "https://smataco.my.id/dev/unez/CariRumahAja/routes/bookmark.php",
 };
 
 export default API;
