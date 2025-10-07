@@ -153,7 +153,7 @@ export default function Navbar() {
                       src={profileImage}
                       alt="Profile"
                       className="rounded-full w-8"
-                      onError={(e) => (e.currentTarget.src = ProfileImage)}
+                      onError={(e) => (e.currentTarget.src = profileImage)}
                     />
                   </div>
 
@@ -262,7 +262,7 @@ export default function Navbar() {
                   src={profileImage}
                   alt="Profile"
                   className="rounded-full w-8"
-                  onError={(e) => (e.currentTarget.src = ProfileImage)}
+                  onError={(e) => (e.currentTarget.src = profileImage)}
                 />
               </div>
 

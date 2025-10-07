@@ -182,7 +182,7 @@ const fotoProfil = profile.profil
             src={fotoProfil}
             alt="Profile"
             className="rounded-full w-30"
-            // onError={(e) => (e.currentTarget.src = ProfileImage)}
+            onError={(e) => (e.currentTarget.src = ProfileImage)}
           />
           <button
             onClick={handleEditClick}
