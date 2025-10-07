@@ -59,7 +59,7 @@ const PropertyCard = ({ item, onClick }) => (
             Rp{" "}
             {item.property_price
               ? new Intl.NumberFormat("id-ID").format(
-                  item.property_price.slice(0, -2)
+                  item.property_price.toLocaleString()
                 )
               : "N/A"}
           </span>
