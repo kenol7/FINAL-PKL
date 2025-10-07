@@ -5,6 +5,35 @@ import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { useLoading } from "../../Context/Loader";
 
+// 🔔 ToastAlert didefinisikan inline
+const ToastAlert = ({ message, type, isVisible, onClose }) => {
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    const bgColor =
+        type === "error"
+            ? "bg-red-100 border-red-500 text-red-700"
+            : "bg-green-100 border-green-500 text-green-700";
+
+    return (
+        <div
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md p-4 rounded-lg shadow-lg border-l-4 ${bgColor} transition-all duration-300 ease-in-out`}
+            role="alert"
+        >
+            <p className="font-bold">{type === "error" ? "Error" : "Berhasil"}</p>
+            <p>{message}</p>
+        </div>
+    );
+};
+
 const DetailRumah = () => {
     const [favorit, setFavorit] = useState(false);
     const navigate = useNavigate();
@@ -14,10 +43,26 @@ const DetailRumah = () => {
     const [imageSlider, setImageSlider] = useState([]);
     const [imageShow, setImageShow] = useState("");
     const sliderRef = useRef(null);
-    const mapRef = useRef(null); 
-    const mapInstanceRef = useRef(null); 
+    const mapRef = useRef(null);
+    const mapInstanceRef = useRef(null);
 
-    const map_key = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo"; 
+    const map_key = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+    const apibook = API.endpointBookmark;
+
+    // Toast state
+    const [toast, setToast] = useState({
+        isVisible: false,
+        message: "",
+        type: "success",
+    });
+
+    const showToast = (message, type = "success") => {
+        setToast({ isVisible: true, message, type });
+    };
+
+    const hideToast = () => {
+        setToast((prev) => ({ ...prev, isVisible: false }));
+    };
 
     const ChangeImageShow = (imgName) => {
         setImageShow(imgName);
@@ -30,6 +75,98 @@ const DetailRumah = () => {
             setDetail(response);
         } catch (error) {
             console.error("Gagal fetch detail:", error);
+        }
+    };
+
+    // 🔁 Cek status favorit dari localStorage
+    const updateFavoritStatus = () => {
+        if (!detail?.ref_id) return;
+        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        const isBookmarked = favorites.some(item => item.ref_id === detail.ref_id);
+        setFavorit(isBookmarked);
+    };
+
+    // 📡 Dengarkan custom event saat localStorage berubah
+    useEffect(() => {
+        const handleFavoritesUpdated = () => {
+            updateFavoritStatus();
+        };
+
+        window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+        updateFavoritStatus(); // Cek saat mount
+
+        return () => {
+            window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+        };
+    }, [detail?.ref_id]);
+
+    const toggleFavorit = async () => {
+        if (!detail?.ref_id) {
+            console.warn("ref_id tidak tersedia");
+            return;
+        }
+
+        const email = localStorage.getItem("auth_email");
+        if (!email || !email.trim()) {
+            showToast("Anda harus login terlebih dahulu.", "error");
+            return;
+        }
+
+        const newFavoritStatus = !favorit;
+        setFavorit(newFavoritStatus);
+
+        const mode = newFavoritStatus ? "add" : "delete";
+        const payload = {
+            mode,
+            email: email.trim(),
+            ref_id: detail.ref_id,
+        };
+
+        try {
+            const res = await fetch(apibook, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await res.json();
+
+            if (!res.ok || result.status === "error") {
+                if (result.message && result.message.includes("sudah ada")) {
+                    const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+                    if (!currentFavorites.some(item => item.ref_id === detail.ref_id)) {
+                        localStorage.setItem(
+                            "favorites",
+                            JSON.stringify([...currentFavorites, detail])
+                        );
+                        window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
+                    }
+                    showToast("Properti sudah ada di bookmark.", "success");
+                    return;
+                }
+                throw new Error(result.message || "Gagal memperbarui favorit");
+            }
+
+            const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+            if (newFavoritStatus) {
+                localStorage.setItem("favorites", JSON.stringify([...currentFavorites, detail]));
+            } else {
+                const updated = currentFavorites.filter(item => item.ref_id !== detail.ref_id);
+                localStorage.setItem("favorites", JSON.stringify(updated));
+            }
+
+            window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
+
+            showToast(
+                newFavoritStatus
+                    ? "Properti berhasil ditambahkan ke favorit."
+                    : "Properti berhasil dihapus dari favorit."
+            );
+
+        } catch (error) {
+            console.error("Error toggle favorit:", error);
+            setFavorit(!newFavoritStatus);
+            showToast(error.message, "error");
         }
     };
 
@@ -137,7 +274,6 @@ const DetailRumah = () => {
         };
     }, [imageSlider]);
 
-    // Fetch data saat komponen mount
     useEffect(() => {
         const path = window.location.pathname;
         const segments = path.split("/");
@@ -145,10 +281,7 @@ const DetailRumah = () => {
 
         if (paramRefId) {
             showLoading();
-            Promise.all([
-                GetContribution(paramRefId),
-                GetContributionImage(paramRefId)
-            ]).finally(() => {
+            Promise.all([GetContribution(paramRefId), GetContributionImage(paramRefId)]).finally(() => {
                 hideLoading();
             });
         }
@@ -212,7 +345,8 @@ const DetailRumah = () => {
                             ].map((stat, idx, arr) => (
                                 <div
                                     key={idx}
-                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1 ? "border-r border-gray-900" : ""}`}
+                                    className={`flex flex-col items-center px-3 ${idx < arr.length - 1 ? "border-r border-gray-900" : ""
+                                        }`}
                                 >
                                     <span className="font-semibold text-lg">{stat.value}</span>
                                     <span className="text-gray-600 text-xs">{stat.label}</span>
@@ -220,7 +354,8 @@ const DetailRumah = () => {
                             ))}
                         </div>
                         <button
-                            onClick={() => setFavorit(!favorit)}
+                            onClick={toggleFavorit}
+                            disabled={!detail}
                             className="flex flex-col items-center focus:outline-none mt-2 md:mt-0"
                         >
                             {favorit ? (
@@ -323,8 +458,8 @@ const DetailRumah = () => {
                                 key={i}
                                 onClick={() => ChangeImageShow(el.image)}
                                 className={`px-3 py-1 rounded-full text-sm font-bold ${imageShow === el.image
-                                    ? "bg-[#E7C555] text-white"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                        ? "bg-[#E7C555] text-white"
+                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                             >
                                 {i + 1}
@@ -333,6 +468,14 @@ const DetailRumah = () => {
                     </div>
                 </div>
             </div>
+
+            {/* 🔔 Render ToastAlert */}
+            <ToastAlert
+                message={toast.message}
+                type={toast.type}
+                isVisible={toast.isVisible}
+                onClose={hideToast}
+            />
         </>
     );
 };

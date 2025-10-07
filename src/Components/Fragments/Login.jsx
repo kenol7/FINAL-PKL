@@ -12,7 +12,7 @@ const ToastAlert = ({ message, type, isVisible, onClose }) => {
     if (isVisible) {
       const timer = setTimeout(() => {
         onClose();
-      }, 3000); 
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [isVisible, onClose]);
@@ -71,11 +71,11 @@ const Login = ({ route, onClose }) => {
   const checkLogin = async (event) => {
     event.preventDefault();
 
-    if (!email || !kataSandi) {
+    if (!email.trim() || !kataSandi.trim()) {
       showToast("Isi email dan password dulu");
       return;
     }
-
+    
     const url = new URL(API.endpointlogin);
     url.searchParams.set("email", email);
     url.searchParams.set("password", kataSandi);
@@ -89,16 +89,16 @@ const Login = ({ route, onClose }) => {
         localStorage.setItem("auth_phone", response.user.nomer_telepon);
         localStorage.setItem("auth_email", response.user.email);
         localStorage.setItem("auth_fullname", response.user.nama_lengkap);
-        localStorage.setItem("foto_profil",response.user.image);
+        localStorage.setItem("foto_profil", response.user.image);
         localStorage.setItem("tipe_time", new Date().toISOString());
         window.dispatchEvent(new Event("storage"));
         setTimeout(() => {
           onClose();
-        }, 1500); 
+        }, 1500);
       } else {
         showToast(response.message || "Password atau Email Salah");
-        setEmail("");
-        setKataSandi("");
+        // setEmail("");
+        // setKataSandi("");
       }
     } catch (err) {
       console.error("Error login:", err);

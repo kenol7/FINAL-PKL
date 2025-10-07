@@ -18,14 +18,13 @@ export default function Profile(props) {
     profil: "",
   });
 
-const ProfileImage ='https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg'
+  const ProfileImage = 'https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg'
 
 
-const fotoProfil = profile.profil
-  ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${
-      profile.profil
+  const fotoProfil = profile.profil
+    ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${profile.profil
     }?t=${Date.now()}`
-  : ProfileImage;
+    : ProfileImage;
 
 
   console.log(profile);
@@ -40,43 +39,49 @@ const fotoProfil = profile.profil
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+  const [favorites, setFavorites] = useState([]);
 
   const maskPhone = (phone) => {
-  if (!phone) return "";
-  const cleanPhone = phone.toString().trim();
+    if (!phone) return "";
+    const cleanPhone = phone.toString().trim();
 
-  // Jika panjang nomor kurang dari 5, langsung return bintang semua
-  if (cleanPhone.length <= 5) {
-    return "*".repeat(cleanPhone.length);
-  }
+    // Jika panjang nomor kurang dari 5, langsung return bintang semua
+    if (cleanPhone.length <= 5) {
+      return "*".repeat(cleanPhone.length);
+    }
 
-  // Potong 5 digit terakhir dan ganti dengan *
-  const visiblePart = cleanPhone.slice(0, -8);
-  return visiblePart + "********";
-};
+    // Potong 5 digit terakhir dan ganti dengan *
+    const visiblePart = cleanPhone.slice(0, -8);
+    return visiblePart + "********";
+  };
 
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const cleanedFileName = file.name.replace(/\s+/g, "_"); 
+      const cleanedFileName = file.name.replace(/\s+/g, "_");
 
       const cleanedFile = new File([file], cleanedFileName, {
         type: file.type,
       });
 
-      const fileSizeInMB = file.size / (1024 * 1024); 
+      const fileSizeInMB = file.size / (1024 * 1024);
       if (fileSizeInMB > 2) {
         setImageError("File size exceeds 2MB. Please select a smaller file.");
         setSelectedImage(null);
         setImageFile(null);
       } else {
-        setImageError(""); 
-        setSelectedImage(URL.createObjectURL(cleanedFile)); 
-        setImageFile(cleanedFile); 
+        setImageError("");
+        setSelectedImage(URL.createObjectURL(cleanedFile));
+        setImageFile(cleanedFile);
       }
     }
   };
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("favorites") || "[]");
+    setFavorites(saved);
+  }, []);
 
   const handleEditClick = () => {
     setShowEdit(!showEdit); // Toggle the form visibility
@@ -118,7 +123,7 @@ const fotoProfil = profile.profil
       localStorage.setItem("foto_profil", response.data.filename);
 
       window.dispatchEvent(new Event("storage"));
-      
+
       setProfile((prev) => ({
         ...prev,
         profil: response.data.filename,
@@ -156,13 +161,13 @@ const fotoProfil = profile.profil
     }
 
     setProfile({
-      nama: storedFullname || "Yang Jungwon", 
-      lokasi: " ", 
-      email: storedEmail || "yangjungwon@gmail.com", 
-      phone: storedPhone || "088888888888", 
+      nama: storedFullname || "Yang Jungwon",
+      lokasi: " ",
+      email: storedEmail || "yangjungwon@gmail.com",
+      phone: storedPhone || "088888888888",
       profil: storedProfil,
     });
-  }, []); 
+  }, []);
 
   const handleProfileUpdate = (updatedData) => {
     localStorage.setItem("auth_fullname", updatedData.nama);
@@ -437,70 +442,38 @@ const fotoProfil = profile.profil
               <h1 className="font-semibold text-lg">Favorit</h1>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
+            {favorites.length === 0 ? (
+              <p className="text-gray-500 text-sm">Belum ada properti favorit.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+                {favorites.map((item) => (
+                  <div
+                    key={item.ref_id}
+                    className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
+                    onClick={() => navigate(`/detail/${item.ref_id}`)}
+                  >
+                    <div className="w-full bg-gray-300 h-30" /> {/* Ganti dengan gambar jika ada */}
+                    <div className="flex items-start justify-between p-3">
+                      <div className="flex flex-col">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          {item.cluster_apart_name}
+                        </h3>
+                        <p className="text-gray-700 text-sm">{item.city}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          LT {item.square_land}m² | LB {item.square_building}m² | L{item.property_floor}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
+                          Rp {new Intl.NumberFormat("id-ID").format(item.property_price)}
+                        </span>
+                        <p className="text-xs text-gray-600 mt-1">Transaksi</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
+                ))}
               </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
