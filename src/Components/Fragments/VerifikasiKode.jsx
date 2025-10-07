@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Button from "../Elements/Button";
 import API from '../../Config/Endpoint';
+import axios from "axios";
 
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
@@ -63,32 +64,47 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
     useEffect(() => {
         if (!kode) return;
 
-        let payload = {
-            kode: kode,
-            action: 'decrypt'
+        const fetchDecrypt = async () => {
+            // console.log()
+            try {
+                const response = await axios.post(
+                    `${API.endpointregist}`,
+                    {
+                        mode: "POST",
+                        action: "decrypt",
+                        nomer_telepon: phone || '',
+                        email: email || '',
+                        nama_lengkap: name || '',
+                        kode: kode,
+                    },
+                    {
+                        headers: { "Content-Type": "application/json" },
+                    }
+                );
+
+                const data = response.data;
+                console.log("Response decrypt:", data);
+
+                if (data && data.otp) {
+                    setOtpReal(data.otp);
+                    const realPhone = data.nomer_telepon || phone;
+                    if (!realPhone) {
+                        throw new Error("Nomor telepon tidak ditemukan");
+                    }
+                    setPhoneReal(realPhone);
+                    setNamaLengkap(name || data.nama_lengkap || "");
+                    setUserEmail(email || data.email || "");
+                } else {
+                    showToast("Gagal memuat data verifikasi.", "error");
+                }
+            } catch (err) {
+                console.error("Decrypt error:", err);
+                showToast("Terjadi kesalahan saat memuat data.", "error");
+            }
         };
 
-        fetch(API.endpointregist, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-            .then(res => res.json())
-            .then(response => {
-                if (response && response.otp) {
-                    setOtpReal(response.otp);
-                    setPhoneReal(response.nomer_telepon || phone);
-                    setNamaLengkap(name || response.nama_lengkap || '');
-                    setUserEmail(email || response.email || '');
-                } else {
-                    showToast('Gagal memuat data verifikasi.', 'error');
-                }
-            })
-            .catch(err => {
-                console.error('Decrypt error:', err);
-                showToast('Terjadi kesalahan saat memuat data.', 'error');
-            });
-    }, [kode, name, email, phone]);
+        fetchDecrypt();
+    }, []);
 
     useEffect(() => {
         if (count <= 0) return;
@@ -135,55 +151,85 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
         }, 50);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         const code = otp.join('').trim();
 
         if (!code || code.length !== length) {
             showToast('Masukkan kode OTP lengkap.', 'error');
             return;
         }
-
-        if (code === otpReal) {
-            localStorage.setItem('auth_phone', phoneReal);
-            localStorage.setItem('auth_email', userEmail);
-            localStorage.setItem('auth_fullname', namaLengkap);
-            localStorage.setItem('tipe_time', Date.now().toString());
-
-            if (typeof onUpdateUser === 'function') {
-                onUpdateUser();
-            }
-
-            showToast(`Halo, ${namaLengkap}! Selamat datang.`, "success");
-
-            setTimeout(() => {
-                if (typeof close === 'function') {
-                    close();
-                }
-                navigate('/');
-            }, 1000);
-        } else {
+        console.log(code+'='+ otpReal)
+        if (code !== otpReal) {
             setOtp(new Array(length).fill(""));
             inputRefs.current[0]?.focus();
             showToast('Kode OTP salah, silakan coba lagi.', "error");
+            return;
+        }
+
+        if (!phoneReal) {
+            showToast('Nomor telepon tidak ditemukan. Silakan daftar ulang.', 'error');
+            return;
+        }
+
+        try {
+            console.log("DEBUG OTP:", { phoneReal, code, otpReal });
+
+            const response = await fetch(API.endpointregist, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    mode: "update",
+                    action: "otp",
+                    phone: phoneReal,
+                    otp: code
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success" || result.success) {
+                localStorage.setItem("auth_phone", phoneReal);
+                localStorage.setItem("auth_email", userEmail);
+                localStorage.setItem("auth_fullname", namaLengkap);
+                localStorage.setItem("tipe_time", Date.now().toString());
+
+                if (typeof onUpdateUser === "function") {
+                    onUpdateUser();
+                }
+
+                showToast(`Halo, ${namaLengkap}! Selamat datang.`, "success");
+
+                setTimeout(() => {
+                    if (typeof close === "function") close();
+                    navigate("/");
+                }, 1000);
+            } else {
+                throw new Error(result.message || "Verifikasi gagal di server");
+            }
+        } catch (err) {
+            console.error("Verifikasi OTP gagal:", err);
+            showToast("Gagal memverifikasi akun. Coba lagi.", "error");
         }
     };
+
 
     const handleResend = async () => {
         if (isResending) return;
 
         setIsResending(true);
         try {
-            const payload = {
-                nomor_telepon: phoneReal,
-                email: userEmail,
-                nama_lengkap: namaLengkap,
-                action: 'kirim_ulang_otp'
-            };
+            const url = `${API.endpointregist}?mode=POST&action=kirim_ulang_otp`;
 
-            const response = await fetch(API.endpointregist, {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    nomor_telepon: phoneReal,
+                    email: userEmail,
+                    nama_lengkap: namaLengkap
+                })
             });
 
             const result = await response.json();
@@ -191,7 +237,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
             if (result.status === 'success' || result.success) {
                 setCount(120);
                 showToast('Kode OTP baru telah dikirim!', 'success');
-
             } else {
                 showToast(result.message || 'Gagal mengirim ulang OTP.', 'error');
             }
@@ -202,7 +247,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
             setIsResending(false);
         }
     };
-
     return (
         <>
             <ToastAlert
@@ -233,7 +277,7 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
 
                 {count > 0 ? (
                     <p className="text-sm text-black-600">
-                        Kode berlaku selama : <span className="font-mono">{formatTime(count)}</span>
+                        Kode berlaku selama: <span className="font-mono">{formatTime(count)}</span>
                     </p>
                 ) : (
                     <button
