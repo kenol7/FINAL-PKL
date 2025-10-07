@@ -40,11 +40,13 @@ export default function Navbar() {
   // ✅ Fungsi untuk update user & foto profil
   const updateUser = () => {
     if (localStorage.getItem("auth_fullname")) {
+      
       setUser("Profile");
-      // Ambil foto dari localStorage, atau gunakan default
+    //   // Ambil foto dari localStorage, atau gunakan default
+    console.log(localStorage.getItem("foto_profil"))
       const savedImage = localStorage.getItem("foto_profil");
-      if (savedImage) {
-        // Jika ada nama file, bangun URL-nya
+        if (savedImage) {
+          // console.log(`https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`)
         const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`;
         setProfileImage(url);
       } else {
@@ -57,12 +59,12 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    updateUser();
+     updateUser();
     window.addEventListener("storage", updateUser);
     return () => {
       window.removeEventListener("storage", updateUser);
     };
-  }, []);
+  },[]);
 
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);

@@ -11,6 +11,10 @@ const JualRumah = () => {
     const [discount, setDiscount] = useState("");
     const [nomorTelepon, setNomorTelepon] = useState("");
 
+    // State baru untuk dropdown
+    const [kategoriPemilik, setKategoriPemilik] = useState("");
+    const [statusTransaksi, setStatusTransaksi] = useState("");
+
     const toggleArrow = (field) => {
         setShowArrowUp((prev) => ({
             ...prev,
@@ -63,8 +67,7 @@ const JualRumah = () => {
     };
 
     return (
-        <div className="p-4 sm:p-6 min-h-screen bg-gray-100">
-            {/* Flex container: column di mobile, row di desktop */}
+        <div className="p-4 sm:p-6 min-h-screen ">
             <div className="flex flex-col lg:flex-row gap-6">
 
                 {/* Sidebar (kiri) */}
@@ -143,8 +146,8 @@ const JualRumah = () => {
                             />
                         </div>
 
-                        {/* Grid: 1 kolom di mobile, 3 di desktop */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Grid: 2 kolom untuk Nama Pemilik & Kategori Pemilik */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm mb-1">Nama Pemilik</label>
                                 <input
@@ -154,29 +157,54 @@ const JualRumah = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm mb-1">Harga</label>
-                                <input
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    className="w-full p-2 rounded bg-white text-black"
-                                    placeholder="Contoh: 1500000000"
-                                    value={harga}
-                                    onChange={(e) => handleNumericInput(e, setHarga)}
-                                />
+                                <label className="block text-sm mb-1">Kategori Pemilik</label>
+                                <div
+                                    className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                    onClick={() => toggleArrow("Kategori Pemilik")}
+                                >
+                                    <span>{kategoriPemilik || "Pilih Kategori Pemilik"}</span>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className={`h-5 w-5 transition-transform ${showArrowUp["Kategori Pemilik"] ? "rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm mb-1">Nomor Telepon</label>
-                                <input
-                                    type="tel"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    className="w-full p-2 rounded bg-white text-black"
-                                    placeholder="Contoh: 081234567890"
-                                    value={nomorTelepon}
-                                    onChange={handlePhoneChange}
-                                />
-                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm mb-1">Harga</label>
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                className="w-full p-2 rounded bg-white text-black"
+                                placeholder="Contoh: 1500000000"
+                                value={harga}
+                                onChange={(e) => handleNumericInput(e, setHarga)}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm mb-1">Nomor Telepon</label>
+                            <input
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                className="w-full p-2 rounded bg-white text-black"
+                                placeholder="Contoh: 081234567890"
+                                value={nomorTelepon}
+                                onChange={handlePhoneChange}
+                            />
                         </div>
 
                         <div>
@@ -264,11 +292,26 @@ const JualRumah = () => {
                                     <div key={label}>
                                         <label className="block text-sm mb-1">{label}</label>
                                         {label === "Status Transaksi" ? (
-                                            <input
-                                                type="text"
-                                                className="w-full p-2 rounded bg-white text-black"
-                                                placeholder="Contoh: Siap Jual"
-                                            />
+                                            <div
+                                                className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                                onClick={() => toggleArrow(label)}
+                                            >
+                                                <span>{statusTransaksi || "Pilih Status Transaksi"}</span>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className={`h-5 w-5 transition-transform ${showArrowUp[label] ? "rotate-180" : ""}`}
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    stroke="currentColor"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M19 9l-7 7-7-7"
+                                                    />
+                                                </svg>
+                                            </div>
                                         ) : (
                                             <input
                                                 type="text"
