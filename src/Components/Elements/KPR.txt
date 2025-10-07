@@ -1,557 +1,250 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../Components/Elements/Navbar";
-import Footer from "../Components/Elements/Footer";
-import ProfileImage from "../assets/profile.jpg";
-import Jual from "../assets/sale-01.png";
-import Edit from "../assets/edit.png";
-import { Bookmark } from "lucide-react";
-import { HalamanUbahProfile, HalamanKSB } from "../Pages/HalamanUtama";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import API from "../../Config/Endpoint";
 
-export default function Profile(props) {
-  const [profile, setProfile] = useState({
-    nama: "",
-    lokasi: "",
-    email: "",
-    phone: "",
-    profil: "",
-  });
-const fotoProfil = profile.profil
-  ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${
-      profile.profil
-    }?t=${Date.now()}`
-  : ProfileImage;
+export default function Search() {
+  const [dataProvinsi, setDataProvinsi] = useState([]);
+  const [dataKota, setDataKota] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [selectedProvince, setSelectedProvince] = useState("Provinsi");
+  const [selectedCity, setSelectedCity] = useState("Kota");
+  const [isOpenProvince, setIsOpenProvince] = useState(false);
+  const [isOpenCity, setIsOpenCity] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
 
-
-  console.log(profile);
-  const [showUbahPopup, setShowUbahPopup] = useState(false);
-  const toggleUbahPopup = () => setShowUbahPopup(!showUbahPopup);
-  const [showUbahPassword, setShowUbahPassword] = useState(false);
-  const toggleUbahPassword = () => setShowUbahPassword(!showUbahPassword);
-  const [showEdit, setShowEdit] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [imageError, setImageError] = useState("");
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Clean the file name by replacing spaces with underscores
-      const cleanedFileName = file.name.replace(/\s+/g, "_"); // Replace spaces with underscores
-
-      // Create a new File object with the cleaned name
-      const cleanedFile = new File([file], cleanedFileName, {
-        type: file.type,
-      });
-
-      const fileSizeInMB = file.size / (1024 * 1024); // Convert file size to MB
-      if (fileSizeInMB > 2) {
-        setImageError("File size exceeds 2MB. Please select a smaller file.");
-        setSelectedImage(null);
-        setImageFile(null);
-      } else {
-        setImageError(""); // Clear error message
-        setSelectedImage(URL.createObjectURL(cleanedFile)); // Set image preview
-        setImageFile(cleanedFile); // Set the cleaned file for upload
-      }
-    }
-  };
-
-  const handleEditClick = () => {
-    setShowEdit(!showEdit); // Toggle the form visibility
-  };
-
-  const handlePasswordUpdate = () => {
-    console.log("Password updated!");
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
-    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
-    navigate("/");
-  };
-
-  const uploadImage = async () => {
-    if (!imageFile) return; // If no file is selected, do nothing
-
-    const formData = new FormData();
-    formData.append("mode", "UPDATE"); // Mode as POST
-    formData.append("action", "updateProfilePicture"); // Action for uploading image
-    formData.append("email", profile.email); // Email for identification
-    formData.append("image", imageFile); // Append the image file
-
-    try {
-      const response = await axios.post(
-        "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php", // Correct API endpoint
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Ensure the content type is set correctly for file upload
-          },
-        }
-      );
-
-      // Handle successful response
-      console.log("Image uploaded successfully:", response.data);
-      localStorage.setItem("foto_profil", response.data.filename);
-      // Close the popup after successful upload
-      setProfile((prev) => ({
-        ...prev,
-        profil: response.data.filename,
-      }));
-      setShowEdit(false);
-    } catch (error) {
-      // Handle error: display it for debugging
-      console.error(
-        "Error uploading image:",
-        error.response?.data || error.message
-      );
-    }
-  };
+  const location = useLocation();
 
   useEffect(() => {
-    const storedFullname = localStorage.getItem("auth_fullname");
-    const storedEmail = localStorage.getItem("auth_email");
-    const storedPhone = localStorage.getItem("auth_phone");
-    const storedProfil = localStorage.getItem("foto_profil");
+    const queryParams = new URLSearchParams(location.search);
+    const qMin = queryParams.get("minHarga") || "";
+    const qMax = queryParams.get("maxHarga") || "";
+    const qProv = queryParams.get("province") || "Provinsi";
+    const qCity = queryParams.get("city") || "Kota";
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
-        )
-          .then((res) => res.json())
-          .then((response) => {
-            const city = response.results[0].address_components.find(
-              (component) =>
-                component.types[0].includes("administrative_area_level_2")
-            ).long_name;
-            setProfile((c) => ({ ...c, lokasi: city }));
-          });
-      });
+    setMinPrice(qMin);
+    setMaxPrice(qMax);
+    setSelectedProvince(qProv);
+    setSelectedCity(qCity);
+  }, [location.search]);
+
+  useEffect(() => {
+    axios
+      .get(API.endpointProvinsi)
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setDataProvinsi(res.data);
+        } else if (res.data.data) {
+          setDataProvinsi(res.data.data);
+        } else {
+          setDataProvinsi([]);
+        }
+      })
+      .catch((err) => console.error("Gagal fetch provinsi:", err));
+  }, []);
+
+  useEffect(() => {
+    if (selectedProvince && selectedProvince !== "Provinsi") {
+      const endPointCity = `${API.endpointKota}&provinsi=${encodeURIComponent(
+        selectedProvince
+      )}`;
+
+      axios
+        .get(endPointCity)
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            setDataKota(res.data);
+          } else if (res.data.data) {
+            setDataKota(res.data.data);
+          } else {
+            setDataKota([]);
+          }
+        })
+        .catch((err) => console.error("Gagal fetch kota:", err));
+    } else {
+      setDataKota([]);
     }
+  }, [selectedProvince]);
 
-    setProfile({
-      nama: storedFullname || "Yang Jungwon", // Default name if not found
-      lokasi: " ", // Default location if not found
-      email: storedEmail || "yangjungwon@gmail.com", // Default email if not found
-      phone: storedPhone || "088888888888", // Default phone if not found
-      profil: storedProfil,
-    });
-  }, []); // This will run once when the component is first rendered
+  const handleFilterSubmit = () => {
+    const filterParams = new URLSearchParams({
+      minHarga: minPrice,
+      maxHarga: maxPrice,
+      province: selectedProvince,
+      city: selectedCity,
+    }).toString();
 
-  const handleProfileUpdate = (updatedData) => {
-    // Update localStorage with the new data
-    localStorage.setItem("auth_fullname", updatedData.nama);
-    localStorage.setItem("auth_phone", updatedData.phone);
-
-    // Update the profile state to reflect changes
-    setProfile(updatedData);
-    setShowUbahPopup(!showUbahPopup);
+    if (location.pathname === "/beli") {
+      navigate(`/beli?${filterParams}`, { replace: true });
+      setShowFilter(false);
+    } else {
+      navigate(`/beli?${filterParams}`);
+    }
   };
 
   return (
-    <section className="min-h-screen">
-      <Navbar />
-
-      <div className="flex justify-center">
-        <div className="flex flex-col mt-5 gap-y-2.5">
-          <img
-            src={fotoProfil}
-            alt="Profile"
-            className="rounded-full w-30"
-            // onError={(e) => (e.currentTarget.src = ProfileImage)}
+    <div className="flex justify-center w-full">
+      <div className="flex flex-col justify-center w-full max-w-2xs md:max-w-4xl">
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Filter Pencarian…"
+            className="w-full rounded-full border border-yellow-500 px-6 py-3 pl-20 focus:outline-none focus:ring-2 focus:ring-yellow-700 bg-gray-50 shadow-lg"
+            onClick={() => setShowFilter(!showFilter)}
+            readOnly
           />
-          <button
-            onClick={handleEditClick}
-            className="flex h-5 w-28 border-2 border-black items-center py-4 px-4 gap-4 rounded-full"
+          <div
+            className="absolute inset-y-0 left-9 flex items-center cursor-pointer"
+            onClick={() => setShowFilter(!showFilter)}
           >
-            <img src={Edit} alt="" width="20" />
-            <div>Edit</div>
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row items-start mx-5 lg:mx-40 my-10 gap-10">
-        <div className="bg-gray-100 flex flex-col justify-center border border-yellow-300 rounded-lg px-5 lg:px-15 py-5 w-full lg:w-auto">
-          <div>
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="nama"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nama Lengkap
-              </label>
-              <input
-                id="nama"
-                type="text"
-                value={profile.nama}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="lokasi"
-                className="text-sm font-medium text-gray-700"
-              >
-                Lokasi Kota
-              </label>
-              <input
-                id="lokasi"
-                type="text"
-                value={profile.lokasi}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={profile.email}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="no_hp"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nomor Telepon
-              </label>
-              <input
-                id="no_hp"
-                type="text"
-                value={profile.phone}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col mt-4 gap-3">
-            <div className="flex gap-4">
-              <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
-                onClick={toggleUbahPopup}
-              >
-                Ubah Data
-              </button>
-              <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
-                onClick={toggleUbahPassword}
-              >
-                Ubah Password
-              </button>
-            </div>
-
-            <button
-              className="w-full bg-red-500 px-3 py-2 rounded-lg hover:bg-red-600 transition-all shadow self-center"
-              onClick={handleLogout}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
             >
-              Logout
-            </button>
-          </div>
-        </div>
-
-        <div className="w-full flex flex-col">
-          {/* Bagian Jual */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Jual</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bagian Beli */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              {/* ganti foto nya ya kalo dah ada */}
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Beli</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Bagian Favorit tetap sama */}
-          <div className="w-full">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <Bookmark size={24} />
-              <h1 className="font-semibold text-lg">Favorit</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {imageError && (
-        <div className="text-red-500 text-sm mt-4">{imageError}</div>
-      )}
-
-      {showEdit && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={handleEditClick}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <div className="bg-white p-5 rounded-lg shadow-md z-50">
-            <form className="flex flex-col gap-4">
-              <label
-                htmlFor="imageUpload"
-                className="text-sm font-medium text-gray-700"
-              >
-                Upload a new profile picture
-              </label>
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/*" // Only allow image files
-                onChange={handleImageChange} // Handle file selection
-                className="px-[0.20rem] py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              <path
+                fill="none"
+                stroke="#000"
+                strokeWidth="1.5"
+                d="M19 3H5c-1.414 0-2.121 0-2.56.412S2 4.488 2 5.815v.69c0 1.037 0 1.556.26 1.986s.733.698 1.682 1.232l2.913 1.64c.636.358.955.537 1.183.735c.474.411.766.895.898 1.49c.064.284.064.618.064 1.285v2.67c0 .909 0 1.364.252 1.718c.252.355.7.53 1.594.88c1.879.734 2.818 1.101 3.486.683S15 19.452 15 17.542v-2.67c0-.666 0-1 .064-1.285a2.68 2.68 0 0 1 .899-1.49c.227-.197.546-.376 1.182-.735l2.913-1.64c.948-.533 1.423-.8 1.682-1.23c.26-.43.26-.95.26-1.988v-.69c0-1.326 0-1.99-.44-2.402C21.122 3 20.415 3 19 3Z"
               />
-              <button
-                type="button"
-                onClick={uploadImage} // Upload image to the API
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
-              >
-                Upload
-              </button>
-            </form>
+            </svg>
           </div>
         </div>
-      )}
 
-      {showUbahPopup && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={toggleUbahPopup}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <HalamanUbahProfile
-            onUpdate={handleProfileUpdate}
-            close={toggleUbahPopup}
-          />
-        </div>
-      )}
+        {showFilter && (
+          <div className="mt-3 p-4 border border-yellow-500 rounded-xl bg-transparent">
+            <div className="flex flex-col gap-3">
+              <h2 className="text-center text-lg font-medium">
+                Filter Pencarian
+              </h2>
 
-      {showUbahPassword && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={toggleUbahPassword}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <HalamanKSB
-            onUpdate={handlePasswordUpdate}
-            close={toggleUbahPassword}
-          />
-        </div>
-      )}
+              {/* Harga Minimal */}
+              <input
+                type="number"
+                placeholder="Harga Minimal"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-full rounded-lg border border-blue-500 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-lg"
+              />
 
-      <Footer />
-    </section>
+              {/* Harga Maksimal */}
+              <input
+                type="number"
+                placeholder="Harga Maksimal"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-full rounded-lg border border-blue-500 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-lg"
+              />
+
+              {/* Dropdown Provinsi */}
+              <div className="relative w-full">
+                <button
+                  onClick={() => setIsOpenProvince(!isOpenProvince)}
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+                >
+                  {selectedProvince}
+                  <svg
+                    className={`w-5 h-5 transition-transform ${
+                      isOpenProvince ? "rotate-180" : "rotate-0"
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isOpenProvince && (
+                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
+                    {dataProvinsi.length > 0 ? (
+                      dataProvinsi.map((province, idx) => (
+                        <li
+                          key={idx}
+                          onClick={() => {
+                            setSelectedProvince(province);
+                            setSelectedCity("Kota");
+                            setIsOpenProvince(false);
+                          }}
+                          className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                        >
+                          {province}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2">Data tidak ditemukan</li>
+                    )}
+                  </ul>
+                )}
+              </div>
+
+              {/* Dropdown Kota */}
+              <div className="relative w-full">
+                <button
+                  onClick={() => setIsOpenCity(!isOpenCity)}
+                  disabled={dataKota.length === 0}
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {selectedCity}
+                  <svg
+                    className={`w-5 h-5 transition-transform ${
+                      isOpenCity ? "rotate-180" : "rotate-0"
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {isOpenCity && (
+                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
+                    {dataKota.length > 0 ? (
+                      dataKota.map((city, idx) => (
+                        <li
+                          key={idx}
+                          onClick={() => {
+                            setSelectedCity(city);
+                            setIsOpenCity(false);
+                          }}
+                          className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                        >
+                          {city}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="px-4 py-2">Data tidak ditemukan</li>
+                    )}
+                  </ul>
+                )}
+              </div>
+
+              {/* Tombol Terapkan Filter */}
+              <button
+                onClick={handleFilterSubmit}
+                className="w-full mt-4 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Terapkan Filter
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

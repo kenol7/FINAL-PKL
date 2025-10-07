@@ -60,6 +60,7 @@ export default function Search() {
             setDataKota(res.data.data);
           } else {
             setDataKota([]);
+            setSelectedCity("Kota");
           }
         })
         .catch((err) => console.error("Gagal fetch kota:", err));
@@ -68,21 +69,41 @@ export default function Search() {
     }
   }, [selectedProvince]);
 
-  const handleFilterSubmit = () => {
-    const filterParams = new URLSearchParams({
-      minHarga: minPrice,
-      maxHarga: maxPrice,
-      province: selectedProvince,
-      city: selectedCity,
-    }).toString();
+  // const handleFilterSubmit = () => {
+  //   const filterParams = new URLSearchParams({
+  //     minHarga: minPrice,
+  //     maxHarga: maxPrice,
+  //     province: selectedProvince,
+  //     city: selectedCity,
+  //   }).toString();
 
-    if (location.pathname === "/beli") {
-      navigate(`/beli?${filterParams}`, { replace: true });
-      setShowFilter(false);
-    } else {
-      navigate(`/beli?${filterParams}`);
-    }
-  };
+const handleFilterSubmit = () => {
+  const params = {};
+
+  if (minPrice) params.minHarga = minPrice;
+  if (maxPrice) params.maxHarga = maxPrice;
+  if (selectedProvince !== "Provinsi") params.province = selectedProvince;
+  if (selectedCity !== "Kota") params.city = selectedCity;
+
+  const filterParams = new URLSearchParams(params).toString();
+
+  if (location.pathname === "/beli") {
+    navigate(`/beli?${filterParams}`, { replace: true });
+  } else {
+    navigate(`/beli?${filterParams}`);
+  }
+
+  setShowFilter(false);
+};
+
+
+  //   if (location.pathname === "/beli") {
+  //     navigate(`/beli?${filterParams}`, { replace: true });
+  //     setShowFilter(false);
+  //   } else {
+  //     navigate(`/beli?${filterParams}`);
+  //   }
+  // };
 
   return (
     <div className="flex justify-center w-full">
@@ -233,8 +254,6 @@ export default function Search() {
                   </ul>
                 )}
               </div>
-
-              {/* Tombol Terapkan Filter */}
               <button
                 onClick={handleFilterSubmit}
                 className="w-full mt-4 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"

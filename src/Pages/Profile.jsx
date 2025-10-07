@@ -51,31 +51,29 @@ const fotoProfil = profile.profil
   }
 
   // Potong 5 digit terakhir dan ganti dengan *
-  const visiblePart = cleanPhone.slice(0, -5);
-  return visiblePart + "******";
+  const visiblePart = cleanPhone.slice(0, -8);
+  return visiblePart + "********";
 };
 
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Clean the file name by replacing spaces with underscores
-      const cleanedFileName = file.name.replace(/\s+/g, "_"); // Replace spaces with underscores
+      const cleanedFileName = file.name.replace(/\s+/g, "_"); 
 
-      // Create a new File object with the cleaned name
       const cleanedFile = new File([file], cleanedFileName, {
         type: file.type,
       });
 
-      const fileSizeInMB = file.size / (1024 * 1024); // Convert file size to MB
+      const fileSizeInMB = file.size / (1024 * 1024); 
       if (fileSizeInMB > 2) {
         setImageError("File size exceeds 2MB. Please select a smaller file.");
         setSelectedImage(null);
         setImageFile(null);
       } else {
-        setImageError(""); // Clear error message
-        setSelectedImage(URL.createObjectURL(cleanedFile)); // Set image preview
-        setImageFile(cleanedFile); // Set the cleaned file for upload
+        setImageError(""); 
+        setSelectedImage(URL.createObjectURL(cleanedFile)); 
+        setImageFile(cleanedFile); 
       }
     }
   };
