@@ -24,6 +24,9 @@ import Kprimg from "../assets/HitungKpr.png"
 import { Pointer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
+import { Suspense } from 'react';
 
 const FrameData = [
   { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
@@ -60,6 +63,12 @@ export default function Home() {
   const handledetail = (ref_id) => {
     navigate("/detailrumah/" + ref_id);
   };
+
+  function Model({ scale = 1 }) {
+    const { scene } = useGLTF('models/chatbot.glb');
+    return <primitive object={scene} scale={scale} />;
+  }
+
 
   const GetData = async (lat, lng) => {
     await fetch(
@@ -272,13 +281,12 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-gray-800 rounded-lg font-semibold xl:text-lg lg:text-lg md:text-lg text-base bg-yellow-400 xl:px-8 lg:px-8 md:px-8 px-2 py-1.5">
-                            {`Rp${
-                              item.property_price
-                                ? new Intl.NumberFormat("id-ID").format(
-                                    item.property_price
-                                  )
-                                : "N/A"
-                            }
+                            {`Rp${item.property_price
+                              ? new Intl.NumberFormat("id-ID").format(
+                                item.property_price
+                              )
+                              : "N/A"
+                              }
                           `}
                           </h3>
                           <h3 className="text-gray-700 xl:text-sm lg:text-sm md:text-sm text-xs text-end">
@@ -296,11 +304,18 @@ export default function Home() {
 
         <div className="mt-30 mx-10 md:block hidden">
           <div className="flex justify-center xl:gap-14 lg:gap-8 md:gap-2 gap-2">
-            <div>
-              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" 
-                src={Chatbotimg}
-                alt="ChatbotImg"
-              />
+            <div className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl overflow-hidden bg-gray-100">
+              <Canvas
+                style={{ width: '100%', height: '100%' }}
+                camera={{ position: [0, 0, 3], fov: 40 }}
+              >
+                <ambientLight intensity={0.6} />
+                <directionalLight position={[10, 10, 5]} intensity={1} />
+                <Suspense>
+                  <Model scale={0.8} />
+                </Suspense>
+                <OrbitControls enableZoom={false} enablePan={false} />
+              </Canvas>
             </div>
             <div className="flex justify-center items-center text-center">
               <div className="xl:space-y-20 space-y-8">
@@ -334,7 +349,7 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" 
+              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl"
                 src={Kprimg}
                 alt="KPRimg"
               />
@@ -346,10 +361,17 @@ export default function Home() {
         <div className="md:hidden block mx-5">
           <div className="keen-slider my-10" ref={sliderFiturRef}>
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
-              <img className=" w-[50%] rounded-2xl" 
-                src={Chatbotimg}
-                alt="ChatBotImg"
-              />
+              <Canvas
+                style={{ width: '100%', height: '100%' }}
+                camera={{ position: [0, 0, 0], fov: 30 }}
+              >
+                <ambientLight intensity={0.6} />
+                <directionalLight position={[10, 10, 5]} intensity={1} />
+                <Suspense>
+                  <Model scale={0.8} />
+                </Suspense>
+                <OrbitControls enableZoom={false} enablePan={false} />
+              </Canvas>
               <div className="flex justify-center items-center text-center w-full md:w-auto">
                 <div className="space-y-5 mb-2">
                   <h3 className="text-xl">
@@ -365,7 +387,7 @@ export default function Home() {
               </div>
             </div>
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
-              <img className="w-[50%] rounded-2xl" 
+              <img className="w-[50%] rounded-2xl"
                 src={Kprimg}
                 alt="KprImg"
               />

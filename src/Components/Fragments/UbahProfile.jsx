@@ -113,7 +113,7 @@ const UbahProfile = ({ close, onUpdate }) => {
         </div>
       </form>
       <Button
-        className="w-auto mt-4 mx-auto bg-green-500"
+        className="w-auto mt-4 mx-auto bg-green-500 mt-10 font-jakarta"
         onClick={updateProfileData}
       >
         Simpan Perubahan
