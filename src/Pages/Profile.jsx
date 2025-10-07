@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../Components/Elements/Navbar";
 import Footer from "../Components/Elements/Footer";
-import ProfileImage from "../assets/profile.jpg";
+// import ProfileImage from "../assets/profile.jpg";
 import Jual from "../assets/sale-01.png";
 import Edit from "../assets/edit.png";
 import { Bookmark } from "lucide-react";
@@ -17,6 +17,10 @@ export default function Profile(props) {
     phone: "",
     profil: "",
   });
+
+const ProfileImage ='https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg'
+
+
 const fotoProfil = profile.profil
   ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${
       profile.profil
@@ -36,6 +40,21 @@ const fotoProfil = profile.profil
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+
+  const maskPhone = (phone) => {
+  if (!phone) return "";
+  const cleanPhone = phone.toString().trim();
+
+  // Jika panjang nomor kurang dari 5, langsung return bintang semua
+  if (cleanPhone.length <= 5) {
+    return "*".repeat(cleanPhone.length);
+  }
+
+  // Potong 5 digit terakhir dan ganti dengan *
+  const visiblePart = cleanPhone.slice(0, -5);
+  return visiblePart + "******";
+};
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -235,7 +254,7 @@ const fotoProfil = profile.profil
               <input
                 id="no_hp"
                 type="text"
-                value={profile.phone}
+                value={maskPhone(profile.phone)}
                 className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
               />
             </div>

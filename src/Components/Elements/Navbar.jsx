@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import ProfileImage from "../../assets/profile.jpg"; // fallback jika tidak ada foto
+// import ProfileImage from "../../assets/profile.jpg"; // fallback jika tidak ada foto
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -26,7 +26,7 @@ export default function Navbar() {
   const location = useLocation();
 
   // ✅ State untuk menyimpan URL foto profil
-  const [profileImage, setProfileImage] = useState(ProfileImage);
+  const [profileImage, setProfileImage] = useState();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -48,11 +48,11 @@ export default function Navbar() {
         const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`;
         setProfileImage(url);
       } else {
-        setProfileImage(ProfileImage);
+        setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
       }
     } else {
       setUser(null);
-      setProfileImage(ProfileImage);
+      setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
     }
   };
 
@@ -67,7 +67,7 @@ export default function Navbar() {
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
   const toggleLKSPopup = () => setShowLKSPopup(!showLKSPopup);
-  const toggleVerifPopup = () =>  setShowVerifPopup(!showLKSPopup);
+  const toggleVerifPopup = () => setShowVerifPopup(!showLKSPopup);
 
   const closeVerifPopup = () => {
     setVerifData(null);
@@ -124,7 +124,10 @@ export default function Navbar() {
               </Link>
             </li>
             <li>
-              <Link to="/jualrumah" className={`hover:text-gray-500 ${isActive("/jualrumah")}`}>
+              <Link
+                to="/jualrumah"
+                className={`hover:text-gray-500 ${isActive("/jualrumah")}`}
+              >
                 Jual Rumah
               </Link>
             </li>
@@ -215,8 +218,9 @@ export default function Navbar() {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
-          } lg:hidden md:block`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        } lg:hidden md:block`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
@@ -236,7 +240,10 @@ export default function Navbar() {
           >
             Beli Rumah
           </Link>
-          <Link to="/jualrumah" className={`hover:text-gray-900 ${isActive("/jualrumah")}`}>
+          <Link
+            to="/jualrumah"
+            className={`hover:text-gray-900 ${isActive("/jualrumah")}`}
+          >
             Jual Rumah
           </Link>
           <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
