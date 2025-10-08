@@ -219,7 +219,7 @@ export default function Home() {
             </div>
             <div>
               <a
-                href=""
+                href="/beli"
                 className="bg-yellow-200 px-5 py-1.5 rounded-lg shadow-md"
               >
                 Lihat Semua
@@ -363,7 +363,7 @@ export default function Home() {
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
               <Canvas
                 style={{ width: '100%', height: '100%' }}
-                camera={{ position: [0, 0, 0], fov: 30 }}
+                camera={{ position: [0, 0, 3], fov: 30 }}
               >
                 <ambientLight intensity={0.6} />
                 <directionalLight position={[10, 10, 5]} intensity={1} />

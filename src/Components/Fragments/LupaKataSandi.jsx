@@ -83,7 +83,6 @@ const LKS = ({ close }) => {
                 // ✅ Tampilkan toast sukses
                 showToast("Link reset password telah dikirim ke email Anda.", "success");
 
-                // Tutup popup setelah toast (misal 1.8 detik)
                 setTimeout(() => {
                     close();
                 }, 1800);
@@ -100,7 +99,6 @@ const LKS = ({ close }) => {
 
     return (
         <>
-            {/* ✅ Toast Alert Custom */}
             <ToastAlert
                 message={toast.message}
                 type={toast.type}
@@ -132,7 +130,6 @@ const LKS = ({ close }) => {
                         {error && <p className="text-red-500 text-xs mt-1 text-center">{error}</p>}
                     </div>
 
-                    {/* ✅ Tombol di tengah */}
                     <Button type="submit" className="w-[114px] mt-6 mx-auto block">
                         Kirim
                     </Button>

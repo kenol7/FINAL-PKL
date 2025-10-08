@@ -65,7 +65,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
         if (!kode) return;
 
         const fetchDecrypt = async () => {
-            // console.log()
             try {
                 const response = await axios.post(
                     `${API.endpointregist}`,
@@ -83,7 +82,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
                 );
 
                 const data = response.data;
-                console.log("Response decrypt:", data);
 
                 if (data && data.otp) {
                     setOtpReal(data.otp);
@@ -158,7 +156,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
             showToast('Masukkan kode OTP lengkap.', 'error');
             return;
         }
-        console.log(code+'='+ otpReal)
         if (code !== otpReal) {
             setOtp(new Array(length).fill(""));
             inputRefs.current[0]?.focus();
@@ -172,7 +169,6 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
         }
 
         try {
-            console.log("DEBUG OTP:", { phoneReal, code, otpReal });
 
             const response = await fetch(API.endpointregist, {
                 method: "POST",

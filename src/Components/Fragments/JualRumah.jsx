@@ -11,7 +11,6 @@ const JualRumah = () => {
     const [discount, setDiscount] = useState("");
     const [nomorTelepon, setNomorTelepon] = useState("");
 
-    // State baru untuk dropdown
     const [kategoriPemilik, setKategoriPemilik] = useState("");
     const [statusTransaksi, setStatusTransaksi] = useState("");
 
@@ -24,7 +23,6 @@ const JualRumah = () => {
 
     const handleFileChange = (e) => {
         const files = Array.from(e.target.files);
-        console.log("Uploaded files:", files);
     };
 
     // Hanya izinkan angka

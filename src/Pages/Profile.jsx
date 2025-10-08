@@ -27,7 +27,6 @@ export default function Profile(props) {
     : ProfileImage;
 
 
-  console.log(profile);
   const [showUbahPopup, setShowUbahPopup] = useState(false);
   const toggleUbahPopup = () => setShowUbahPopup(!showUbahPopup);
   const [showUbahPassword, setShowUbahPassword] = useState(false);
@@ -88,7 +87,6 @@ export default function Profile(props) {
   };
 
   const handlePasswordUpdate = () => {
-    console.log("Password updated!");
   };
 
   const handleLogout = () => {
@@ -119,7 +117,6 @@ export default function Profile(props) {
       );
 
       // Handle successful response
-      console.log("Image uploaded successfully:", response.data);
       localStorage.setItem("foto_profil", response.data.filename);
 
       window.dispatchEvent(new Event("storage"));
@@ -450,9 +447,9 @@ export default function Profile(props) {
                   <div
                     key={item.ref_id}
                     className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
-                    onClick={() => navigate(`/detail/${item.ref_id}`)}
+                    onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
                   >
-                    <div className="w-full bg-gray-300 h-30" /> {/* Ganti dengan gambar jika ada */}
+                    <div className="w-full bg-gray-300 h-30" /> 
                     <div className="flex items-start justify-between p-3">
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-gray-900">

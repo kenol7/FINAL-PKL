@@ -55,8 +55,18 @@ const Register = ({ onRegisterSuccess, close }) => {
         setToast((prev) => ({ ...prev, visible: false }));
     };
 
-    const handleNamaLengkapChange = (newValue) => setNamaLengkap(newValue);
+    const handleNamaLengkapChange = (newValue) => {
+        let sanitized = newValue.replace(/[^a-zA-Z\s\.\-]/g, '');
+        sanitized = sanitized.trimStart();
+        if (sanitized.trim() === '') {
+            setNamaLengkap('');
+        } else {
+            setNamaLengkap(sanitized);
+        }
+    };
+
     const handleEmailChange = (newValue) => setEmail(newValue);
+    
     const handleNomorTeleponChange = (newValue) => {
         const numericValue = newValue.replace(/[^0-9]/g, '');
         if (numericValue === '') {
@@ -70,10 +80,11 @@ const Register = ({ onRegisterSuccess, close }) => {
         }
 
         if (correctedValue.startsWith('08')) {
-            const limitedValue = correctedValue.slice(0, 13);
+            const limitedValue = correctedValue.slice(0, 20);
             setNomorTelepon(limitedValue);
         }
     };
+
     const handleKataSandiChange = (newValue) => setKataSandi(newValue);
 
     const handleSubmit = (event) => {
@@ -93,8 +104,8 @@ const Register = ({ onRegisterSuccess, close }) => {
         setShowuptrue(false);
 
         let payload = {
-            name: namaLengkap,
-            email: email,
+            name: namaLengkap.trim(),
+            email: email.trim().toLowerCase(),
             phone: nomorTelepon,
             password: kataSandi,
             mode: 'POST',
@@ -108,7 +119,6 @@ const Register = ({ onRegisterSuccess, close }) => {
         })
             .then(res => res.json())
             .then(response => {
-                console.log(response);
                 if (response.status === "success") {
                     showToast("Akun berhasil dibuat! Mengalihkan ke verifikasi...", "success");
                     setTimeout(() => {
@@ -122,7 +132,6 @@ const Register = ({ onRegisterSuccess, close }) => {
                                 email: response.email,
                                 phone: nomorTelepon
                             });
-                            console.log("Kode dari server:", response.kode);
                         }
                     }, 1500);
                 } else {
