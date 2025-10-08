@@ -1,34 +1,66 @@
 import Button from "../Elements/Button";
 import Input from "../Elements/Input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { ThreeCircles } from 'react-loader-spinner'
+import { ThreeCircles } from 'react-loader-spinner';
+
+
+const ToastAlert = ({ message, type, isVisible, onClose }) => {
+    useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    const bgColor =
+        type === "error"
+            ? "bg-red-100 border-red-500 text-red-700"
+            : "bg-green-100 border-green-500 text-green-700";
+
+    return (
+        <div
+            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-11/12 max-w-md p-4 rounded-lg shadow-lg border-l-4 ${bgColor} transition-all duration-300 ease-in-out opacity-100 animate-fade-in`}
+            role="alert"
+            aria-live="polite" 
+        >
+            <p className="font-bold">{type === "error" ? "Error" : "Berhasil"}</p>
+            <p>{message}</p>
+        </div>
+    );
+};
 
 const KSB = ({ close }) => {
-
-
-
     const [showPassword, setShowPassword] = useState(false);
-    const [newPasswrod, setNewPassword] = useState("");
-    const [oldPasswrod, setOldPassword] = useState("");
-    const [confirmPasswrod, setConfirmPassword] = useState("");
-    const email = localStorage.getItem("auth_email")
+    const [newPassword, setNewPassword] = useState(""); 
+    const [oldPassword, setOldPassword] = useState(""); 
+    const [confirmPassword, setConfirmPassword] = useState(""); 
+    const email = localStorage.getItem("auth_email");
     const [loading, setLoading] = useState(false);
 
-    const handleConfirmPasswordChange = (newValue) => {
-        setConfirmPassword(newValue);
+    const [toast, setToast] = useState({
+        isVisible: false,
+        message: "",
+        type: "success",
+    });
+
+    const showToast = (message, type = "success") => {
+        setToast({ isVisible: true, message, type });
     };
-    const handleOldPasswordChange = (newValue) => {
-        setOldPassword(newValue);
-    }; const handleNewPasswordChange = (newValue) => {
-        setNewPassword(newValue);
+
+    const hideToast = () => {
+        setToast((prev) => ({ ...prev, isVisible: false }));
     };
 
     const submit = async (e) => {
         e.preventDefault();
 
-        if (newPasswrod !== confirmPasswrod) {
-            alert("Password tidak sama!");
+        if (newPassword !== confirmPassword) {
+            showToast("Password tidak sama!", "error"); 
             return;
         }
 
@@ -41,8 +73,8 @@ const KSB = ({ close }) => {
                     mode: "UPDATE",
                     action: "resetPassword",
                     email: email,
-                    old_password: oldPasswrod,
-                    new_password: newPasswrod,
+                    old_password: oldPassword,
+                    new_password: newPassword,
                 },
                 {
                     headers: {
@@ -51,32 +83,35 @@ const KSB = ({ close }) => {
                 }
             );
 
-
             if (response.data?.status === "success") {
-                alert("Password berhasil diubah!");
-                close();
+                showToast("Password berhasil diubah!", "success");
+                setTimeout(() => {
+                    close();
+                }, 1000);
             } else {
-                alert(response.data?.message || "Gagal mengubah password!");
+                showToast(response.data?.message || "Gagal mengubah password!", "error");
             }
         } catch (error) {
-            alert("Terjadi kesalahan pada server!");
+            showToast("Terjadi kesalahan pada server!", "error");
         } finally {
             setLoading(false);
         }
     };
+
     return (
-        <form className="vh-100 d-flex"
-            method="POST"
-        >
-            <p className="font-jakarta text-[14px] text-center justify-content-center mt-7">Masukkan kata sandi yang baru</p>
-            <div className="mt-15 flex flex-col ml-5 ">
+        <form className="vh-100 d-flex" onSubmit={submit}>
+            <p className="font-jakarta text-[14px] text-center justify-content-center mt-7">
+                Masukkan kata sandi yang baru
+            </p>
+
+            <div className="mt-15 flex flex-col ml-5">
                 <label className="font-jakarta text-xs">Kata Sandi Lama</label>
                 <div className="relative w-full">
                     <Input
                         type={showPassword ? "text" : "password"}
                         name="kata_sandi"
                         className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
-                        onChange={handleOldPasswordChange}
+                        onChange={(e) => setOldPassword(e.target.value)} 
                     />
                     <button
                         type="button"
@@ -91,14 +126,15 @@ const KSB = ({ close }) => {
                     </button>
                 </div>
             </div>
-            <div className="mt-8 flex flex-col ml-5 ">
+
+            <div className="mt-8 flex flex-col ml-5">
                 <label className="font-jakarta text-xs">Kata Sandi Baru</label>
                 <div className="relative w-full">
                     <Input
                         type={showPassword ? "text" : "password"}
-                        name="kata_sandi"
+                        name="kata_sandi_baru"
                         className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
-                        onChange={handleNewPasswordChange}
+                        onChange={(e) => setNewPassword(e.target.value)}
                     />
                     <button
                         type="button"
@@ -113,14 +149,15 @@ const KSB = ({ close }) => {
                     </button>
                 </div>
             </div>
-            <div className="mt-8 flex flex-col ml-5 ">
+
+            <div className="mt-8 flex flex-col ml-5">
                 <label className="font-jakarta text-xs">Konfirmasi Kata Sandi</label>
                 <div className="relative w-full">
                     <Input
                         type={showPassword ? "text" : "password"}
                         name="konfirmasi_kata_sandi"
                         className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
-                        onChange={handleConfirmPasswordChange}
+                        onChange={(e) => setConfirmPassword(e.target.value)} 
                     />
                     <button
                         type="button"
@@ -134,6 +171,7 @@ const KSB = ({ close }) => {
                         />
                     </button>
                 </div>
+
                 <div className="mt-10 text-center">
                     {loading ? (
                         <ThreeCircles
@@ -144,15 +182,22 @@ const KSB = ({ close }) => {
                             ariaLabel="loading"
                         />
                     ) : (
-                        <Button className="mt-5" onClick={submit}>
+                        <Button className="mt-5" type="submit"> 
                             Lanjut
                         </Button>
                     )}
                 </div>
             </div>
 
+
+            <ToastAlert
+                isVisible={toast.isVisible}
+                message={toast.message}
+                type={toast.type}
+                onClose={hideToast}
+            />
         </form>
     );
-}
+};
 
 export default KSB;

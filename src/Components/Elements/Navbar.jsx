@@ -5,6 +5,7 @@ import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import {
   HalamanLogin,
@@ -25,28 +26,45 @@ export default function Navbar() {
   const [verifData, setVerifData] = useState(null);
   const location = useLocation();
 
-  // ✅ State untuk menyimpan URL foto profil
   const [profileImage, setProfileImage] = useState();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
-    setProfileImage(ProfileImage); // reset ke default
-    navigate("/");
+    const [profile, setProfile] = useState({
+      nama: "",
+      lokasi: "",
+      email: "",
+      phone: "",
+      profil: "",
+    });
+
+  const handleLogout = async () => {
+    const email = localStorage.getItem("auth_email");
+
+    try {
+      if (email) {
+        await axios.get(
+          `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
+        );
+      }
+      localStorage.clear();
+      setUser(null);
+      setProfile({ nama: "", lokasi: "", email: "", phone: "" });
+      navigate("/");
+    } catch (error) {
+      console.error("Gagal logout dari server:", error);
+      localStorage.clear();
+      navigate("/");
+    }
   };
 
-  // ✅ Fungsi untuk update user & foto profil
   const updateUser = () => {
     if (localStorage.getItem("auth_fullname")) {
-      
+
       setUser("Profile");
-    //   // Ambil foto dari localStorage, atau gunakan default
-    console.log(localStorage.getItem("foto_profil"))
+      console.log(localStorage.getItem("foto_profil"))
       const savedImage = localStorage.getItem("foto_profil");
-        if (savedImage) {
-          // console.log(`https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`)
+      if (savedImage) {
         const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`;
         setProfileImage(url);
       } else {
@@ -59,12 +77,12 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-     updateUser();
+    updateUser();
     window.addEventListener("storage", updateUser);
     return () => {
       window.removeEventListener("storage", updateUser);
     };
-  },[]);
+  }, []);
 
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
@@ -220,9 +238,8 @@ export default function Navbar() {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        } lg:hidden md:block`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+          } lg:hidden md:block`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">

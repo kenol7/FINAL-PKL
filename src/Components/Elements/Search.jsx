@@ -236,7 +236,7 @@ export default function Search() {
                 </button>
 
                 {isOpenCity && (
-                  <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
+                  <ul className="absolute z-50 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg max-h-52 overflow-y-auto">
                     {dataKota.length > 0 ? (
                       dataKota.map((city, idx) => (
                         <li

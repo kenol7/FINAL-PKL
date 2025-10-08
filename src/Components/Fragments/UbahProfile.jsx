@@ -48,7 +48,6 @@ const UbahProfile = ({ close, onUpdate }) => {
     })
       .then((res) => res.json())
       .then((response) => {
-        console.log(response);
         if (response.status === "success") {
           alert(response.message);
           const data = {

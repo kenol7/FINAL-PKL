@@ -5,7 +5,6 @@ import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { useLoading } from "../../Context/Loader";
 
-// 🔔 ToastAlert didefinisikan inline
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
         if (isVisible) {
@@ -328,7 +327,7 @@ const DetailRumah = () => {
                             <h1 className="text-xl md:text-2xl font-bold">{detail.cluster_apart_name}</h1>
                             <h3 className="text-sm text-gray-600">{detail.city}</h3>
                         </div>
-                        <div className="bg-[#E7C555] rounded-2xl w-full md:w-[244px] h-[45px] flex items-center justify-center text-center text-lg font-semibold font-jakarta">
+                        <div className="bg-[#E7C555] rounded-2xl w-[75px] md:w-[244px] h-[45px] flex items-center justify-center text-center text-lg font-semibold font-jakarta whitespace-nowrap">
                             Rp{" "}
                             {detail.property_price
                                 ? new Intl.NumberFormat("id-ID").format(detail.property_price)

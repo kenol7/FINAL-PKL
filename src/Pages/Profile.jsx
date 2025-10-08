@@ -20,12 +20,11 @@ export default function Profile(props) {
   const ProfileImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
   const fotoProfil = profile.profil
-    ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${
-        profile.profil
-      }?t=${Date.now()}`
+    ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${profile.profil
+    }?t=${Date.now()}`
     : ProfileImage;
 
-  console.log(profile);
+
   const [showUbahPopup, setShowUbahPopup] = useState(false);
   const toggleUbahPopup = () => setShowUbahPopup(!showUbahPopup);
   const [showUbahPassword, setShowUbahPassword] = useState(false);
@@ -85,39 +84,37 @@ export default function Profile(props) {
   };
 
   const handlePasswordUpdate = () => {
-    console.log("Password updated!");
   };
 
- const handleLogout = async () => {
-  const email = localStorage.getItem("auth_email");
+  const handleLogout = async () => {
+    const email = localStorage.getItem("auth_email");
 
-  try {
-    if (email) {
-      // Panggil API logout
-      await axios.get(
-        `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
-      );
-      console.log("Logout API berhasil dipanggil");
+    try {
+      if (email) {
+        // Panggil API logout
+        await axios.get(
+          `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
+        );
+      }
+      localStorage.clear();
+      setUser(null);
+      setProfile({ nama: "", lokasi: "", email: "", phone: "" });
+      navigate("/");
+    } catch (error) {
+      console.error("Gagal logout dari server:", error);
+      localStorage.clear();
+      navigate("/");
     }
-    localStorage.clear();
-    setUser(null);
-    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
-    navigate("/");
-  } catch (error) {
-    console.error("Gagal logout dari server:", error);
-    localStorage.clear();
-    navigate("/");
-  }
-};
+  };
 
   const uploadImage = async () => {
-    if (!imageFile) return; 
+    if (!imageFile) return;
 
     const formData = new FormData();
-    formData.append("mode", "UPDATE"); 
-    formData.append("action", "updateProfilePicture"); 
-    formData.append("email", profile.email); 
-    formData.append("image", imageFile); 
+    formData.append("mode", "UPDATE");
+    formData.append("action", "updateProfilePicture");
+    formData.append("email", profile.email);
+    formData.append("image", imageFile);
     try {
       const response = await axios.post(
         "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php", // Correct API endpoint
@@ -130,7 +127,6 @@ export default function Profile(props) {
       );
 
       // Handle successful response
-      console.log("Image uploaded successfully:", response.data);
       localStorage.setItem("foto_profil", response.data.filename);
 
       window.dispatchEvent(new Event("storage"));
@@ -390,10 +386,9 @@ export default function Profile(props) {
                   <div
                     key={item.ref_id}
                     className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
-                    onClick={() => navigate(`/detail/${item.ref_id}`)}
+                    onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
                   >
-                    <div className="w-full bg-gray-300 h-30" />{" "}
-                    {/* Ganti dengan gambar jika ada */}
+                    <div className="w-full bg-gray-300 h-30" /> {/* Ganti dengan gambar jika ada */}
                     <div className="flex items-start justify-between p-3">
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-gray-900">
