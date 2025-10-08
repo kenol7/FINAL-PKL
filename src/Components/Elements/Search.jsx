@@ -77,25 +77,24 @@ export default function Search() {
   //     city: selectedCity,
   //   }).toString();
 
-const handleFilterSubmit = () => {
-  const params = {};
+  const handleFilterSubmit = () => {
+    const params = {};
 
-  if (minPrice) params.minHarga = minPrice;
-  if (maxPrice) params.maxHarga = maxPrice;
-  if (selectedProvince !== "Provinsi") params.province = selectedProvince;
-  if (selectedCity !== "Kota") params.city = selectedCity;
+    if (minPrice) params.minHarga = minPrice;
+    if (maxPrice) params.maxHarga = maxPrice;
+    if (selectedProvince !== "Provinsi") params.province = selectedProvince;
+    if (selectedCity !== "Kota") params.city = selectedCity;
 
-  const filterParams = new URLSearchParams(params).toString();
+    const filterParams = new URLSearchParams(params).toString();
 
-  if (location.pathname === "/beli") {
-    navigate(`/beli?${filterParams}`, { replace: true });
-  } else {
-    navigate(`/beli?${filterParams}`);
-  }
+    if (location.pathname === "/beli") {
+      navigate(`/beli?${filterParams}`, { replace: true });
+    } else {
+      navigate(`/beli?${filterParams}`);
+    }
 
-  setShowFilter(false);
-};
-
+    setShowFilter(false);
+  };
 
   //   if (location.pathname === "/beli") {
   //     navigate(`/beli?${filterParams}`, { replace: true });
@@ -164,7 +163,10 @@ const handleFilterSubmit = () => {
               {/* Dropdown Provinsi */}
               <div className="relative w-full">
                 <button
-                  onClick={() => setIsOpenProvince(!isOpenProvince)}
+                  onClick={() => {
+                    setIsOpenProvince(!isOpenProvince);
+                    setIsOpenCity(false);
+                  }}
                   className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
                 >
                   {selectedProvince}
