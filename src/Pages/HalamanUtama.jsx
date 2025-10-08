@@ -6,7 +6,7 @@ import SK from "../Components/Fragments/SK";
 import UbahProfile from "../Components/Fragments/UbahProfile";
 import OTPInput from "../Components/Fragments/VerifikasiKode";
 import LKS from "../Components/Fragments/LupaKataSandi";
-import { DetailLayout, SKLayout } from "../Components/Layouts/LayoutUtama";
+import { DetailLayout, SKLayout, DetailJualLayout } from "../Components/Layouts/LayoutUtama";
 import { KSBLayout } from "../Components/Layouts/LayoutUtama";
 import { LoginLayout } from "../Components/Layouts/LayoutUtama";
 import { RegisterLayout } from "../Components/Layouts/LayoutUtama";
@@ -109,6 +109,10 @@ const HalamanDetail = () => {
   return <DetailLayout />;
 };
 
+const HalamanDetailJual = () => {
+  return <DetailJualLayout />
+}
+
 const HalamanJual = () => {
   return <Juallayout />;
 };
@@ -135,5 +139,6 @@ export {
   Halamansk,
   HalamanDetail,
   HalamanJual,
-  HalamanUbahProfile
+  HalamanUbahProfile,
+  HalamanDetailJual,
 };

@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import SK from "../Fragments/SK";
 import Logo from "../../assets/logo.png";
 import DetailRumah from "../Fragments/DetailRumah";
+import DetailJual from "../Fragments/DetailJual";
 import Footer from "../Elements/Footer";
 import JualRumah from "../Fragments/JualRumah";
 import Navbar from "../Elements/Navbar";
@@ -133,6 +134,19 @@ const DetailLayout = () => {
   );
 };
 
+const DetailJualLayout = () => {
+  return (
+    <div>
+      <Navbar />
+      <main className="flex-1">
+        <DetailJual />
+      </main>
+
+      <Footer />
+    </div>
+  );
+};
+
 const Juallayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -166,4 +180,5 @@ export {
   DetailLayout,
   Juallayout,
   UbahProfileLayout,
+  DetailJualLayout,
 };

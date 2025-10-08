@@ -17,6 +17,7 @@
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "firebase": "^12.3.0",
+    "framer-motion": "^12.23.22",
     "keen-slider": "^6.8.6",
     "leaflet": "^1.9.4",
     "lottie-react": "^2.4.1",
