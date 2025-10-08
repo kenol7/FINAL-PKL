@@ -1,639 +1,227 @@
-import React, { useEffect, useState } from "react";
-import Navbar from "../Components/Elements/Navbar";
-import Footer from "../Components/Elements/Footer";
-import ProfileImage from "../assets/profile.jpg";
-import Jual from "../assets/sale-01.png";
-import Edit from "../assets/edit.png";
-import { Bookmark } from "lucide-react";
-import { HalamanUbahProfile, HalamanKSB } from "../Pages/HalamanUtama";
+BUAT DI BUTTON EDIT 
+buka halaman untuk edit rumah tinggal set:
+
+setIsEditMode(true);
+
+Misalnya lewat tombol “Edit” di card penjualan atau dari route lain.import React, { useEffect, useState } from "react";
+
+
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import Search from "../Components/Elements/Search";
+import Footer from "../Components/Elements/Footer";
+import Navbar from "../Components/Elements/Navbar";
+import { useNavigate, useLocation } from "react-router-dom";
 
-export default function Profile(props) {
-  const [profile, setProfile] = useState({
-    nama: "",
-    lokasi: "",
-    email: "",
-    phone: "",
-    profil: "",
-  });
-  const fotoProfil = profile.profil
-    ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${
-        profile.profil
-      }?t=${Date.now()}`
-    : ProfileImage;
+const API_FILTER =
+  "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti";
+const IMAGE_BASE_URL =
+  "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
-  console.log(profile);
-  const [showUbahPopup, setShowUbahPopup] = useState(false);
-  const toggleUbahPopup = () => setShowUbahPopup(!showUbahPopup);
-  const [showUbahPassword, setShowUbahPassword] = useState(false);
-  const toggleUbahPassword = () => setShowUbahPassword(!showUbahPassword);
-  const [showEdit, setShowEdit] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [imageError, setImageError] = useState("");
-  const [user, setUser] = useState(null);
+const SkeletonCard = () => (
+  <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
+    <div className="h-[200px] bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+    <div className="p-3 space-y-2">
+      <div className="h-4 rounded w-3/4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="h-3 rounded w-1/2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="h-3 rounded w-2/3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="flex justify-end">
+        <div className="h-5 rounded w-20 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const PropertyCard = ({ item, onClick }) => (
+  <div
+    className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30 cursor-pointer"
+    onClick={onClick}
+  >
+    <div className="rounded-xl overflow-hidden relative">
+      <div className="w-full h-[200px] bg-gray-300 flex items-center justify-center">
+        <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
+          {item.ref_id}
+        </h3>
+        <img
+          src={IMAGE_BASE_URL}
+          alt={item.cluster_apart_name}
+          className="object-cover w-full h-full"
+          loading="lazy"
+        />
+      </div>
+      <div className="flex items-center justify-between bg-gray-100 p-3">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            {item.cluster_apart_name?.slice(0, 15) || "Perumahan"}
+          </h3>
+          <p className="text-sm text-gray-700">
+            {item.city || "Kota Tidak Diketahui"}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            LT {item.square_land}m² | LB {item.square_building}m² | L{" "}
+            {item.property_floor}
+          </p>
+        </div>
+        <div className="flex flex-col text-right w-fit">
+          <span className="block text-sm font-semibold text-gray-800 bg-yellow-400 px-3 rounded-lg">
+            Rp{" "}
+            {item.property_price
+              ? new Intl.NumberFormat("id-ID").format(
+                  item.property_price.slice(0, -2)
+                )
+              : "N/A"}
+          </span>
+          <p className="text-xs text-gray-600 mt-1">Transaksi</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export default function Beli() {
+  const [dataRumah, setDataRumah] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [itemsPerPage] = useState(12);
   const navigate = useNavigate();
-  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+  const location = useLocation();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Clean the file name by replacing spaces with underscores
-      const cleanedFileName = file.name.replace(/\s+/g, "_"); // Replace spaces with underscores
+  const handleDetail = (ref_id) => navigate("/detailrumah/" + ref_id);
 
-      // Create a new File object with the cleaned name
-      const cleanedFile = new File([file], cleanedFileName, {
-        type: file.type,
-      });
-
-      const fileSizeInMB = file.size / (1024 * 1024); // Convert file size to MB
-      if (fileSizeInMB > 2) {
-        setImageError("File size exceeds 2MB. Please select a smaller file.");
-        setSelectedImage(null);
-        setImageFile(null);
-      } else {
-        setImageError(""); // Clear error message
-        setSelectedImage(URL.createObjectURL(cleanedFile)); // Set image preview
-        setImageFile(cleanedFile); // Set the cleaned file for upload
-      }
-    }
-  };
-
-  const handleEditClick = () => {
-    setShowEdit(!showEdit); // Toggle the form visibility
-  };
-
-  const handlePasswordUpdate = () => {
-    console.log("Password updated!");
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
-    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
-    navigate("/");
-  };
-
-  const uploadImage = async () => {
-    if (!imageFile) return; // If no file is selected, do nothing
-
-    const formData = new FormData();
-    formData.append("mode", "UPDATE"); // Mode as POST
-    formData.append("action", "updateProfilePicture"); // Action for uploading image
-    formData.append("email", profile.email); // Email for identification
-    formData.append("image", imageFile); // Append the image file
-
-    try {
-      const response = await axios.post(
-        "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php", // Correct API endpoint
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Ensure the content type is set correctly for file upload
-          },
-        }
-      );
-
-      // Handle successful response
-      console.log("Image uploaded successfully:", response.data);
-      localStorage.setItem("foto_profil", response.data.filename);
-      // Close the popup after successful upload
-      setProfile((prev) => ({
-        ...prev,
-        profil: response.data.filename,
-      }));
-      setShowEdit(false);
-    } catch (error) {
-      // Handle error: display it for debugging
-      console.error(
-        "Error uploading image:",
-        error.response?.data || error.message
-      );
-    }
-  };
-
+  // === FETCH DATA DARI API_FILTER (tanpa atau dengan parameter filter) ===
   useEffect(() => {
-    const storedFullname = localStorage.getItem("auth_fullname");
-    const storedEmail = localStorage.getItem("auth_email");
-    const storedPhone = localStorage.getItem("auth_phone");
-    const storedProfil = localStorage.getItem("foto_profil");
+    const queryParams = new URLSearchParams(location.search);
+    const params = {
+      search: queryParams.get("search") || "",
+      minHarga: queryParams.get("minHarga") || "",
+      maxHarga: queryParams.get("maxHarga") || "",
+      province: queryParams.get("province") || "",
+      city: queryParams.get("city") || "",
+    };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
-        )
-          .then((res) => res.json())
-          .then((response) => {
-            const city = response.results[0].address_components.find(
-              (component) =>
-                component.types[0].includes("administrative_area_level_2")
-            ).long_name;
-            setProfile((c) => ({ ...c, lokasi: city }));
-          });
+    setLoading(true);
+
+    axios
+      .post(API_FILTER, {
+        search: params.search,
+        provinsi: params.province,
+        kota: params.city,
+        minHarga: params.minHarga,
+        maxHarga: params.maxHarga,
+        mode: "filter_properti",
+      })
+      .then((res) => {
+        if (Array.isArray(res.data)) setDataRumah(res.data);
+        else if (res.data.data && Array.isArray(res.data.data))
+          setDataRumah(res.data.data);
+        else setDataRumah([]);
+      })
+      .catch((err) => {
+        console.error("Gagal fetch data:", err);
+        setDataRumah([]);
+      })
+      .finally(() => setLoading(false));
+  }, [location.search]); // Re-fetch saat parameter di URL berubah
+
+  // Pagination
+  const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentData = dataRumah.slice(indexOfFirst, indexOfLast);
+
+  const renderPaginationButtons = () =>
+    Array.from({ length: totalPages }, (_, i) => i + 1)
+      .filter((page) => {
+        if (totalPages <= 10) return true;
+        if (currentPage <= 6) return page <= 10 || page === totalPages;
+        if (currentPage >= totalPages - 5)
+          return page > totalPages - 10 || page === 1;
+        return (
+          page === 1 ||
+          page === totalPages ||
+          (page >= currentPage - 4 && page <= currentPage + 4)
+        );
+      })
+      .map((page, idx, arr) => {
+        const prevPage = arr[idx - 1];
+        const showEllipsis = prevPage && page - prevPage > 1;
+        return (
+          <span key={page} className="flex items-center">
+            {showEllipsis && (
+              <span className="px-2 py-1 text-gray-500">...</span>
+            )}
+            <button
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === page
+                  ? "bg-[#549AF8] text-white"
+                  : "bg-white text-gray-800 hover:bg-gray-100"
+              }`}
+            >
+              {page}
+            </button>
+          </span>
+        );
       });
-    }
-
-    setProfile({
-      nama: storedFullname || "Yang Jungwon", // Default name if not found
-      lokasi: " ", // Default location if not found
-      email: storedEmail || "yangjungwon@gmail.com", // Default email if not found
-      phone: storedPhone || "088888888888", // Default phone if not found
-      profil: storedProfil,
-    });
-  }, []); // This will run once when the component is first rendered
-
-  const handleProfileUpdate = (updatedData) => {
-    // Update localStorage with the new data
-    localStorage.setItem("auth_fullname", updatedData.nama);
-    localStorage.setItem("auth_phone", updatedData.phone);
-
-    // Update the profile state to reflect changes
-    setProfile(updatedData);
-    setShowUbahPopup(!showUbahPopup);
-  };
 
   return (
-    <section className="min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <Navbar />
-
-      <div className="flex justify-center">
-        <div className="flex flex-col mt-5 gap-y-2.5">
-          <img
-            src={fotoProfil}
-            alt="Profile"
-            className="rounded-full w-30"
-            // onError={(e) => (e.currentTarget.src = ProfileImage)}
-          />
-          <button
-            onClick={handleEditClick}
-            className="flex h-5 w-28 border-2 border-black items-center py-4 px-4 gap-4 rounded-full"
-          >
-            <img src={Edit} alt="" width="20" />
-            <div>Edit</div>
-          </button>
-        </div>
+      <div className="flex justify-center mt-10">
+        <Search />
       </div>
 
-      <div className="flex flex-col lg:flex-row items-start mx-5 lg:mx-40 my-10 gap-10">
-        <div className="bg-gray-100 flex flex-col justify-center border border-yellow-300 rounded-lg px-5 lg:px-15 py-5 w-full lg:w-auto">
-          <div>
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="nama"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nama Lengkap
-              </label>
-              <input
-                id="nama"
-                type="text"
-                value={profile.nama}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="lokasi"
-                className="text-sm font-medium text-gray-700"
-              >
-                Lokasi Kota
-              </label>
-              <input
-                id="lokasi"
-                type="text"
-                value={profile.lokasi}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={profile.email}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="no_hp"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nomor Telepon
-              </label>
-              <input
-                id="no_hp"
-                type="text"
-                value={profile.phone}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
+      <main className="flex-1 p-6 bg-white">
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: itemsPerPage }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
           </div>
-
-          <div className="flex flex-col mt-4 gap-3">
-            <div className="flex gap-4">
-              <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
-                onClick={toggleUbahPopup}
-              >
-                Ubah Data
-              </button>
-              <button
-                className="w-32 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow"
-                onClick={toggleUbahPassword}
-              >
-                Ubah Password
-              </button>
-            </div>
-
-            <button
-              className="w-full bg-red-500 px-3 py-2 rounded-lg hover:bg-red-600 transition-all shadow self-center"
-              onClick={handleLogout}
+        ) : currentData.length === 0 ? (
+          <div className="text-center text-gray-500">
+            Tidak ada data ditemukan
+          </div>
+        ) : (
+          <>
+            <div
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 overflow-y-auto"
+              style={{ maxHeight: "calc(105vh - 200px)" }}
             >
-              Logout
-            </button>
-          </div>
-        </div>
-
-        <div className="w-full flex flex-col">
-          {/* Bagian Jual */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Jual</h1>
+              {currentData.map((item) => (
+                <PropertyCard
+                  key={item.ref_id}
+                  item={item}
+                  onClick={() => handleDetail(item.ref_id)}
+                />
+              ))}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                {renderPaginationButtons()}
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
               </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bagian Favorit tetap sama */}
-          <div className="w-full">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <Bookmark size={24} />
-              <h1 className="font-semibold text-lg">Favorit</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {imageError && (
-        <div className="text-red-500 text-sm mt-4">{imageError}</div>
-      )}
-
-      {showEdit && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={handleEditClick}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <div className="bg-white p-5 rounded-lg shadow-md z-50">
-            <form className="flex flex-col gap-4">
-              <label
-                htmlFor="imageUpload"
-                className="text-sm font-medium text-gray-700"
-              >
-                Upload a new profile picture
-              </label>
-              <input
-                id="imageUpload"
-                type="file"
-                accept="image/*" // Only allow image files
-                onChange={handleImageChange} // Handle file selection
-                className="px-[0.20rem] py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-              <button
-                type="button"
-                onClick={uploadImage} // Upload image to the API
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
-              >
-                Upload
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showUbahPopup && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={toggleUbahPopup}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <HalamanUbahProfile
-            onUpdate={handleProfileUpdate}
-            close={toggleUbahPopup}
-          />
-        </div>
-      )}
-
-      {showUbahPassword && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            onClick={toggleUbahPassword}
-            className="absolute inset-0 bg-black/35 backdrop-blur-md"
-          />
-          <HalamanKSB
-            onUpdate={handlePasswordUpdate}
-            close={toggleUbahPassword}
-          />
-        </div>
-      )}
+            )}
+          </>
+        )}
+      </main>
 
       <Footer />
-    </section>
+    </div>
   );
 }
-
-
-
-
-
-halaman utama
-
-
-
-import KataSandiBaru from "../Components/Fragments/KataSandiBaru";
-import LupaKataSandi from "../Components/Fragments/LupaKataSandi";
-import Login from "../Components/Fragments/Login";
-import Register from "../Components/Fragments/Register";
-import SK from "../Components/Fragments/SK";
-import OTPInput from "../Components/Fragments/VerifikasiKode";
-import UbahProfile from "../Components/Fragments/UbahProfile";
-import {
-  DetailLayout,
-  SKLayout,
-  DetailJualLayout,
-} from "../Components/Layouts/LayoutUtama";
-import { KSBLayout } from "../Components/Layouts/LayoutUtama";
-import { LoginLayout } from "../Components/Layouts/LayoutUtama";
-import { RegisterLayout } from "../Components/Layouts/LayoutUtama";
-import { LKSLayout } from "../Components/Layouts/LayoutUtama";
-import { VerifLayout } from "../Components/Layouts/LayoutUtama";
-import { UbahProfileLayout } from "../Components/Layouts/LayoutUtama";
-import { Juallayout } from "../Components/Layouts/LayoutUtama";
-import { useParams } from "react-router-dom";
-
-const HalamanKSB = ({ close }) => {
-  return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
-      <div className="relative z-10">
-        <KSBLayout title="Kata Sandi Baru" onBack={close}>
-          <KataSandiBaru close={close} />
-        </KSBLayout>
-      </div>
-    </div>
-  );
-};
-
-const HalamanLKS = ({ close, routeVerif }) => {
-  return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
-      <div className="relative z-10">
-        <LKSLayout title="Lupa Kata Sandi" onBack={close}>
-          <LupaKataSandi route={routeVerif} />
-        </LKSLayout>
-      </div>
-    </div>
-  );
-};
-
-const HalamanLogin = ({ close, routeLKS }) => {
-  return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
-      <div className="relative z-10">
-        <LoginLayout title="Masuk" onBack={close}>
-          <Login route={routeLKS} onClose={close} />
-        </LoginLayout>
-      </div>
-    </div>
-  );
-};
-
-const HalamanRegister = ({ close, onRegisterSuccess }) => {
-  return (
-    <div className="relative min-h-screen flex items-center justify-center">
-      <div className="absolute inset-0 blur-sm"></div>
-      <div className="relative z-10">
-        <RegisterLayout title={"Daftar"} onBack={close}>
-          <Register close={close} onRegisterSuccess={onRegisterSuccess} />
-        </RegisterLayout>
-      </div>
-    </div>
-  );
-};
-
-const Halamansk = () => {
-  return (
-    <div>
-      <div className="relative min-h-screen flex items-center justify-center ">
-        <div className="absolute inset-0  blur-sm"></div>
-        <div className="relative z-10">
-          <SKLayout>
-            <SK />
-          </SKLayout>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const HalamanVerif = ({ data, close, onUpdateUser }) => {
-  const { code, name, email } = useParams();
-  const verifData = data || { kode: code, name, email };
-
-  return (
-    <div className="relative min-h-screen flex items-center justify-center">
-      <div className="absolute inset-0 blur-sm"></div>
-      <div className="relative z-10">
-        <VerifLayout>
-          <OTPInput
-            kode={verifData.kode}
-            name={verifData.name}
-            email={verifData.email}
-            close={close}
-            onUpdateUser={onUpdateUser}
-          />
-        </VerifLayout>
-      </div>
-    </div>
-  );
-};
-
-const HalamanDetail = () => {
-  return <DetailLayout />;
-};
-
-const HalamanDetailJual = () => {
-  return <DetailJualLayout />;
-};
-
-const HalamanUbahProfile = ({ close, onUpdate }) => {
-  return (
-    <div className="relative min-h-screen flex items-center justify-center ">
-      <div className="absolute inset-0  blur-sm"></div>
-      <div className="relative z-10">
-        <UbahProfileLayout title={"Ubah Data"} onBack={close}>
-          <UbahProfile onUpdate={onUpdate} />
-        </UbahProfileLayout>
-      </div>
-    </div>
-  );
-};
-
-const HalamanJual = () => {
-  return <Juallayout />;
-};
-
-export {
-  HalamanKSB,
-  HalamanLKS,
-  HalamanLogin,
-  HalamanRegister,
-  HalamanVerif,
-  Halamansk,
-  HalamanDetail,
-  HalamanJual,
-  HalamanUbahProfile,
-  HalamanDetailJual,
-};

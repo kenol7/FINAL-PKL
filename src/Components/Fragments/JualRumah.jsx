@@ -20,6 +20,8 @@ const JualRumah = () => {
   const [tanggalTerjual, setTanggalTerjual] = useState("");
   const [isOpenStatus, setIsOpenStatus] = useState(false);
 
+  const [isEditMode, setIsEditMode] = useState(false);
+
   const toggleArrow = (field) => {
     setShowArrowUp((prev) => ({
       ...prev,
@@ -440,102 +442,108 @@ const JualRumah = () => {
               ))}
             </div>
 
-            {/* Status Penjualan */}
-            <div className="mt-8">
-              <h3 className="font-semibold mb-2">Status Penjualan</h3>
+            {/* Status Penjualan (Hanya muncul di Edit Mode) */}
+            {isEditMode && (
+              <div className="mt-8">
+                <h3 className="font-semibold mb-2">Status Penjualan</h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
-                {/* Dropdown Status Penjualan */}
-                <div className="relative">
-                  <label className="block text-sm mb-1">Status Penjualan</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                  {/* Dropdown Status Penjualan */}
+                  <div className="relative">
+                    <label className="block text-sm mb-1">
+                      Status Penjualan
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsOpenStatus(!isOpenStatus)}
+                      className="w-full flex justify-between items-center px-4 py-2 rounded-lg border border-blue-500 bg-white text-black shadow-sm focus:outline-none"
+                    >
+                      {statusPenjualan || "Pilih Status Penjualan"}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className={`h-5 w-5 transition-transform ${
+                          isOpenStatus ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+
+                    {isOpenStatus && (
+                      <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg">
+                        {["Tersedia", "Terjual"].map((status, idx) => (
+                          <li
+                            key={idx}
+                            onClick={() => {
+                              setStatusPenjualan(status);
+                              setIsOpenStatus(false);
+                            }}
+                            className="cursor-pointer px-4 py-2 hover:bg-blue-100"
+                          >
+                            {status}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Input Tanggal Terjual */}
+                  <AnimatePresence>
+                    {statusPenjualan === "Terjual" && (
+                      <motion.div
+                        key="tanggal-terjual"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full"
+                      >
+                        <label className="block text-sm mb-1">
+                          Tanggal Terjual
+                        </label>
+                        <input
+                          type="date"
+                          value={tanggalTerjual}
+                          onChange={(e) => setTanggalTerjual(e.target.value)}
+                          className="w-full p-2 rounded-lg border border-blue-500 bg-white text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
+            {/* Tombol Aksi — hanya muncul di Edit Mode */}
+            {isEditMode && (
+              <div className="mt-8 pt-4 border-t border-blue-400">
+                <p className="text-xs italic mb-2">
+                  *Cek Ulang Sebelum Klik Verifikasi Data
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     type="button"
-                    onClick={() => setIsOpenStatus(!isOpenStatus)}
-                    className="w-full flex justify-between items-center px-4 py-2 rounded-lg border border-blue-500 bg-white text-black shadow-sm focus:outline-none"
+                    className="flex-1 bg-green-500 hover:bg-green-600 py-2 rounded-lg font-semibold transition"
                   >
-                    {statusPenjualan || "Pilih Status Penjualan"}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className={`h-5 w-5 transition-transform ${
-                        isOpenStatus ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    Simpan Perubahan
                   </button>
-
-                  {isOpenStatus && (
-                    <ul className="absolute z-10 mt-2 w-full text-black rounded-lg border border-blue-500 bg-white shadow-lg">
-                      {["Tersedia", "Terjual"].map((status, idx) => (
-                        <li
-                          key={idx}
-                          onClick={() => {
-                            setStatusPenjualan(status);
-                            setIsOpenStatus(false);
-                          }}
-                          className="cursor-pointer px-4 py-2 hover:bg-blue-100"
-                        >
-                          {status}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <button
+                    type="button"
+                    className="flex-1 bg-red-500 hover:bg-red-600 py-2 rounded-lg font-semibold transition"
+                  >
+                    Hapus Data
+                  </button>
                 </div>
-
-                {/* Input Tanggal Terjual (animasi muncul di samping) */}
-                <AnimatePresence>
-                  {statusPenjualan === "Terjual" && (
-                    <motion.div
-                      key="tanggal-terjual"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full"
-                    >
-                      <label className="block text-sm mb-1">
-                        Tanggal Terjual
-                      </label>
-                      <input
-                        type="date"
-                        value={tanggalTerjual}
-                        onChange={(e) => setTanggalTerjual(e.target.value)}
-                        className="w-full p-2 rounded-lg border border-blue-500 bg-white text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </div>
-            </div>
-
-            {/* Tombol Aksi */}
-            <div className="mt-8 pt-4 border-t border-blue-400">
-              <p className="text-xs italic mb-2">
-                *Cek Ulang Sebelum Klik Verifikasi Data
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  className="flex-1 bg-green-500 hover:bg-green-600 py-2 rounded-lg font-semibold transition"
-                >
-                  Simpan Perubahan
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 bg-red-500 hover:bg-red-600 py-2 rounded-lg font-semibold transition"
-                >
-                  Hapus Data
-                </button>
-              </div>
-            </div>
+            )}
 
             <div className="mt-8 pt-4 border-t border-blue-400">
               <p className="text-xs italic mb-2">
