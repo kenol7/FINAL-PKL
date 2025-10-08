@@ -8,7 +8,6 @@ import { Bookmark } from "lucide-react";
 import { HalamanUbahProfile, HalamanKSB } from "../Pages/HalamanUtama";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
 export default function Profile(props) {
   const [profile, setProfile] = useState({
     nama: "",
@@ -18,9 +17,8 @@ export default function Profile(props) {
     profil: "",
   });
 
-  const ProfileImage = 'https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg'
-
-
+  const ProfileImage =
+    "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
   const fotoProfil = profile.profil
     ? `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${profile.profil
     }?t=${Date.now()}`
@@ -53,7 +51,6 @@ export default function Profile(props) {
     const visiblePart = cleanPhone.slice(0, -8);
     return visiblePart + "********";
   };
-
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -89,22 +86,35 @@ export default function Profile(props) {
   const handlePasswordUpdate = () => {
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
-    setProfile({ nama: "", lokasi: "", email: "", phone: "" });
-    navigate("/");
+  const handleLogout = async () => {
+    const email = localStorage.getItem("auth_email");
+
+    try {
+      if (email) {
+        // Panggil API logout
+        await axios.get(
+          `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
+        );
+      }
+      localStorage.clear();
+      setUser(null);
+      setProfile({ nama: "", lokasi: "", email: "", phone: "" });
+      navigate("/");
+    } catch (error) {
+      console.error("Gagal logout dari server:", error);
+      localStorage.clear();
+      navigate("/");
+    }
   };
 
   const uploadImage = async () => {
-    if (!imageFile) return; // If no file is selected, do nothing
+    if (!imageFile) return;
 
     const formData = new FormData();
-    formData.append("mode", "UPDATE"); // Mode as POST
-    formData.append("action", "updateProfilePicture"); // Action for uploading image
-    formData.append("email", profile.email); // Email for identification
-    formData.append("image", imageFile); // Append the image file
-
+    formData.append("mode", "UPDATE");
+    formData.append("action", "updateProfilePicture");
+    formData.append("email", profile.email);
+    formData.append("image", imageFile);
     try {
       const response = await axios.post(
         "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php", // Correct API endpoint
@@ -359,79 +369,6 @@ export default function Profile(props) {
             </div>
           </div>
 
-          {/* Bagian Beli */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              {/* ganti foto nya ya kalo dah ada ingett dik */}
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Beli</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           {/* Bagian Favorit tetap sama */}
           <div className="w-full">
             <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
@@ -440,7 +377,9 @@ export default function Profile(props) {
             </div>
 
             {favorites.length === 0 ? (
-              <p className="text-gray-500 text-sm">Belum ada properti favorit.</p>
+              <p className="text-gray-500 text-sm">
+                Belum ada properti favorit.
+              </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
                 {favorites.map((item) => (
@@ -449,7 +388,7 @@ export default function Profile(props) {
                     className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
                     onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
                   >
-                    <div className="w-full bg-gray-300 h-30" /> 
+                    <div className="w-full bg-gray-300 h-30" /> {/* Ganti dengan gambar jika ada */}
                     <div className="flex items-start justify-between p-3">
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-gray-900">
@@ -457,12 +396,16 @@ export default function Profile(props) {
                         </h3>
                         <p className="text-gray-700 text-sm">{item.city}</p>
                         <p className="text-xs text-gray-400 mt-1">
-                          LT {item.square_land}m² | LB {item.square_building}m² | L{item.property_floor}
+                          LT {item.square_land}m² | LB {item.square_building}m²
+                          | L{item.property_floor}
                         </p>
                       </div>
                       <div className="flex flex-col items-end">
                         <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                          Rp {new Intl.NumberFormat("id-ID").format(item.property_price)}
+                          Rp{" "}
+                          {new Intl.NumberFormat("id-ID").format(
+                            item.property_price
+                          )}
                         </span>
                         <p className="text-xs text-gray-600 mt-1">Transaksi</p>
                       </div>

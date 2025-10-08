@@ -15,6 +15,7 @@ const API = {
     "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti",
   endpointImage: "https://smataco.my.id/dev/unez/CariRumahAja/foto",
   endpointBookmark : "https://smataco.my.id/dev/unez/CariRumahAja/routes/bookmark.php",
+  endpointLogout : "https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout",
 };
 
 export default API;

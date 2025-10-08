@@ -78,7 +78,6 @@ export default function Home() {
       .then((response) => {
         console.log(response);
         setrumahTerdekat(response);
-        // console.log(rumahTerdekat.length);
       });
   };
   const textLocation = async () => {
