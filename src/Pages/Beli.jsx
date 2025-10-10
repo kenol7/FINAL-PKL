@@ -82,6 +82,9 @@ export default function Beli() {
   const [itemsPerPage] = useState(12);
   const navigate = useNavigate();
   const location = useLocation();
+  const [summaryData, setSummaryData] = useState({});
+
+  console.log(dataRumah);
 
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -95,9 +98,13 @@ export default function Beli() {
       maxHarga: queryParams.get("maxHarga") || "",
       province: queryParams.get("province") || "",
       city: queryParams.get("city") || "",
+      search: queryParams.get("search") || "",
     };
     // const sortOrder = queryParams.get("sort_order") || "";
-    const sortParam = queryParams.get("sort_order") || sortOrder;
+    // const sortParam = queryParams.get("sort_order") || sortOrder;
+    // setLoading(true);
+    const sortParam = queryParams.get("sort_order") || "asc";
+    setSortOrder(sortParam); // sinkronkan state dari URL
     setLoading(true);
 
     axios
@@ -109,18 +116,23 @@ export default function Beli() {
         mode: "filter_properti",
         // sort_order: sortOrder,
         sort_order: sortParam,
+        search: params.search,
       })
       .then((res) => {
         let data = [];
 
-        if (Array.isArray(res.data)) data = res.data;
-        else if (res.data.data && Array.isArray(res.data.data))
-          data = res.data.data;
-        // if (sortOrder === "asc") {
-        //   data.sort((a, b) => a.property_price - b.property_price);
-        // } else if (sortOrder === "desc") {
-        //   data.sort((a, b) => b.property_price - a.property_price);
-        // }
+        if (res.data && Array.isArray(res.data.properties)) {
+          data = res.data.properties;
+        } else if (Array.isArray(res.data)) {
+          data = res.data;
+        }
+
+        // ✅ simpan summary (Apartemen, Ruko/Rukan, Tanah & Bangunan)
+        if (res.data && res.data.summary) {
+          setSummaryData(res.data.summary);
+        }
+
+        // ✅ urutkan sesuai sort order
         if (sortParam === "asc") {
           data.sort((a, b) => a.property_price - b.property_price);
         } else if (sortParam === "desc") {
@@ -134,8 +146,31 @@ export default function Beli() {
         setDataRumah([]);
       })
       .finally(() => setLoading(false));
-    // }, [location.search]);
   }, [location.search, sortOrder]);
+
+  //       if (Array.isArray(res.data)) data = res.data;
+  //       else if (res.data.data && Array.isArray(res.data.data))
+  //         data = res.data.data;
+  //       // if (sortOrder === "asc") {
+  //       //   data.sort((a, b) => a.property_price - b.property_price);
+  //       // } else if (sortOrder === "desc") {
+  //       //   data.sort((a, b) => b.property_price - a.property_price);
+  //       // }
+  //       if (sortParam === "asc") {
+  //         data.sort((a, b) => a.property_price - b.property_price);
+  //       } else if (sortParam === "desc") {
+  //         data.sort((a, b) => b.property_price - a.property_price);
+  //       }
+
+  //       setDataRumah(data);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Gagal fetch data:", err);
+  //       setDataRumah([]);
+  //     })
+  //     .finally(() => setLoading(false));
+  //   // }, [location.search]);
+  // }, [location.search, sortOrder]);
 
   // Pagination
   const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
@@ -184,8 +219,28 @@ export default function Beli() {
       <div className="flex justify-center mt-10">
         <Search />
       </div>
-
-      <div className="flex justify-end items-center px-10 mt-6">
+      <div className="flex justify-between items-center px-10 mt-6">
+        <div className="w-52 h-5 md:block hidden"></div>
+        <div className="gap-3 flex flex-wrap justify-center">
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Tanah & Bangunan{" "}
+            <span className="font-semibold">
+              {summaryData["Tanah & Bangunan"] ?? 0}
+            </span>
+          </a>
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Apartemen{" "}
+            <span className="font-semibold">
+              {summaryData["Apartemen"] ?? 0}
+            </span>
+          </a>
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Ruko{" "}
+            <span className="font-semibold">
+              {summaryData["Ruko/Rukan"] ?? 0}
+            </span>
+          </a>
+        </div>
         <button
           onClick={() => {
             const newOrder = sortOrder === "asc" ? "desc" : "asc";

@@ -16,7 +16,7 @@ export default function Search() {
   const [showFilter, setShowFilter] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const location = useLocation();
 
   useEffect(() => {
@@ -89,16 +89,16 @@ export default function Search() {
     if (e.key === "Enter") {
       e.preventDefault();
 
-      if (
-        !keyword.trim() &&
-        !minPrice &&
-        !maxPrice &&
-        selectedProvince === "Provinsi" &&
-        selectedCity === "Kota"
-      ) {
-        alert("Isi minimal satu filter atau kata kunci untuk mencari!");
-        return;
-      }
+      // if (
+      //   !keyword.trim() &&
+      //   !minPrice &&
+      //   !maxPrice &&
+      //   selectedProvince === "Provinsi" &&
+      //   selectedCity === "Kota"
+      // ) {
+      //   alert("Isi minimal satu filter atau kata kunci untuk mencari!");
+      //   return;
+      // }
 
       const queryString = buildQueryParams();
       navigate(`/beli?${queryString}`);
@@ -178,7 +178,7 @@ export default function Search() {
               </h2>
               <button
                 onClick={() => setShowFilter(false)}
-                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
+                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700 cursor-pointer"
               >
                 ✕
               </button>
@@ -227,7 +227,7 @@ export default function Search() {
               <div className="relative mb-3">
                 <button
                   onClick={() => setIsOpenProvince(!isOpenProvince)}
-                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800"
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 cursor-grab active:cursor-grabbing"
                 >
                   {selectedProvince}
                   <svg
@@ -275,7 +275,7 @@ export default function Search() {
                 <button
                   onClick={() => setIsOpenCity(!isOpenCity)}
                   disabled={dataKota.length === 0}
-                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-grabbing"
                 >
                   {selectedCity}
                   <svg

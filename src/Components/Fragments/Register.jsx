@@ -3,6 +3,8 @@ import Input from "../Elements/Input";
 import Button from "../Elements/Button";
 import { useNavigate } from 'react-router-dom';
 import API from "../../Config/Endpoint";
+import { SKLayout } from '../Layouts/LayoutUtama';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
@@ -55,8 +57,16 @@ const Register = ({ onRegisterSuccess, close }) => {
         setToast((prev) => ({ ...prev, visible: false }));
     };
 
-    const handleNamaLengkapChange = (newValue) => {
-        let sanitized = newValue.replace(/[^a-zA-Z\s\.\-]/g, '');
+    const [showSK, setShowSK] = useState(false);
+
+    const handleNamaLengkapChange = (e) => {
+        const newValue = e.target.value;
+        if (typeof newValue !== 'string') {
+            setNamaLengkap('');
+            return;
+        }
+
+        let sanitized = newValue.replace(/[^a-zA-Z\s.\-'’]/g, '');
         sanitized = sanitized.trimStart();
         if (sanitized.trim() === '') {
             setNamaLengkap('');
@@ -65,40 +75,50 @@ const Register = ({ onRegisterSuccess, close }) => {
         }
     };
 
-    const handleEmailChange = (newValue) => setEmail(newValue);
-    
-    const handleNomorTeleponChange = (newValue) => {
-        const numericValue = newValue.replace(/[^0-9]/g, '');
-        if (numericValue === '') {
-            setNomorTelepon('');
-            return;
-        }
-
-        let correctedValue = numericValue;
-        if (correctedValue.length === 1 && correctedValue.startsWith('8')) {
-            correctedValue = '0' + correctedValue;
-        }
-
-        if (correctedValue.startsWith('08')) {
-            const limitedValue = correctedValue.slice(0, 20);
-            setNomorTelepon(limitedValue);
-        }
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
     };
 
-    const handleKataSandiChange = (newValue) => setKataSandi(newValue);
+    const [normalizedPhone, setNormalizedPhone] = useState('');
+
+    const handleNomorTeleponChange = (e) => {
+        setNomorTelepon(e.target.value);
+    };
+
+    function normalizePhone(input, defaultRegion = 'ID') {
+        try {
+            const phoneNumber = parsePhoneNumber(input, defaultRegion);
+            if (phoneNumber.isValid()) {
+                return phoneNumber.format('E.164');
+            }
+        } catch (err) {
+            // invalid
+        }
+        return null;
+    }
+
+    const handleKataSandiChange = (e) => {
+        setKataSandi(e.target.value);
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
+
+        const normalized = normalizePhone(nomorTelepon);
         if (!isChecked) {
             showToast("Anda harus menyetujui Syarat & Ketentuan (S&K).");
             return;
         }
-        if (!nomorTelepon) {
-            showToast("Nomor telepon tidak boleh kosong.");
+        if (!normalized) {
+            showToast("Nomor telepon tidak valid.");
             return;
         }
+
+        setNormalizedPhone(normalized);
         setShowPopup(true);
     };
+
+
     const confirmSubmit = () => {
         setShowPopup(false);
         setShowuptrue(false);
@@ -106,7 +126,7 @@ const Register = ({ onRegisterSuccess, close }) => {
         let payload = {
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone: nomorTelepon,
+            phone: normalizedPhone,
             password: kataSandi,
             mode: 'POST',
             action: 'register'
@@ -228,7 +248,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                         />
                         <span
                             className="text-xs font-jakarta underline cursor-pointer"
-                            onClick={() => navigate("/syaratdanketentuan")}
+                            onClick={() => setShowSK(true)}
                         >
                             S&K
                         </span>
@@ -268,6 +288,20 @@ const Register = ({ onRegisterSuccess, close }) => {
                         <div className="flex gap-[73px] mt-[24px]">
                             <Button onClick={confirmSubmit}>Iya</Button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {showSK && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35">
+                    <div className="relative w-full h-[90vh] overflow-auto bg-white rounded-lg">
+                        <button
+                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+                            onClick={() => setShowSK(false)}
+                        >
+                            ✕
+                        </button>
+                        <SKLayout onBack={() => setShowSK(false)} />
                     </div>
                 </div>
             )}

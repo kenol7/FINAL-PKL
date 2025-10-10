@@ -71,35 +71,38 @@ const Login = ({ route, onClose }) => {
   const checkLogin = async (event) => {
     event.preventDefault();
 
-    if (!email.trim() || !kataSandi.trim()) {
+    if (!email || !email.trim() || !kataSandi || !kataSandi.trim()) {
       showToast("Isi email dan password dulu");
       return;
     }
-    
-    const url = new URL(API.endpointlogin);
-    url.searchParams.set("email", email);
-    url.searchParams.set("password", kataSandi);
+
+    // const url = new URL(API.endpointlogin);
+    // url.searchParams.set("email", email);
+    // url.searchParams.set("password", kataSandi);
 
     try {
-      const res = await fetch(url.toString(), { method: "GET" });
-      const response = await res.json();
+      await fetch(API.endpointlogin + '&email=' + document.getElementById('email').value + '&password=' + document.getElementById('kata_sandi').value)
+        .then(res => res.json())
+        .then(response => {
 
-      if (response.status === "success") {
-        showToast(`Hello, ${response.user.nama_lengkap}`, "success");
-        localStorage.setItem("auth_phone", response.user.nomer_telepon);
-        localStorage.setItem("auth_email", response.user.email);
-        localStorage.setItem("auth_fullname", response.user.nama_lengkap);
-        localStorage.setItem("foto_profil", response.user.image);
-        localStorage.setItem("tipe_time", new Date().toISOString());
-        window.dispatchEvent(new Event("storage"));
-        setTimeout(() => {
-          onClose();
-        }, 1500);
-      } else {
-        showToast(response.message || "Password atau Email Salah");
-        // setEmail("");
-        // setKataSandi("");
-      }
+
+          if (response.status === "success") {
+            showToast(`Hello, ${response.user.nama_lengkap}`, "success");
+            localStorage.setItem("auth_phone", response.user.nomer_telepon);
+            localStorage.setItem("auth_email", response.user.email);
+            localStorage.setItem("auth_fullname", response.user.nama_lengkap);
+            localStorage.setItem("foto_profil", response.user.image);
+            localStorage.setItem("tipe_time", new Date().toISOString());
+            window.dispatchEvent(new Event("storage"));
+            setTimeout(() => {
+              onClose();
+            }, 1500);
+          } else {
+            showToast(response.message || "Password atau Email Salah");
+            // setEmail("");
+            // setKataSandi("");
+          }
+        })
     } catch (err) {
       console.error("Error login:", err);
       showToast("Terjadi kesalahan koneksi");
@@ -136,7 +139,8 @@ const Login = ({ route, onClose }) => {
           label="Email"
           type="email"
           name="email"
-          onChange={handleEmailChange}
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
         />
 
         <div className="flex flex-col items-start w-[278px]">
@@ -144,9 +148,10 @@ const Login = ({ route, onClose }) => {
           <div className="relative w-full">
             <Input
               type={showPassword ? "text" : "password"}
-              className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
               name="kata_sandi"
-              onChange={handleKataSandiChange}
+              value={kataSandi} 
+              onChange={(e) => setKataSandi(e.target.value)}
+              className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
             />
             <button
               type="button"

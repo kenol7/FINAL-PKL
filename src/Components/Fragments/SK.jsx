@@ -24,7 +24,7 @@ const SK = () => {
   };
 
   return (
-    <div className="mt-[21px] ml-[54px] mr-[54px] text-justify">
+    <div className="mt-[21px] ml-[54px] mr-[54px] text-justify overflow-x-hidden break-words">
       <div dangerouslySetInnerHTML={{ __html: formatText(content) }} />
     </div>
   );
