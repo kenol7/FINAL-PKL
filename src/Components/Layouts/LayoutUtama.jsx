@@ -46,9 +46,9 @@ const LoginLayout = (props) => {
   );
 };
 const KSBLayout = (props) => {
-  const { title, children } = props;
+  const { title, children,onBack } = props;
   return (
-    <LoginLayout height="533px">
+    <LoginLayout height="533px" onBack={onBack}>
       {title}
       {children}
     </LoginLayout>

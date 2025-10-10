@@ -17,7 +17,7 @@ function App() {
         <GlobalLoader />
         <Routes>
           <Route path="/" element={<Home/>} />
-          <Route path="/kpr" element={<ProctectedRoute><KprPage/> </ProctectedRoute>} />
+          <Route path="/kpr" element={<KprPage/>} />
           <Route path="/chatbot" element={<ProctectedRoute><ChatBot/> </ProctectedRoute>} />
           <Route path="/profile" element={<ProctectedRoute><Profile/> </ProctectedRoute>} />
           <Route path="/login" element={<HalamanLogin />} />
@@ -27,8 +27,8 @@ function App() {
           <Route path="/jualrumah" element={<ProctectedRoute><HalamanJual/> </ProctectedRoute>} />
           <Route path="/verifikasikode/:code/:name/:email" element={<HalamanVerif />} />
           <Route path="/syaratdanketentuan" element={<Halamansk />} />
-          <Route path="/beli" element={<ProctectedRoute><Beli/> </ProctectedRoute>} />
-          <Route path="/detailrumah/:refid" element={<ProctectedRoute><HalamanDetail/> </ProctectedRoute>} />
+          <Route path="/beli" element={<Beli/>} />
+          <Route path="/detailrumah/:refid" element={<HalamanDetail/>} />
         </Routes>
       </BrowserRouter>
     </LoadingProvider>
