@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import axios from "axios"; //pake axios aja ya dik :)
+import axios from "axios";
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -27,6 +27,9 @@ import { Link } from "react-router-dom";
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { Suspense } from 'react';
+
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const FrameData = [
   { id: 1, url: Frame1, duration: 5, alt: "Frame 1" },
@@ -62,6 +65,29 @@ export default function Home() {
 
   const handledetail = (ref_id) => {
     navigate("/detailrumah/" + ref_id);
+  };
+
+  const imgRefDesktop = useRef(null);
+  const imgRefMobile = useRef(null);
+
+  const handleRotateDesktop = () => {
+    if (imgRefDesktop.current) {
+      gsap.to(imgRefDesktop.current, {
+        rotation: "+=360",
+        duration: 1,
+        ease: "power2.out"
+      });
+    }
+  };
+
+  const handleRotateMobile = () => {
+    if (imgRefMobile.current) {
+      gsap.to(imgRefMobile.current, {
+        rotation: "+=360",
+        duration: 1,
+        ease: "power2.out"
+      });
+    }
   };
 
   function Model({ scale = 1 }) {
@@ -348,11 +374,19 @@ export default function Home() {
               </div>
             </div>
             <div>
-              <img className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl"
+              <img
+                ref={imgRefDesktop}
+                className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl cursor-pointer"
                 src={Kprimg}
-                alt="KPRimg"
+                alt="KprImg"
+                onClick={handleRotateDesktop}
+                style={{
+                  transformOrigin: 'center',
+                  transition: 'transform 0.3s ease'
+                }}
               />
             </div>
+            {/* className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl" */}
           </div>
         </div>
 
@@ -386,9 +420,12 @@ export default function Home() {
               </div>
             </div>
             <div className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
-              <img className="w-[50%] rounded-2xl"
+              <img
+                ref={imgRefMobile}
+                className="w-[50%] rounded-2xl cursor-pointer"
                 src={Kprimg}
                 alt="KprImg"
+                onClick={handleRotateMobile}
               />
               <div className="flex justify-center items-center text-center w-full md:w-auto">
                 <div className="space-y-5 mb-2">

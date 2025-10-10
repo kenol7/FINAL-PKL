@@ -68,13 +68,13 @@ const HalamanRegister = ({ close, onRegisterSuccess }) => {
   );
 };
 
-const Halamansk = () => {
+const Halamansk = ({close}) => {
   return (
     <div>
       <div className="relative min-h-screen flex items-center justify-center ">
         <div className="absolute inset-0  blur-sm"></div>
         <div className="relative z-10">
-          <SKLayout>
+          <SKLayout onBack={close}>
             <SK />
           </SKLayout>
         </div>

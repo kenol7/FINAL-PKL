@@ -167,6 +167,8 @@ export default function Profile(props) {
       });
     }
 
+    
+
     setProfile({
       nama: storedFullname || "Yang Jungwon",
       lokasi: " ",
@@ -388,7 +390,7 @@ export default function Profile(props) {
                     className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
                     onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
                   >
-                    <div className="w-full bg-gray-300 h-30" /> {/* Ganti dengan gambar jika ada */}
+                    <div className="w-full bg-gray-300 h-30" /> 
                     <div className="flex items-start justify-between p-3">
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-gray-900">

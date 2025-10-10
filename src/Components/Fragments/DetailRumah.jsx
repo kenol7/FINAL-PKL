@@ -4,6 +4,7 @@ import API from "../../Config/Endpoint";
 import "keen-slider/keen-slider.min.css";
 import KeenSlider from "keen-slider";
 import { useLoading } from "../../Context/Loader";
+import Peta from "./peta";
 
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
@@ -42,10 +43,6 @@ const DetailRumah = () => {
     const [imageSlider, setImageSlider] = useState([]);
     const [imageShow, setImageShow] = useState("");
     const sliderRef = useRef(null);
-    const mapRef = useRef(null);
-    const mapInstanceRef = useRef(null);
-
-    const map_key = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
     const apibook = API.endpointBookmark;
 
     // Toast state
@@ -54,6 +51,8 @@ const DetailRumah = () => {
         message: "",
         type: "success",
     });
+
+    // const [showStreetView, setShowStreetView] = useState(false);
 
     const showToast = (message, type = "success") => {
         setToast({ isVisible: true, message, type });
@@ -182,70 +181,70 @@ const DetailRumah = () => {
         }
     };
 
-    const loadGoogleMapsScript = () => {
-        if (window.google && window.google.maps) {
-            return Promise.resolve();
-        }
+    // const loadGoogleMapsScript = () => {
+    //     if (window.google && window.google.maps) {
+    //         return Promise.resolve();
+    //     }
 
-        return new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${map_key}&libraries=geometry`;
-            script.async = true;
-            script.defer = true;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    };
+    //     return new Promise((resolve, reject) => {
+    //         const script = document.createElement("script");
+    //         script.src = `https://maps.googleapis.com/maps/api/js?key=${map_key}&libraries=geometry`;
+    //         script.async = true;
+    //         script.defer = true;
+    //         script.onload = resolve;
+    //         script.onerror = reject;
+    //         document.head.appendChild(script);
+    //     });
+    // };
 
-    const initMap = (lat, lng) => {
-        if (!window.google || !window.google.maps) {
-            console.warn("Google Maps belum siap");
-            return;
-        }
+    // const initMap = (lat, lng) => {
+    //     if (!window.google || !window.google.maps) {
+    //         console.warn("Google Maps belum siap");
+    //         return;
+    //     }
 
-        const mapOptions = {
-            zoom: 15,
-            center: { lat, lng },
-            mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-            zoomControl: true,
-            streetViewControl: false,
-            fullscreenControl: true,
-            mapTypeControl: false,
-        };
+    //     const mapOptions = {
+    //         zoom: 15,
+    //         center: { lat, lng },
+    //         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+    //         zoomControl: true,
+    //         streetViewControl: false,
+    //         fullscreenControl: true,
+    //         mapTypeControl: false,
+    //     };
 
-        const map = new window.google.maps.Map(mapRef.current, mapOptions);
+    //     const map = new window.google.maps.Map(mapRef.current, mapOptions);
 
-        new window.google.maps.Marker({
-            position: { lat, lng },
-            map: map,
-            title: detail?.cluster_apart_name || "Lokasi Properti",
-        });
+    //     new window.google.maps.Marker({
+    //         position: { lat, lng },
+    //         map: map,
+    //         title: detail?.cluster_apart_name || "Lokasi Properti",
+    //     });
 
-        mapInstanceRef.current = map;
-    };
+    //     mapInstanceRef.current = map;
+    // };
 
-    useEffect(() => {
-        if (!detail || !detail.latitude || !detail.longitude) return;
+    // useEffect(() => {
+    //     if (!detail || !detail.latitude || !detail.longitude) return;
 
-        const lat = parseFloat(detail.latitude);
-        const lng = parseFloat(detail.longitude);
+    //     const lat = parseFloat(detail.latitude);
+    //     const lng = parseFloat(detail.longitude);
 
-        if (isNaN(lat) || isNaN(lng)) return;
+    //     if (isNaN(lat) || isNaN(lng)) return;
 
-        if (mapInstanceRef.current) {
-            mapInstanceRef.current.setCenter({ lat, lng });
-            return;
-        }
+    //     if (mapInstanceRef.current) {
+    //         mapInstanceRef.current.setCenter({ lat, lng });
+    //         return;
+    //     }
 
-        loadGoogleMapsScript()
-            .then(() => {
-                initMap(lat, lng);
-            })
-            .catch((err) => {
-                console.error("Gagal memuat Google Maps:", err);
-            });
-    }, [detail]);
+    //     loadGoogleMapsScript()
+    //         .then(() => {
+    //             initMap(lat, lng);
+    //         })
+    //         .catch((err) => {
+    //             console.error("Gagal memuat Google Maps:", err);
+    //         });
+    // }, [detail]);
 
     useEffect(() => {
         if (!sliderRef.current || imageSlider.length === 0) return;
@@ -327,7 +326,7 @@ const DetailRumah = () => {
                             <h1 className="text-xl md:text-2xl font-bold">{detail.cluster_apart_name}</h1>
                             <h3 className="text-sm text-gray-600">{detail.city}</h3>
                         </div>
-                        <div className="bg-[#E7C555] rounded-2xl w-[75px] md:w-[244px] h-[45px] flex items-center justify-center text-center text-lg font-semibold font-jakarta whitespace-nowrap">
+                        <div className="bg-[#E7C555] rounded-2xl px-3 py-1 md:px-4 md:py-2 min-w-[80px] md:min-w-[200px] max-w-full h-auto md:h-[45px] flex items-center justify-center text-center text-sm md:text-lg font-semibold font-jakarta break-words">
                             Rp{" "}
                             {detail.property_price
                                 ? new Intl.NumberFormat("id-ID").format(detail.property_price)
@@ -430,7 +429,7 @@ const DetailRumah = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center gap-5">
                     <div className="relative w-full">
                         <img
                             src={`${API.endpointImage}/${imageShow}?v=${Math.random() * 2000}`}
@@ -440,10 +439,15 @@ const DetailRumah = () => {
                     </div>
 
                     {detail.latitude && detail.longitude ? (
-                        <div
-                            ref={mapRef}
-                            className="w-full h-52 md:h-60 rounded-lg shadow-md mt-6"
-                            style={{ minHeight: "200px" }}
+                        <Peta
+                            latitude={parseFloat(detail.latitude)}
+                            longitude={parseFloat(detail.longitude)}
+                            mapid={'map01'}
+                            lebar={'100%'}
+                            tinggi={'240px'}
+                            teks={'Posisi Properti'}
+                            zoom={20}
+
                         />
                     ) : (
                         <div className="mt-6 bg-gray-100 border border-gray-300 rounded-lg p-4 w-full text-center text-sm text-gray-500">
@@ -457,8 +461,8 @@ const DetailRumah = () => {
                                 key={i}
                                 onClick={() => ChangeImageShow(el.image)}
                                 className={`px-3 py-1 rounded-full text-sm font-bold ${imageShow === el.image
-                                        ? "bg-[#E7C555] text-white"
-                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                    ? "bg-[#E7C555] text-white"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                     }`}
                             >
                                 {i + 1}
@@ -466,10 +470,10 @@ const DetailRumah = () => {
                         ))}
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* 🔔 Render ToastAlert */}
-            <ToastAlert
+            < ToastAlert
                 message={toast.message}
                 type={toast.type}
                 isVisible={toast.isVisible}
