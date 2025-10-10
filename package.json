@@ -24,6 +24,7 @@
     "install": "^0.13.0",
     "keen-slider": "^6.8.6",
     "leaflet": "^1.9.4",
+    "libphonenumber": "^0.0.10",
     "libphonenumber-js": "^1.12.23",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.544.0",

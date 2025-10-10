@@ -1,313 +1,304 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../Components/Elements/Navbar";
+import axios from "axios";
+import Search from "../Components/Elements/Search";
 import Footer from "../Components/Elements/Footer";
-import ProfileImage from "../assets/profile.jpg";
-import Jual from "../assets/sale-01.png";
-import Edit from "../assets/edit.png";
-import { Bookmark } from "lucide-react";
+import Navbar from "../Components/Elements/Navbar";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowDownAZ, ArrowUpZA } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Profile(props) {
-  console.log(localStorage.getItem("auth_phone"));
-  const [profile, setProfile] = useState({
-    nama: localStorage.getItem("auth_fullname"),
-    lokasi: "",
-    email: localStorage.getItem("auth_email"),
-    phone: localStorage.getItem("auth_phone"),
-  });
+const API_FILTER =
+  "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti";
+const IMAGE_BASE_URL =
+  "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
-  const [user, setUser] = useState(null);
-  const [city, setCity] = useState(null);
-  const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
+const SkeletonCard = () => (
+  <div className="w-full overflow-hidden bg-white rounded-lg shadow-lg">
+    <div className="h-[200px] bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+    <div className="p-3 space-y-2">
+      <div className="h-4 rounded w-3/4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="h-3 rounded w-1/2 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="h-3 rounded w-2/3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      <div className="flex justify-end">
+        <div className="h-5 rounded w-20 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer"></div>
+      </div>
+    </div>
+  </div>
+);
 
-  // useEffect(() => {
-  //   setProfile({
-  //     nama: localStorage.getItem("auth_fullname") || "Yang Jungwon",
-  //     lokasi: [],
-  //     email: localStorage.getItem("auth_email") || "yangjungwon@gmail.com",
-  //     phone: localStorage.getItem("auth_phone") || "088888888888",
-  //   });
-  // }, []);
+const PropertyCard = ({ item, onClick }) => (
+  <motion.div
+    layout
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.3 }}
+    className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30 cursor-pointer"
+    onClick={onClick}
+  >
+    <div className="rounded-xl overflow-hidden relative">
+      <div className="w-full h-[200px] bg-gray-300 flex items-center justify-center">
+        <h3 className="text-xs font-extrabold top-3 right-3 absolute bg-[#E5E7EB] px-2 py-1 rounded-full border-2 border-[#D4AF37]">
+          {item.ref_id}
+        </h3>
+        <img
+          src={IMAGE_BASE_URL}
+          alt={item.cluster_apart_name}
+          className="object-cover w-full h-full"
+          loading="lazy"
+        />
+      </div>
+      <div className="flex items-center justify-between bg-gray-100 p-3">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            {item.cluster_apart_name?.slice(0, 15) || "Perumahan"}
+          </h3>
+          <p className="text-sm text-gray-700">
+            {item.city || "Kota Tidak Diketahui"}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            LT {item.square_land}m² | LB {item.square_building}m² | L{" "}
+            {item.property_floor}
+          </p>
+        </div>
+        <div className="flex flex-col text-right w-fit">
+          <span className="block text-sm font-semibold text-gray-800 bg-yellow-400 px-3 rounded-lg">
+            Rp{" "}
+            {item.property_price
+              ? new Intl.NumberFormat("id-ID").format(item.property_price)
+              : "N/A"}
+          </span>
+          <p className="text-xs text-gray-600 mt-1">Transaksi</p>
+        </div>
+      </div>
+    </div>
+  </motion.div>
+);
 
-  const handleLogout = () => {
-    console.log(handleLogout);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_fullname");
-    localStorage.removeItem("auth_email");
-    localStorage.removeItem("auth_phone");
-    setUser(null);
-    window.location.href = "/";
-  };
+export default function Beli() {
+  const [dataRumah, setDataRumah] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [itemsPerPage] = useState(12);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [summaryData, setSummaryData] = useState({});
 
-  const textLocation = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        // setLatitude(position.coords.latitude);
-        // setLongitude(position.coords.longitude)
-        console.log(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
-        );
-        fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.coords.latitude},${position.coords.longitude}&key=${KeyMaps}`
-        )
-          .then((res) => res.json())
-          .then((response) => {
-            console.log(response);
-            console.log("alamat=" + response.results[0].formatted_address);
-            const city = response.results[0].address_components.find(
-              (component) =>
-                component.types[0].includes("administrative_area_level_2")
-            ).long_name;
-            setProfile((c) => ({ ...c, lokasi: city }));
-          });
-      });
-    }
-  };
+
+  console.log(dataRumah);
+
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  const handleDetail = (ref_id) => navigate("/detailrumah/" + ref_id);
+
+  // === FETCH DATA DARI API_FILTER (tanpa atau dengan parameter filter) ===
   useEffect(() => {
-    textLocation();
-  }, []);
+    const queryParams = new URLSearchParams(location.search);
+    const params = {
+      minHarga: queryParams.get("minHarga") || "",
+      maxHarga: queryParams.get("maxHarga") || "",
+      province: queryParams.get("province") || "",
+      city: queryParams.get("city") || "",
+      search: queryParams.get("search") || "",
+    };
 
+    const sortParam = queryParams.get("sort_order") || sortOrder;
+    setLoading(true);
 
-  
-  return (
-    <section className="min-h-screen">
-      <Navbar />
+    axios
+      .post(API_FILTER, {
+        provinsi: params.province,
+        kota: params.city,
+        minHarga: params.minHarga,
+        maxHarga: params.maxHarga,
+        mode: "filter_properti",
+        search: params.search,
+        sort_order: sortParam,
+      })
+      .then((res) => {
+        let data = [];
 
-      <div className="flex justify-center">
-        <div className="flex flex-col mt-5 gap-y-2.5">
-          <img src={ProfileImage} alt="" className="rounded-full w-30" />
-          <a className="flex h-5 w-28 border-2 border-black items-center py-4 px-4 gap-4 rounded-full">
-            <img src={Edit} alt="" width="20" />
-            <div>Edit</div>
-          </a>
-        </div>
-      </div>
-      <div className="flex flex-col lg:flex-row items-start mx-5 lg:mx-40 my-10 gap-10">
-        <div className="bg-gray-100 flex flex-col justify-center border border-yellow-300 rounded-lg px-5 lg:px-15 py-5 w-full lg:w-auto">
-          <div>
-            <div className="flex flex-col space-y-1">
-              <label
-                htmlFor="nama"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nama Lengkap
-              </label>
-              <input
-                id="nama"
-                type="text"
-                value={profile.nama}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
+        // ✅ ambil dari res.data.properties
+        if (res.data && Array.isArray(res.data.properties)) {
+          data = res.data.properties;
+        } else if (Array.isArray(res.data)) {
+          data = res.data;
+        }
 
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="lokasi"
-                className="text-sm font-medium text-gray-700"
-              >
-                Lokasi Kota
-              </label>
-              <input
-                id="lokasi"
-                type="text"
-                value={profile.lokasi}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
+        // ✅ simpan summary (Apartemen, Ruko/Rukan, Tanah & Bangunan)
+        if (res.data && res.data.summary) {
+          setSummaryData(res.data.summary);
+        }
 
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={profile.email}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
+        // ✅ urutkan sesuai sort order
+        if (sortParam === "asc") {
+          data.sort((a, b) => a.property_price - b.property_price);
+        } else if (sortParam === "desc") {
+          data.sort((a, b) => b.property_price - a.property_price);
+        }
 
-            <div className="flex flex-col space-y-1 mt-2">
-              <label
-                htmlFor="no_hp"
-                className="text-sm font-medium text-gray-700"
-              >
-                Nomor Telepon
-              </label>
-              <input
-                id="no_hp"
-                type="text"
-                value={profile.phone}
-                className="px-[0.20rem] font-bold w-full lg:w-64 py-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-          </div>
+        setDataRumah(data);
+      })
+      .catch((err) => {
+        console.error("Gagal fetch data:", err);
+        setDataRumah([]);
+      })
+      .finally(() => setLoading(false));
+  }, [location.search, sortOrder]);
 
-          <div className="flex mt-4 gap-10">
-            <button className="w-28 bg-yellow-200 px-3 py-2 rounded-lg hover:bg-yellow-300 transition-all shadow">
-              Ubah Data
-            </button>
+  // Pagination
+  const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentData = dataRumah.slice(indexOfFirst, indexOfLast);
+
+  const renderPaginationButtons = () =>
+    Array.from({ length: totalPages }, (_, i) => i + 1)
+      .filter((page) => {
+        if (totalPages <= 10) return true;
+        if (currentPage <= 6) return page <= 10 || page === totalPages;
+        if (currentPage >= totalPages - 5)
+          return page > totalPages - 10 || page === 1;
+        return (
+          page === 1 ||
+          page === totalPages ||
+          (page >= currentPage - 4 && page <= currentPage + 4)
+        );
+      })
+      .map((page, idx, arr) => {
+        const prevPage = arr[idx - 1];
+        const showEllipsis = prevPage && page - prevPage > 1;
+        return (
+          <span key={page} className="flex items-center">
+            {showEllipsis && (
+              <span className="px-2 py-1 text-gray-500">...</span>
+            )}
             <button
-              onClick={handleLogout}
-              className="w-28 bg-red-500 px-3 py-2 rounded-lg hover:bg-red-600 transition-all shadow"
+              onClick={() => setCurrentPage(page)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === page
+                  ? "bg-[#549AF8] text-white"
+                  : "bg-white text-gray-800 hover:bg-gray-100"
+              }`}
             >
-              Logout
+              {page}
             </button>
-          </div>
-        </div>
+          </span>
+        );
+      });
 
-        <div className="w-full flex flex-col">
-          {/* Bagian Jual */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Jual</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bagian Favorit tetap sama */}
-          <div className="w-full">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <Bookmark size={24} />
-              <h1 className="font-semibold text-lg">Favorit</h1>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <div className="flex justify-center mt-10">
+        <Search />
       </div>
+
+      <div className="flex justify-between items-center px-10 mt-6">
+        <div className="w-52 h-5 md:block hidden"></div>
+          <div className="gap-3 flex flex-wrap justify-center">
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Tanah & Bangunan{" "}
+              <span className="font-semibold">
+                {summaryData["Tanah & Bangunan"] ?? 0}
+              </span>
+            </a>
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Apartemen{" "}
+              <span className="font-semibold">
+                {summaryData["Apartemen"] ?? 0}
+              </span>
+            </a>
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Ruko{" "}
+              <span className="font-semibold">
+                {summaryData["Ruko/Rukan"] ?? 0}
+              </span>
+            </a>
+          </div>
+        <button
+          onClick={() => {
+            const newOrder = sortOrder === "asc" ? "desc" : "asc";
+            setSortOrder(newOrder);
+            const queryParams = new URLSearchParams(location.search);
+            queryParams.set("sort_order", newOrder);
+            navigate(`?${queryParams.toString()}`);
+          }}
+          className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-md shadow-sm hover:bg-gray-100 transition-all duration-200"
+        >
+          {sortOrder === "asc" ? (
+            <>
+              <ArrowDownAZ size={18} className="text-gray-700" />
+              <span className="font-medium text-gray-700">
+                Termurah → Termahal
+              </span>
+            </>
+          ) : (
+            <>
+              <ArrowUpZA size={18} className="text-gray-700" />
+              <span className="font-medium text-gray-700">
+                Termahal → Termurah
+              </span>
+            </>
+          )}
+        </button>
+      </div>
+
+      <main className="flex-1 p-6 bg-white">
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: itemsPerPage }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : currentData.length === 0 ? (
+          <div className="text-center text-gray-500">
+            Tidak ada data ditemukan
+          </div>
+        ) : (
+          <>
+            <AnimatePresence>
+              <motion.div
+                layout
+                className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 overflow-y-auto"
+                style={{ maxHeight: "calc(105vh - 200px)" }}
+              >
+                {currentData.map((item) => (
+                  <PropertyCard
+                    key={item.ref_id}
+                    item={item}
+                    onClick={() => handleDetail(item.ref_id)}
+                  />
+                ))}
+              </motion.div>
+            </AnimatePresence>
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                {renderPaginationButtons()}
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </main>
 
       <Footer />
-    </section>
+    </div>
   );
 }

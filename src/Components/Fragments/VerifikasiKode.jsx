@@ -123,6 +123,8 @@ const OTPInput = ({ kode, name, email, close, onUpdateUser }) => {
         }
     };
 
+    console.log(otp);
+
     const handleKeyDown = (e, index) => {
         if (e.key === "Backspace") {
             if (otp[index] === "" && index > 0) {

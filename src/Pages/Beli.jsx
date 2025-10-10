@@ -4,6 +4,8 @@ import Search from "../Components/Elements/Search";
 import Footer from "../Components/Elements/Footer";
 import Navbar from "../Components/Elements/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowDownAZ, ArrowUpZA } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const API_FILTER =
   "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=latest";
@@ -25,7 +27,12 @@ const SkeletonCard = () => (
 );
 
 const PropertyCard = ({ item, onClick }) => (
-  <div
+  <motion.div
+    layout
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    transition={{ duration: 0.3 }}
     className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30 cursor-pointer"
     onClick={onClick}
   >
@@ -58,16 +65,14 @@ const PropertyCard = ({ item, onClick }) => (
           <span className="block text-sm font-semibold text-gray-800 bg-yellow-400 px-3 rounded-lg">
             Rp{" "}
             {item.property_price
-              ? new Intl.NumberFormat("id-ID").format(
-                  item.property_price.toLocaleString()
-                )
+              ? new Intl.NumberFormat("id-ID").format(item.property_price)
               : "N/A"}
           </span>
           <p className="text-xs text-gray-600 mt-1">Transaksi</p>
         </div>
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 export default function Beli() {
@@ -77,6 +82,11 @@ export default function Beli() {
   const [itemsPerPage] = useState(12);
   const navigate = useNavigate();
   const location = useLocation();
+  const [summaryData, setSummaryData] = useState({});
+
+  console.log(dataRumah);
+
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const handleDetail = (ref_id) => navigate("/detailrumah/" + ref_id);
 
@@ -88,8 +98,13 @@ export default function Beli() {
       maxHarga: queryParams.get("maxHarga") || "",
       province: queryParams.get("province") || "",
       city: queryParams.get("city") || "",
+      search: queryParams.get("search") || "",
     };
-
+    // const sortOrder = queryParams.get("sort_order") || "";
+    // const sortParam = queryParams.get("sort_order") || sortOrder;
+    // setLoading(true);
+    const sortParam = queryParams.get("sort_order") || "asc";
+    setSortOrder(sortParam); // sinkronkan state dari URL
     setLoading(true);
 
     axios
@@ -99,19 +114,63 @@ export default function Beli() {
         minHarga: params.minHarga,
         maxHarga: params.maxHarga,
         mode: "filter_properti",
+        // sort_order: sortOrder,
+        sort_order: sortParam,
+        search: params.search,
       })
       .then((res) => {
-        if (Array.isArray(res.data)) setDataRumah(res.data);
-        else if (res.data.data && Array.isArray(res.data.data))
-          setDataRumah(res.data.data);
-        else setDataRumah([]);
+        let data = [];
+
+        if (res.data && Array.isArray(res.data.properties)) {
+          data = res.data.properties;
+        } else if (Array.isArray(res.data)) {
+          data = res.data;
+        }
+
+        // ✅ simpan summary (Apartemen, Ruko/Rukan, Tanah & Bangunan)
+        if (res.data && res.data.summary) {
+          setSummaryData(res.data.summary);
+        }
+
+        // ✅ urutkan sesuai sort order
+        if (sortParam === "asc") {
+          data.sort((a, b) => a.property_price - b.property_price);
+        } else if (sortParam === "desc") {
+          data.sort((a, b) => b.property_price - a.property_price);
+        }
+
+        setDataRumah(data);
       })
       .catch((err) => {
         console.error("Gagal fetch data:", err);
         setDataRumah([]);
       })
       .finally(() => setLoading(false));
-  }, [location.search]); // Re-fetch saat parameter di URL berubah
+  }, [location.search, sortOrder]);
+
+  //       if (Array.isArray(res.data)) data = res.data;
+  //       else if (res.data.data && Array.isArray(res.data.data))
+  //         data = res.data.data;
+  //       // if (sortOrder === "asc") {
+  //       //   data.sort((a, b) => a.property_price - b.property_price);
+  //       // } else if (sortOrder === "desc") {
+  //       //   data.sort((a, b) => b.property_price - a.property_price);
+  //       // }
+  //       if (sortParam === "asc") {
+  //         data.sort((a, b) => a.property_price - b.property_price);
+  //       } else if (sortParam === "desc") {
+  //         data.sort((a, b) => b.property_price - a.property_price);
+  //       }
+
+  //       setDataRumah(data);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Gagal fetch data:", err);
+  //       setDataRumah([]);
+  //     })
+  //     .finally(() => setLoading(false));
+  //   // }, [location.search]);
+  // }, [location.search, sortOrder]);
 
   // Pagination
   const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
@@ -160,6 +219,55 @@ export default function Beli() {
       <div className="flex justify-center mt-10">
         <Search />
       </div>
+      <div className="flex justify-between items-center px-10 mt-6">
+        <div className="w-52 h-5 md:block hidden"></div>
+        <div className="gap-3 flex flex-wrap justify-center">
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Tanah & Bangunan{" "}
+            <span className="font-semibold">
+              {summaryData["Tanah & Bangunan"] ?? 0}
+            </span>
+          </a>
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Apartemen{" "}
+            <span className="font-semibold">
+              {summaryData["Apartemen"] ?? 0}
+            </span>
+          </a>
+          <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+            Ruko{" "}
+            <span className="font-semibold">
+              {summaryData["Ruko/Rukan"] ?? 0}
+            </span>
+          </a>
+        </div>
+        <button
+          onClick={() => {
+            const newOrder = sortOrder === "asc" ? "desc" : "asc";
+            setSortOrder(newOrder);
+            const queryParams = new URLSearchParams(location.search);
+            queryParams.set("sort_order", newOrder);
+            navigate(`?${queryParams.toString()}`);
+          }}
+          className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-md shadow-sm hover:bg-gray-100 transition-all duration-200"
+        >
+          {sortOrder === "asc" ? (
+            <>
+              <ArrowDownAZ size={18} className="text-gray-700" />
+              <span className="font-medium text-gray-700">
+                Termurah → Termahal
+              </span>
+            </>
+          ) : (
+            <>
+              <ArrowUpZA size={18} className="text-gray-700" />
+              <span className="font-medium text-gray-700">
+                Termahal → Termurah
+              </span>
+            </>
+          )}
+        </button>
+      </div>
 
       <main className="flex-1 p-6 bg-white">
         {loading ? (
@@ -174,18 +282,21 @@ export default function Beli() {
           </div>
         ) : (
           <>
-            <div
-              className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 overflow-y-auto"
-              style={{ maxHeight: "calc(105vh - 200px)" }}
-            >
-              {currentData.map((item) => (
-                <PropertyCard
-                  key={item.ref_id}
-                  item={item}
-                  onClick={() => handleDetail(item.ref_id)}
-                />
-              ))}
-            </div>
+            <AnimatePresence>
+              <motion.div
+                layout
+                className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 overflow-y-auto"
+                style={{ maxHeight: "calc(105vh - 200px)" }}
+              >
+                {currentData.map((item) => (
+                  <PropertyCard
+                    key={item.ref_id}
+                    item={item}
+                    onClick={() => handleDetail(item.ref_id)}
+                  />
+                ))}
+              </motion.div>
+            </AnimatePresence>
 
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
