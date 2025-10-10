@@ -30,13 +30,13 @@ export default function Navbar() {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-    const [profile, setProfile] = useState({
-      nama: "",
-      lokasi: "",
-      email: "",
-      phone: "",
-      profil: "",
-    });
+  const [profile, setProfile] = useState({
+    nama: "",
+    lokasi: "",
+    email: "",
+    phone: "",
+    profil: "",
+  });
 
   const handleLogout = async () => {
     const email = localStorage.getItem("auth_email");
@@ -47,13 +47,23 @@ export default function Navbar() {
           `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
         );
       }
-      localStorage.clear();
+
+      // Hanya hapus data auth, BUKAN favorites
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
+
       setUser(null);
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
       navigate("/");
     } catch (error) {
       console.error("Gagal logout dari server:", error);
-      localStorage.clear();
+      // Tetap hapus auth data saja
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
       navigate("/");
     }
   };

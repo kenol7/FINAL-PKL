@@ -6,7 +6,7 @@ import Navbar from "../Components/Elements/Navbar";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const API_FILTER =
-  "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti";
+  "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=latest";
 const IMAGE_BASE_URL =
   "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 

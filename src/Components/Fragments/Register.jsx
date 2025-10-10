@@ -4,7 +4,7 @@ import Button from "../Elements/Button";
 import { useNavigate } from 'react-router-dom';
 import API from "../../Config/Endpoint";
 import { SKLayout } from '../Layouts/LayoutUtama';
-import { parsePhoneNumber } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
@@ -49,6 +49,8 @@ const Register = ({ onRegisterSuccess, close }) => {
     // State untuk toast
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
 
+    const [nomorTeleponE164, setNomorTeleponE164] = useState("");
+
     const showToast = (message, type = "error") => {
         setToast({ message, type, visible: true });
     };
@@ -82,7 +84,20 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [normalizedPhone, setNormalizedPhone] = useState('');
 
     const handleNomorTeleponChange = (e) => {
-        setNomorTelepon(e.target.value);
+        const rawInput = e.target.value;
+        setNomorTelepon(rawInput);
+
+        let normalized = null;
+        try {
+            const phoneNumber = parsePhoneNumberFromString(rawInput);
+            if (phoneNumber && phoneNumber.isValid()) {
+                normalized = phoneNumber.format('E.164');
+            }
+        } catch (err) {
+
+        }
+
+        setNomorTeleponE164(normalized);
     };
 
     function normalizePhone(input, defaultRegion = 'ID') {
@@ -92,7 +107,6 @@ const Register = ({ onRegisterSuccess, close }) => {
                 return phoneNumber.format('E.164');
             }
         } catch (err) {
-            // invalid
         }
         return null;
     }
@@ -109,8 +123,8 @@ const Register = ({ onRegisterSuccess, close }) => {
             showToast("Anda harus menyetujui Syarat & Ketentuan (S&K).");
             return;
         }
-        if (!normalized) {
-            showToast("Nomor telepon tidak valid.");
+        if (!nomorTeleponE164) {
+            showToast("Nomor telepon tidak valid. Pastikan format benar (contoh: +6281234567890 atau 081234567890).");
             return;
         }
 
@@ -126,7 +140,7 @@ const Register = ({ onRegisterSuccess, close }) => {
         let payload = {
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone: normalizedPhone,
+            phone:  nomorTeleponE164,
             password: kataSandi,
             mode: 'POST',
             action: 'register'
