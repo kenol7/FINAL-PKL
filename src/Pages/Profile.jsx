@@ -37,6 +37,9 @@ export default function Profile(props) {
   const navigate = useNavigate();
   const KeyMaps = "AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo";
   const [favorites, setFavorites] = useState([]);
+  const [jual, setJual] = useState([])
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchjual, setSearchJual] = useState("")
 
   const maskPhone = (phone) => {
     if (!phone) return "";
@@ -91,18 +94,27 @@ export default function Profile(props) {
 
     try {
       if (email) {
-        // Panggil API logout
         await axios.get(
           `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
         );
       }
-      localStorage.clear();
+
+      // Hanya hapus data auth, BUKAN favorites
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
+
       setUser(null);
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
       navigate("/");
     } catch (error) {
       console.error("Gagal logout dari server:", error);
-      localStorage.clear();
+      // Tetap hapus auth data saja
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
       navigate("/");
     }
   };
@@ -167,7 +179,7 @@ export default function Profile(props) {
       });
     }
 
-    
+
 
     setProfile({
       nama: storedFullname || "Yang Jungwon",
@@ -297,100 +309,57 @@ export default function Profile(props) {
           </div>
         </div>
 
-        <div className="w-full flex flex-col">
-          {/* Bagian Jual */}
-          <div className="w-full mb-10">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <img src={Jual} alt="" width="24" />
-              <h1 className="font-semibold text-lg">Jual</h1>
+        <div className="w-full font-jakarta">
+          <div className="flex items-center justify-between mb-5 ml-2 lg:ml-0">
+            <div className="flex items-center gap-3">
+              <Bookmark size={24} />
+              <h1 className="font-semibold text-lg">Jual Rumah</h1>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl shadow-md bg-white overflow-hidden">
-                <div className="w-full bg-gray-300 h-30" />
-                <div className="flex items-start justify-between p-3">
-                  <div className="flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-900">
-                      Perumahan Griya
-                    </h3>
-                    <p className="text-gray-700 text-sm">Jakarta Timur</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      LT 97m² | LB 78m² | L1
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
-                      Rp 2.589.500
-                    </span>
-                    <p className="text-xs text-gray-600 mt-1">Transaksi</p>
-                  </div>
-                </div>
-              </div>
+            <div className="relative w-[300px]">
+              <input
+                type="text"
+                placeholder="Cari Rumah Mu yang di jual"
+                className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-sm"
+                value={searchjual}
+                onChange={(e) => setSearchJual(e.target.value)}
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </div>
           </div>
 
-          {/* Bagian Favorit tetap sama */}
-          <div className="w-full">
-            <div className="flex gap-3 mb-5 ml-2 lg:ml-0">
-              <Bookmark size={24} />
-              <h1 className="font-semibold text-lg">Favorit</h1>
-            </div>
-
-            {favorites.length === 0 ? (
-              <p className="text-gray-500 text-sm">
-                Belum ada properti favorit.
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
-                {favorites.map((item) => (
+          {jual.length === 0 ? (
+            <p className="text-gray-500 text-sm">
+              Belum ada properti yang dijual.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+              {jual
+                .filter((item) =>
+                  item.cluster_apart_name.toLowerCase().includes(searchjual.toLowerCase()) ||
+                  item.city.toLowerCase().includes(searchjual.toLowerCase())
+                )
+                .slice(0, 4)
+                .map((item) => (
                   <div
                     key={item.ref_id}
                     className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
                     onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
                   >
-                    <div className="w-full bg-gray-300 h-30" /> 
+                    <div className="w-full bg-gray-300 h-30" />
                     <div className="flex items-start justify-between p-3">
                       <div className="flex flex-col">
                         <h3 className="text-sm font-semibold text-gray-900">
@@ -403,7 +372,7 @@ export default function Profile(props) {
                         </p>
                       </div>
                       <div className="flex flex-col items-end">
-                        <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded">
+                        <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded max-w-[120px] truncate">
                           Rp{" "}
                           {new Intl.NumberFormat("id-ID").format(
                             item.property_price
@@ -414,6 +383,84 @@ export default function Profile(props) {
                     </div>
                   </div>
                 ))}
+            </div>
+          )}
+
+          {/* Bagian Favorit tetap sama */}
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-5 ml-2 lg:ml-0">
+              <div className="flex items-center gap-3">
+                <Bookmark size={24} />
+                <h1 className="font-semibold text-lg">Favorit</h1>
+              </div>
+
+              <div className="relative w-[300px]">
+                <input
+                  type="text"
+                  placeholder="Cari properti favorit..."
+                  className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {favorites.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                Belum ada properti favorit.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+                {favorites
+                  .filter((item) =>
+                    item.cluster_apart_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.city.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .slice(0, 4)
+                  .map((item) => (
+                    <div
+                      key={item.ref_id}
+                      className="rounded-xl shadow-md bg-white overflow-hidden cursor-pointer"
+                      onClick={() => navigate(`/detailrumah/${item.ref_id}`)}
+                    >
+                      <div className="w-full bg-gray-300 h-30" />
+                      <div className="flex items-start justify-between p-3">
+                        <div className="flex flex-col">
+                          <h3 className="text-sm font-semibold text-gray-900">
+                            {item.cluster_apart_name}
+                          </h3>
+                          <p className="text-gray-700 text-sm">{item.city}</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            LT {item.square_land}m² | LB {item.square_building}m²
+                            | L{item.property_floor}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className="bg-yellow-400 text-gray-900 font-semibold text-xs px-2 py-1 rounded max-w-[120px] truncate">
+                            Rp{" "}
+                            {new Intl.NumberFormat("id-ID").format(
+                              item.property_price
+                            )}
+                          </span>
+                          <p className="text-xs text-gray-600 mt-1">Transaksi</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
