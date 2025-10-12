@@ -8,7 +8,7 @@ import { ArrowDownAZ, ArrowUpZA } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const API_FILTER =
-  "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=latest";
+  "https://smataco.my.id/dev/unez/CariRumahAja/routes/filter.php?mode=filter_properti";
 const IMAGE_BASE_URL =
   "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
