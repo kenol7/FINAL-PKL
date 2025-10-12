@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import Search from "../Components/Elements/Search";
 import Footer from "../Components/Elements/Footer";
@@ -83,14 +83,11 @@ export default function Beli() {
   const navigate = useNavigate();
   const location = useLocation();
   const [summaryData, setSummaryData] = useState({});
-
-  console.log(dataRumah);
-
   const [sortOrder, setSortOrder] = useState("asc");
 
   const handleDetail = (ref_id) => navigate("/detailrumah/" + ref_id);
 
-  // === FETCH DATA DARI API_FILTER (tanpa atau dengan parameter filter) ===
+  // ✅ FETCH DATA - hanya saat filter berubah (BUKAN saat sort berubah)
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const params = {
@@ -100,11 +97,11 @@ export default function Beli() {
       city: queryParams.get("city") || "",
       search: queryParams.get("search") || "",
     };
-    // const sortOrder = queryParams.get("sort_order") || "";
-    // const sortParam = queryParams.get("sort_order") || sortOrder;
-    // setLoading(true);
-    const sortParam = queryParams.get("sort_order") || "asc";
-    setSortOrder(sortParam); // sinkronkan state dari URL
+
+    // Ambil sort order dari URL untuk sinkronisasi state
+    const urlSortOrder = queryParams.get("sort_order") || "asc";
+    setSortOrder(urlSortOrder);
+    
     setLoading(true);
 
     axios
@@ -114,9 +111,8 @@ export default function Beli() {
         minHarga: params.minHarga,
         maxHarga: params.maxHarga,
         mode: "filter_properti",
-        // sort_order: sortOrder,
-        sort_order: sortParam,
         search: params.search,
+        // ❌ TIDAK kirim sort_order ke backend
       })
       .then((res) => {
         let data = [];
@@ -127,18 +123,12 @@ export default function Beli() {
           data = res.data;
         }
 
-        // ✅ simpan summary (Apartemen, Ruko/Rukan, Tanah & Bangunan)
+        // Simpan summary
         if (res.data && res.data.summary) {
           setSummaryData(res.data.summary);
         }
 
-        // ✅ urutkan sesuai sort order
-        if (sortParam === "asc") {
-          data.sort((a, b) => a.property_price - b.property_price);
-        } else if (sortParam === "desc") {
-          data.sort((a, b) => b.property_price - a.property_price);
-        }
-
+        // ❌ HAPUS sorting di sini - biar di client side aja
         setDataRumah(data);
       })
       .catch((err) => {
@@ -146,37 +136,33 @@ export default function Beli() {
         setDataRumah([]);
       })
       .finally(() => setLoading(false));
-  }, [location.search, sortOrder]);
+  }, [
+    // ✅ Dependency yang TIDAK termasuk sort_order
+    new URLSearchParams(location.search).get("minHarga"),
+    new URLSearchParams(location.search).get("maxHarga"),
+    new URLSearchParams(location.search).get("province"),
+    new URLSearchParams(location.search).get("city"),
+    new URLSearchParams(location.search).get("search"),
+  ]);
 
-  //       if (Array.isArray(res.data)) data = res.data;
-  //       else if (res.data.data && Array.isArray(res.data.data))
-  //         data = res.data.data;
-  //       // if (sortOrder === "asc") {
-  //       //   data.sort((a, b) => a.property_price - b.property_price);
-  //       // } else if (sortOrder === "desc") {
-  //       //   data.sort((a, b) => b.property_price - a.property_price);
-  //       // }
-  //       if (sortParam === "asc") {
-  //         data.sort((a, b) => a.property_price - b.property_price);
-  //       } else if (sortParam === "desc") {
-  //         data.sort((a, b) => b.property_price - a.property_price);
-  //       }
+  // ✅ SORTING CLIENT-SIDE menggunakan useMemo
+  const sortedData = useMemo(() => {
+    const data = [...dataRumah]; // copy array agar tidak mutasi original
+    
+    if (sortOrder === "asc") {
+      return data.sort((a, b) => a.property_price - b.property_price);
+    } else if (sortOrder === "desc") {
+      return data.sort((a, b) => b.property_price - a.property_price);
+    }
+    
+    return data;
+  }, [dataRumah, sortOrder]);
 
-  //       setDataRumah(data);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Gagal fetch data:", err);
-  //       setDataRumah([]);
-  //     })
-  //     .finally(() => setLoading(false));
-  //   // }, [location.search]);
-  // }, [location.search, sortOrder]);
-
-  // Pagination
-  const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
+  // ✅ Pagination menggunakan sortedData (bukan dataRumah)
+  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentData = dataRumah.slice(indexOfFirst, indexOfLast);
+  const currentData = sortedData.slice(indexOfFirst, indexOfLast);
 
   const renderPaginationButtons = () =>
     Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -213,6 +199,20 @@ export default function Beli() {
         );
       });
 
+  // ✅ Handle Sort - TANPA fetching ulang
+  const handleSortToggle = () => {
+    const newOrder = sortOrder === "asc" ? "desc" : "asc";
+    setSortOrder(newOrder);
+    
+    // Update URL
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.set("sort_order", newOrder);
+    navigate(`?${queryParams.toString()}`, { replace: true });
+    
+    // Reset ke halaman pertama
+    setCurrentPage(1);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -242,13 +242,7 @@ export default function Beli() {
           </a>
         </div>
         <button
-          onClick={() => {
-            const newOrder = sortOrder === "asc" ? "desc" : "asc";
-            setSortOrder(newOrder);
-            const queryParams = new URLSearchParams(location.search);
-            queryParams.set("sort_order", newOrder);
-            navigate(`?${queryParams.toString()}`);
-          }}
+          onClick={handleSortToggle}
           className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-md shadow-sm hover:bg-gray-100 transition-all duration-200"
         >
           {sortOrder === "asc" ? (
