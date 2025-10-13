@@ -412,14 +412,14 @@ const JualRumah = () => {
                         <div className="flex flex-col gap-4">
                             <h3 className="font-bold">Peta Lokasi</h3>
                             <div className="w-full h-40 bg-white rounded-lg"></div>
-                            <div className="flex flex-col gap-2">
+                            {/* <div className="flex flex-col gap-2">
                                 <label className="text-sm">Latitude</label>
                                 <input type="text" className="w-full p-2 rounded bg-white text-black" placeholder="Contoh: -6.2088" />
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm">Longitude</label>
                                 <input type="text" className="w-full p-2 rounded bg-white text-black" placeholder="Contoh: 106.8456" />
-                            </div>
+                            </div> */}
                         </div>
                     </div>
 

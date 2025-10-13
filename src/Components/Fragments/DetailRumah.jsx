@@ -129,31 +129,31 @@ const DetailRumah = () => {
 
             const result = await res.json();
 
-            if (!res.ok || result.status === "error") {
-                if (result.message && result.message.includes("sudah ada")) {
-                    const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-                    if (!currentFavorites.some(item => item.ref_id === detail.ref_id)) {
-                        localStorage.setItem(
-                            "favorites",
-                            JSON.stringify([...currentFavorites, detail])
-                        );
-                        window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
-                    }
-                    showToast("Properti sudah ada di bookmark.", "success");
-                    return;
-                }
-                throw new Error(result.message || "Gagal memperbarui favorit");
-            }
+            // if (!res.ok || result.status === "error") {
+            //     if (result.message && result.message.includes("sudah ada")) {
+            //         const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+            //         if (!currentFavorites.some(item => item.ref_id === detail.ref_id)) {
+            //             localStorage.setItem(
+            //                 "favorites",
+            //                 JSON.stringify([...currentFavorites, detail])
+            //             );
+            //             window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
+            //         }
+            //         showToast("Properti sudah ada di bookmark.", "success");
+            //         return;
+            //     }
+            //     throw new Error(result.message || "Gagal memperbarui favorit");
+            // }
 
-            const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-            if (newFavoritStatus) {
-                localStorage.setItem("favorites", JSON.stringify([...currentFavorites, detail]));
-            } else {
-                const updated = currentFavorites.filter(item => item.ref_id !== detail.ref_id);
-                localStorage.setItem("favorites", JSON.stringify(updated));
-            }
+            // const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+            // if (newFavoritStatus) {
+            //     localStorage.setItem("favorites", JSON.stringify([...currentFavorites, detail]));
+            // } else {
+            //     const updated = currentFavorites.filter(item => item.ref_id !== detail.ref_id);
+            //     localStorage.setItem("favorites", JSON.stringify(updated));
+            // }
 
-            window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
+            // window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
 
             showToast(
                 newFavoritStatus

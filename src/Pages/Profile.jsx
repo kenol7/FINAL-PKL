@@ -8,6 +8,7 @@ import { Bookmark } from "lucide-react";
 import { HalamanUbahProfile, HalamanKSB } from "../Pages/HalamanUtama";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../Config/Endpoint";
 export default function Profile(props) {
   const [profile, setProfile] = useState({
     nama: "",
@@ -65,12 +66,13 @@ export default function Profile(props) {
       });
 
       const fileSizeInMB = file.size / (1024 * 1024);
+      console.log(fileSizeInMB)
       if (fileSizeInMB > 2) {
-        setImageError("File size exceeds 2MB. Please select a smaller file.");
+        alert("File size exceeds 2MB. Please select a smaller file.");
         setSelectedImage(null);
         setImageFile(null);
       } else {
-        setImageError("");
+        alert("");
         setSelectedImage(URL.createObjectURL(cleanedFile));
         setImageFile(cleanedFile);
       }
@@ -78,8 +80,13 @@ export default function Profile(props) {
   };
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("favorites") || "[]");
-    setFavorites(saved);
+    console.log(API.endpointBookmark)
+    fetch(API.endpointBookmark + '?mode=get&email=' + localStorage.getItem('auth_email'))
+    .then (res => res.json())
+    .then (response => {
+      setFavorites(response)
+    })
+    .catch(error => console.log(error))
   }, []);
 
   const handleEditClick = () => {
@@ -386,7 +393,6 @@ export default function Profile(props) {
             </div>
           )}
 
-          {/* Bagian Favorit tetap sama */}
           <div className="w-full">
             <div className="flex items-center justify-between mb-5 ml-2 lg:ml-0">
               <div className="flex items-center gap-3">
