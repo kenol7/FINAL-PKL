@@ -46,12 +46,10 @@ export default function Profile(props) {
     if (!phone) return "";
     const cleanPhone = phone.toString().trim();
 
-    // Jika panjang nomor kurang dari 5, langsung return bintang semua
     if (cleanPhone.length <= 5) {
       return "*".repeat(cleanPhone.length);
     }
 
-    // Potong 5 digit terakhir dan ganti dengan *
     const visiblePart = cleanPhone.slice(0, -8);
     return visiblePart + "********";
   };

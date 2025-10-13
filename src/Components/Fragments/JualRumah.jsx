@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import EXIF from 'exif-js';
+import PetaDragable from "./PetaDragable";
 
 const ToastAlert = ({ message, type, isVisible, onClose }) => {
     useEffect(() => {
@@ -40,11 +42,17 @@ const JualRumah = () => {
         setToast({ message, type, visible: true });
     };
 
+    const [mapPosition, setMapPosition] = useState({ lat: -6.2088, lng: 106.8456 });
+    const [isDraggable, setIsDraggable] = useState(false);
+
     const hideToast = () => {
         setToast((prev) => ({ ...prev, visible: false }));
     };
 
     const [showArrowUp, setShowArrowUp] = useState({});
+
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [activeIndex, setActiveIndex] = useState(0);
 
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
@@ -264,9 +272,25 @@ const JualRumah = () => {
         toggleArrow("Kelurahan");
     };
 
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        console.log("Uploaded files:", files);
+    const handleFileChange = async (e) => {
+        const files = Array.from(e.target.files).slice(0, 5);
+        setUploadedFiles(files);
+        if (files.length > 0) {
+            setActiveIndex(0);
+
+            // Coba baca metadata dari gambar pertama
+            try {
+                const coords = await readImageMetadata(files[0]);
+                setMapPosition(coords);
+                setIsDraggable(false); // Jika berhasil baca, marker tidak bisa di-drag
+                showToast("Koordinat berhasil dibaca dari gambar.", "success");
+            } catch (error) {
+                console.warn("Gagal baca metadata:", error.message);
+                // Jika gagal, biarkan marker bisa di-drag
+                setIsDraggable(true);
+                showToast("Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.", "info");
+            }
+        }
     };
 
     const handleNumericInput = (e, setter) => {
@@ -274,6 +298,56 @@ const JualRumah = () => {
         if (/^\d*$/.test(value)) {
             setter(value);
         }
+    };
+
+    // Fungsi untuk membaca metadata EXIF dari gambar
+    const readImageMetadata = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        EXIF.getData(img, function () {
+                            const lat = EXIF.getTag(this, "GPSLatitude");
+                            const lng = EXIF.getTag(this, "GPSLongitude");
+                            const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+                            const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+
+                            if (lat && lng && latRef && lngRef) {
+                                const decimalLat = convertDMSToDD(lat, latRef);
+                                const decimalLng = convertDMSToDD(lng, lngRef);
+                                resolve({ lat: decimalLat, lng: decimalLng });
+                            } else {
+                                reject(new Error("Tidak ada data GPS di gambar."));
+                            }
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                img.onerror = () => reject(new Error("Gagal memuat gambar."));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(new Error("Gagal membaca file."));
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const convertDMSToDD = (dms, ref) => {
+        if (!dms || !ref) return null;
+
+        const degrees = dms[0];
+        const minutes = dms[1];
+        const seconds = dms[2];
+
+        let dd = degrees + minutes / 60 + seconds / 3600;
+
+        if (ref === "S" || ref === "W") {
+            dd = dd * -1;
+        }
+
+        return dd;
     };
 
     const handlePhoneChange = (e) => {
@@ -390,36 +464,65 @@ const JualRumah = () => {
                     {/* Sidebar */}
                     <div className="w-full lg:w-[300px] bg-blue-500 text-white p-6 rounded-xl flex flex-col gap-6 font-jakarta">
                         <div className="flex flex-col items-center gap-4">
-                            <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.632l2.724 2.724a2 2 0 012.828 0L16 11.832V19a2 2 0 01-2 2H8a2 2 0 01-2-2v-7.168l-2.724-2.724A2 2 0 013 9z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
+                            <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                {uploadedFiles.length > 0 ? (
+                                    <img
+                                        src={URL.createObjectURL(uploadedFiles[activeIndex])}
+                                        alt={`Preview ${activeIndex + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                )}
                             </div>
-                            <label className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md cursor-pointer transition text-center">
-                                Upload Gambar
+
+                            {/* Thumbnail navigator */}
+                            {uploadedFiles.length > 1 && (
+                                <div className="flex gap-1">
+                                    {uploadedFiles.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveIndex(idx)}
+                                            className={`w-6 h-6 rounded border ${activeIndex === idx ? 'border-yellow-400 bg-yellow-100' : 'border-gray-400'}`}
+                                        >
+                                            <img
+                                                src={URL.createObjectURL(_)}
+                                                alt=""
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Upload button */}
+                            <label className="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md cursor-pointer transition text-center text-white">
+                                {uploadedFiles.length > 0 ? "Ganti Gambar" : "Upload Gambar"}
                                 <input
                                     type="file"
                                     multiple
                                     accept="image/*"
                                     onChange={handleFileChange}
                                     className="hidden"
+                                    max="5"
                                 />
                             </label>
-                            <p className="text-xs text-center">*Pastikan gambar di bawah 2MB, maksimal 5 foto</p>
+                            <p className="text-xs text-center text-white"> *Maksimal 5 foto, ukuran 2MB per file </p>
                         </div>
 
                         <div className="flex flex-col gap-4">
                             <h3 className="font-bold">Peta Lokasi</h3>
-                            <div className="w-full h-40 bg-white rounded-lg"></div>
-                            {/* <div className="flex flex-col gap-2">
-                                <label className="text-sm">Latitude</label>
-                                <input type="text" className="w-full p-2 rounded bg-white text-black" placeholder="Contoh: -6.2088" />
+                            <div className="flex flex-col gap-4">
+                                <PetaDragable
+                                    initialPosition={mapPosition}
+                                    onPositionChange={setMapPosition}
+                                    zoom={16}
+                                    height="240px"
+                                    isDraggable={isDraggable}
+                                />
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm">Longitude</label>
-                                <input type="text" className="w-full p-2 rounded bg-white text-black" placeholder="Contoh: 106.8456" />
-                            </div> */}
                         </div>
                     </div>
 

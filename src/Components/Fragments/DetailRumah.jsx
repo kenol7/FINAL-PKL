@@ -76,22 +76,33 @@ const DetailRumah = () => {
         }
     };
 
-    // 🔁 Cek status favorit dari localStorage
-    const updateFavoritStatus = () => {
+    const fetchFavoriteStatus = async () => {
         if (!detail?.ref_id) return;
-        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-        const isBookmarked = favorites.some(item => item.ref_id === detail.ref_id);
-        setFavorit(isBookmarked);
+
+        const email = localStorage.getItem("auth_email");
+        if (!email) {
+            setFavorit(false);
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API.endpointBookmark}?mode=get&email=${encodeURIComponent(email)}`);
+            const response = await res.json();
+            const isBookmarked = Array.isArray(response) && response.some(item => item.ref_id === detail.ref_id);
+            setFavorit(isBookmarked);
+        } catch (error) {
+            console.error("Gagal memeriksa status favorit:", error);
+            setFavorit(false);
+        }
     };
 
-    // 📡 Dengarkan custom event saat localStorage berubah
     useEffect(() => {
         const handleFavoritesUpdated = () => {
-            updateFavoritStatus();
+            fetchFavoriteStatus();
         };
 
         window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
-        updateFavoritStatus(); // Cek saat mount
+        fetchFavoriteStatus();
 
         return () => {
             window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
@@ -99,73 +110,52 @@ const DetailRumah = () => {
     }, [detail?.ref_id]);
 
     const toggleFavorit = async () => {
-        if (!detail?.ref_id) {
-            console.warn("ref_id tidak tersedia");
-            return;
-        }
+        const toggleFavorit = async () => {
+            if (!detail?.ref_id) {
+                console.warn("ref_id tidak tersedia");
+                return;
+            }
 
-        const email = localStorage.getItem("auth_email");
-        if (!email || !email.trim()) {
-            showToast("Anda harus login terlebih dahulu.", "error");
-            return;
-        }
+            const email = localStorage.getItem("auth_email");
+            if (!email || !email.trim()) {
+                showToast("Anda harus login terlebih dahulu.", "error");
+                return;
+            }
 
-        const newFavoritStatus = !favorit;
-        setFavorit(newFavoritStatus);
+            const newFavoritStatus = !favorit;
+            setFavorit(newFavoritStatus); // optimistic UI update
 
-        const mode = newFavoritStatus ? "add" : "delete";
-        const payload = {
-            mode,
-            email: email.trim(),
-            ref_id: detail.ref_id,
+            const mode = newFavoritStatus ? "add" : "delete";
+            const payload = {
+                mode,
+                email: email.trim(),
+                ref_id: detail.ref_id,
+            };
+
+            try {
+                const res = await fetch(apibook, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await res.json();
+
+                showToast(
+                    newFavoritStatus
+                        ? "Properti berhasil ditambahkan ke favorit."
+                        : "Properti berhasil dihapus dari favorit."
+                );
+
+                // Opsional: refresh status dari server untuk pastikan sinkron
+                // fetchFavoriteStatus(); // Anda bisa uncomment ini jika ingin ekstra aman
+
+            } catch (error) {
+                console.error("Error toggle favorit:", error);
+                setFavorit(!newFavoritStatus); // rollback UI
+                showToast(error.message, "error");
+            }
         };
-
-        try {
-            const res = await fetch(apibook, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-
-            const result = await res.json();
-
-            // if (!res.ok || result.status === "error") {
-            //     if (result.message && result.message.includes("sudah ada")) {
-            //         const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-            //         if (!currentFavorites.some(item => item.ref_id === detail.ref_id)) {
-            //             localStorage.setItem(
-            //                 "favorites",
-            //                 JSON.stringify([...currentFavorites, detail])
-            //             );
-            //             window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
-            //         }
-            //         showToast("Properti sudah ada di bookmark.", "success");
-            //         return;
-            //     }
-            //     throw new Error(result.message || "Gagal memperbarui favorit");
-            // }
-
-            // const currentFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-            // if (newFavoritStatus) {
-            //     localStorage.setItem("favorites", JSON.stringify([...currentFavorites, detail]));
-            // } else {
-            //     const updated = currentFavorites.filter(item => item.ref_id !== detail.ref_id);
-            //     localStorage.setItem("favorites", JSON.stringify(updated));
-            // }
-
-            // window.dispatchEvent(new Event("favoritesUpdated")); // 🔔
-
-            showToast(
-                newFavoritStatus
-                    ? "Properti berhasil ditambahkan ke favorit."
-                    : "Properti berhasil dihapus dari favorit."
-            );
-
-        } catch (error) {
-            console.error("Error toggle favorit:", error);
-            setFavorit(!newFavoritStatus);
-            showToast(error.message, "error");
-        }
     };
 
     const GetContributionImage = async (refid) => {
