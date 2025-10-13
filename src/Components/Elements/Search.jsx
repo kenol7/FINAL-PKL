@@ -26,13 +26,11 @@ export default function Search() {
     const qMax = queryParams.get("maxHarga") || "";
     const qProv = queryParams.get("province") || "Provinsi";
     const qCity = queryParams.get("city") || "Kota";
-    const qSort = queryParams.get("sort_order") || "asc"; // ✅ Tambahkan ini
 
     setMinPrice(qMin);
     setMaxPrice(qMax);
     setSelectedProvince(qProv);
     setSelectedCity(qCity);
-    setSortOrder(qSort); // ✅ Set sort order dari URL
   }, [location.search]);
 
   // Fetch provinsi
@@ -178,6 +176,7 @@ export default function Search() {
                   Harga Minimal
                 </label>
                 <div className="mt-2 flex items-center rounded-md bg-gray-100 pl-3 border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-500">
+                  <div className="shrink-0 text-base text-gray-600 select-none"></div>
                   <input
                     type="text"
                     placeholder="0"
@@ -197,6 +196,7 @@ export default function Search() {
                   Harga Maksimal
                 </label>
                 <div className="mt-2 flex items-center rounded-md bg-gray-100 pl-3 border border-gray-300 focus-within:ring-2 focus-within:ring-indigo-500">
+                  <div className="shrink-0 text-base text-gray-600 select-none"></div>
                   <input
                     type="text"
                     placeholder="0"
@@ -304,8 +304,8 @@ export default function Search() {
                 )}
               </div>
 
-              {/* ✅ SORT ORDER SUDAH ADA - tidak perlu diubah */}
-              <div className="mb-4">
+              {/* SORT ORDER SUDAH ADA - tidak perlu diubah */}
+              {/* <div className="mb-4">
                 <p className="text-gray-700 mb-2 font-medium">Urutkan Harga:</p>
                 <div className="flex gap-2">
                   <button
@@ -329,7 +329,7 @@ export default function Search() {
                     Termahal ⬇️
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Tombol Terapkan Filter */}
               <button

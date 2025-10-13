@@ -9,17 +9,21 @@ import { useNavigate } from "react-router-dom";
 
 export default function KprPage() {
   const [dataRumah, setDataRumah] = useState([]);
+  const [hasilKPR, setHasilKPR] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [itemsPerPage, setItemsPerPage] = useState(9);
-
+  const [hasilSimulasi, setHasilSimulasi] = useState(null);
+  const [loadingSimulasi, setLoadingSimulasi] = useState(false);
 
   const navigate = useNavigate();
   const handledetail = (ref_id) => {
-    navigate('/detailrumah/' + ref_id)
-  }
+    navigate("/detailrumah/" + ref_id);
+  };
   const endPoint =
-    "https://smataco.my.id/dev/unez/CariRumahAja/api/contribution.php?mode=latest";
+    "https://smataco.my.id/dev/unez/CariRumahAja/api/contribution.php?";
+  const endPointFilter =
+    "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?";
   const endpointImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
@@ -46,6 +50,46 @@ export default function KprPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleHitungKPR = async ({ dp, tenor }) => {
+    const params = {
+      mode: "hitung_kpr",
+      dp,
+      tenor,
+    };
+    try {
+      setLoading(true);
+      const res = await axios.get(endPointFilter, { params });
+      console.log("Hasil KPR:", res.data);
+      setDataRumah(res.data);
+    } catch (err) {
+      console.error("Gagal hitung KPR:", err);
+      alert("Terjadi kesalahan saat menghitung KPR!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitSimulasi = async ({ dp, tenor, gaji }) => {
+    const params = {
+      mode: "simulasi_kemampuan",
+      dp,
+      tenor,
+      gaji,
+    };
+    try {
+      setLoadingSimulasi(true);
+      const res = await axios.get(endPointFilter, { params });
+      setHasilSimulasi(res.data.simulasi);
+      console.log("Hasil Simulasi:", res.data.rekomendasi);
+      setDataRumah(res.data.rekomendasi);
+    } catch (err) {
+      console.error("Gagal simulasi:", err);
+      alert("Gagal menghitung simulasi KPR");
+    } finally {
+      setLoadingSimulasi(false);
+    }
+  };
+
   const totalPages = Math.ceil(dataRumah.length / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
@@ -71,9 +115,42 @@ export default function KprPage() {
       <Navbar />
 
       <div className="flex flex-1">
-        <Sidebar />
+        <Sidebar
+          onHitungKPR={handleHitungKPR}
+          onSimulasiKPR={handleSubmitSimulasi}
+          loadingSimulasi={loadingSimulasi}
+        />
 
         <main className="flex-1 p-6 bg-white">
+          <div className="gap-3 flex flex-wrap justify-center mb-10">
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Gaji Bulanan:
+              <span className="font-semibold ml-2">
+                {hasilSimulasi ? hasilSimulasi.gaji_bulanan : "0"}
+              </span>
+            </a>
+
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Maks Cicilan:
+              <span className="font-semibold ml-2">
+                {hasilSimulasi ? hasilSimulasi.maks_cicilan : "0"}
+              </span>
+            </a>
+
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              Estimasi Harga Rumah:
+              <span className="font-semibold ml-2">
+                {hasilSimulasi ? hasilSimulasi.estimasi_harga_rumah : "0"}
+              </span>
+            </a>
+
+            <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+              DP Nominal:
+              <span className="font-semibold ml-2">
+                {hasilSimulasi ? hasilSimulasi.dp_nominal : "0"}
+              </span>
+            </a>
+          </div>
           {/* Loading shimmer */}
           {loading ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -84,14 +161,15 @@ export default function KprPage() {
           ) : currentData.length === 0 ? (
             <div className="text-center text-gray-500">Tidak ada data</div>
           ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 overflow-y-auto"
-              style={{ maxHeight: "calc(105vh - 200px)" }}>
+            <div
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 overflow-y-auto"
+              style={{ maxHeight: "calc(105vh - 200px)" }}
+            >
               {currentData.map((item, i) => (
                 <div
                   key={i}
                   className="w-full overflow-hidden bg-white rounded-lg shadow-md shadow-black/30"
-                  
-                  onClick={() => handledetail (item.ref_id)}
+                  onClick={() => handledetail(item.ref_id)}
                 >
                   <div className="rounded-xl overflow-hidden relative">
                     {/* Image */}
@@ -106,7 +184,7 @@ export default function KprPage() {
                         className="object-cover w-full h-full"
                         loading="lazy"
                       />
-                      
+
                       {/* <img
                           // src={endpointImage + item.image}
                           src={endpointImage}
@@ -140,7 +218,7 @@ export default function KprPage() {
                           Rp{" "}
                           {item.property_price
                             ? new Intl.NumberFormat("id-ID").format(
-                                item.property_price.slice(0, -2)
+                                item.property_price
                               )
                             : "N/A"}
                         </span>
