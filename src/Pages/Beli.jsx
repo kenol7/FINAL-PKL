@@ -87,7 +87,7 @@ export default function Beli() {
 
   const handleDetail = (ref_id) => navigate("/detailrumah/" + ref_id);
 
-  // ✅ FETCH DATA - hanya saat filter berubah (BUKAN saat sort berubah)
+  // FETCH DATA - hanya saat filter berubah (BUKAN saat sort berubah)
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const params = {
@@ -98,7 +98,6 @@ export default function Beli() {
       search: queryParams.get("search") || "",
     };
 
-    // Ambil sort order dari URL untuk sinkronisasi state
     const urlSortOrder = queryParams.get("sort_order") || "asc";
     setSortOrder(urlSortOrder);
     
@@ -112,7 +111,7 @@ export default function Beli() {
         maxHarga: params.maxHarga,
         mode: "filter_properti",
         search: params.search,
-        // ❌ TIDAK kirim sort_order ke backend
+        //  TIDAK kirim sort_order ke backend nonono
       })
       .then((res) => {
         let data = [];
@@ -128,7 +127,7 @@ export default function Beli() {
           setSummaryData(res.data.summary);
         }
 
-        // ❌ HAPUS sorting di sini - biar di client side aja
+        //HAPUS sorting di sini - biar di client side aja
         setDataRumah(data);
       })
       .catch((err) => {
@@ -137,7 +136,6 @@ export default function Beli() {
       })
       .finally(() => setLoading(false));
   }, [
-    // ✅ Dependency yang TIDAK termasuk sort_order
     new URLSearchParams(location.search).get("minHarga"),
     new URLSearchParams(location.search).get("maxHarga"),
     new URLSearchParams(location.search).get("province"),
@@ -145,7 +143,7 @@ export default function Beli() {
     new URLSearchParams(location.search).get("search"),
   ]);
 
-  // ✅ SORTING CLIENT-SIDE menggunakan useMemo
+  //
   const sortedData = useMemo(() => {
     const data = [...dataRumah]; // copy array agar tidak mutasi original
     
@@ -158,7 +156,6 @@ export default function Beli() {
     return data;
   }, [dataRumah, sortOrder]);
 
-  // ✅ Pagination menggunakan sortedData (bukan dataRumah)
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
@@ -199,17 +196,14 @@ export default function Beli() {
         );
       });
 
-  // ✅ Handle Sort - TANPA fetching ulang
   const handleSortToggle = () => {
     const newOrder = sortOrder === "asc" ? "desc" : "asc";
     setSortOrder(newOrder);
     
-    // Update URL
     const queryParams = new URLSearchParams(location.search);
     queryParams.set("sort_order", newOrder);
     navigate(`?${queryParams.toString()}`, { replace: true });
     
-    // Reset ke halaman pertama
     setCurrentPage(1);
   };
 
