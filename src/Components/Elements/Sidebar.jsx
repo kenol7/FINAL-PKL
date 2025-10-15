@@ -1,22 +1,152 @@
-import React, { useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import MenuIcon from "../../assets/menu.png";
 import CloseIcon from "../../assets/close.png";
+import introJs from "intro.js";
+import "intro.js/introjs.css";
 
-export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
+export default function Sidebar({ onHitungKPR, onSimulasiKPR }) {
   const [open, setOpen] = useState(false); // sidebar mobile
-  const [showFormHitung, setShowFormHitung] = useState(false); // toggle Hitung KPR
-  const [showFormSimulasi, setShowFormSimulasi] = useState(false); // toggle Simulasi KPR
+  const [showFormHitung, setShowFormHitung] = useState(false);
+  const [showFormSimulasi, setShowFormSimulasi] = useState(false);
 
   const [dp, setDp] = useState("");
   const [tenor, setTenor] = useState("");
   const [gaji, setGaji] = useState("");
 
+  const hasRunIntro = useRef(false);
+
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("hasSeenIntroSimulasiKPR");
+    if (hasSeenIntro || hasRunIntro.current) return;
+
+    const isMobile = window.innerWidth < 768;
+    const btnSelector = isMobile
+      ? "#btn-simulasi-kpr-mobile"
+      : "#btn-simulasi-kpr-desktop";
+    const formSelector = isMobile
+      ? "#form-simulasi-kpr-mobile"
+      : "#form-simulasi-kpr-desktop";
+    const inputSelectors = isMobile
+      ? [
+          "#input-penghasilan-mobile",
+          "#input-kesanggupan-mobile",
+          "#input-tenor-mobile",
+        ]
+      : [
+          "#input-penghasilan-desktop",
+          "#input-kesanggupan-desktop",
+          "#input-tenor-desktop",
+        ];
+    const submitSelector = isMobile
+      ? "#btn-submit-mobile"
+      : "#btn-submit-desktop";
+
+    const waitForElement = (selector, timeout = 4000) =>
+      new Promise((resolve) => {
+        const start = Date.now();
+        const check = () => {
+          const el = document.querySelector(selector);
+          if (el) return resolve(el);
+          if (Date.now() - start > timeout) return resolve(null);
+          setTimeout(check, 100);
+        };
+        check();
+      });
+
+    const startIntroSteps = (steps) => {
+      const intro = introJs();
+      intro.setOptions({
+        steps,
+        disableInteraction: false,
+        nextLabel: "Lanjut →",
+        prevLabel: "← Kembali",
+        doneLabel: "Selesai",
+        showStepNumbers: false,
+        scrollToElement: true,
+        exitOnOverlayClick: false,
+      });
+
+      const finish = () =>
+        localStorage.setItem("hasSeenIntroSimulasiKPR", "true");
+      intro.oncomplete(finish);
+      intro.onexit(finish);
+      intro.start();
+
+      return intro;
+    };
+
+    const runIntro = async () => {
+      const intro = startIntroSteps([
+        {
+          element: btnSelector,
+          intro: "💰 Klik tombol ini untuk membuka form Simulasi KPR.",
+          position: "bottom",
+        },
+      ]);
+
+      intro.onchange(async (targetElement) => {
+        if (
+          targetElement &&
+          targetElement.matches &&
+          targetElement.matches(btnSelector)
+        ) {
+          // klik tombol untuk buka form
+          try {
+            targetElement.click();
+          } catch (_) {}
+
+          // tunggu form muncul
+          const formEl = await waitForElement(formSelector, 5000);
+          if (!formEl) return;
+
+          await new Promise((r) => setTimeout(r, 300)); // tunggu render
+
+          // kumpulkan input yang tersedia
+          const validInputSteps = inputSelectors
+            .map((sel, idx) => {
+              const el = document.querySelector(sel);
+              if (!el) return null;
+              const label =
+                el.placeholder ||
+                el.name ||
+                (el.labels?.[0]?.innerText ?? `Input ${idx + 1}`);
+              return {
+                element: sel,
+                intro: `📋 Isi kolom <b>${label}</b> sesuai data kamu.`,
+                position: "bottom",
+              };
+            })
+            .filter(Boolean);
+
+          // restart intro dengan langkah lengkap
+          const allSteps = [
+            ...validInputSteps,
+            {
+              element: submitSelector,
+              intro:
+                "✅ Setelah semua terisi, klik tombol <b>Hitung</b> untuk melihat hasil simulasi KPR kamu.",
+              position: "bottom",
+            },
+          ];
+
+          intro.exit(); // tutup intro pertama
+          setTimeout(() => startIntroSteps(allSteps), 300); // mulai intro baru
+        }
+      });
+    };
+
+    const timer = setTimeout(runIntro, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  //  Handler Hitung KPR 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!dp || !tenor) {
       alert("Semua field wajib diisi!");
       return;
     }
+
     if (typeof onHitungKPR === "function") {
       onHitungKPR({ dp, tenor, mode: "hitung_kpr" });
       setShowFormHitung(false);
@@ -27,14 +157,16 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
     }
   };
 
+  //  Handler Simulasi KPR 
   const handleSubmitSimulasi = (e) => {
     e.preventDefault();
-    if (!gaji || !tenor || !dp) {
+    if (!dp || !tenor || !gaji) {
       alert("Semua field wajib diisi!");
       return;
     }
+
     if (typeof onSimulasiKPR === "function") {
-      onSimulasiKPR({ gaji, tenor, dp, mode: "simulasi_kemampuan" });
+      onSimulasiKPR({ dp, tenor, gaji, mode: "simulasi_kpr" });
       setShowFormSimulasi(false);
     } else {
       console.warn(
@@ -43,7 +175,8 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
     }
   };
 
-  const formatUang = (value) => {
+  //  Format Rupiah 
+  const formatRupiah = (value) => {
     if (!value) return "";
     const numberString = value.toString().replace(/\D/g, "");
     const number = parseInt(numberString, 10);
@@ -51,7 +184,7 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
     return new Intl.NumberFormat("id-ID").format(number);
   };
 
-  const unformatUang = (value) => value.replace(/\D/g, "");
+  const unformatRupiah = (value) => value.replace(/\D/g, "");
 
   return (
     <>
@@ -63,7 +196,7 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
         </p>
         <div className="flex flex-col items-center justify-center h-full w-full gap-y-5">
           {/* /* Bagian atas (Hitung KPR) */}
-          <div className="flex flex-col items-center w-full">
+          {/* <div className="flex flex-col items-center w-full">
             <button
               onClick={() => {
                 setShowFormHitung(!showFormHitung);
@@ -79,24 +212,18 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                 <div className="bg-green-200 py-3 text-center">
                   <h2 className="text-xl font-bold text-black">Hitung KPR</h2>
                 </div>
-                <form className="p-4 space-y-3 " onSubmit={handleSubmit}>
-                  {/* <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
-                      Harga Properti
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div> */}
+                <form className="p-4 space-y-3" onSubmit={handleSubmit}>
                   <div>
                     <label className="block text-gray-700 text-sm font-medium mb-1">
                       Uang Muka (DP)
                     </label>
                     <input
                       type="text"
-                      value={dp ? `Rp ${formatUang(dp)}` : ""}
-                      onChange={(e) => setDp(unformatUang(e.target.value))}
+                      value={dp ? `Rp ${formatRupiah(dp)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setDp(rawValue);
+                      }}
                       className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -108,7 +235,9 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                       <input
                         type="number"
                         value={tenor}
-                        onChange={(e) => setTenor(e.target.value)}
+                        onChange={(e) => {
+                          setTenor(e.target.value);
+                        }}
                         className="flex-1 px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
                       <span className=" text-gray-700 text-sm">Tahun</span>
@@ -120,9 +249,10 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                     </label>
                     <input
                       type="text"
-                      placeholder="Referensi Bank BRI : 2.99%"
+                      placeholder="Refrensi Bank BRI : 2.99%"
                       className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
                       readOnly
+                      disabled
                     />
                   </div>
                   <button
@@ -134,11 +264,12 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                 </form>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Bagian bawah (Simulasi KPR) */}
           <div className="flex flex-col items-center w-full">
             <button
+              id="btn-simulasi-kpr-desktop"
               onClick={() => {
                 setShowFormSimulasi(!showFormSimulasi);
                 setShowFormHitung(false);
@@ -153,29 +284,36 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                 <div className="bg-green-200 py-3 text-center">
                   <h2 className="text-xl font-bold text-black">Simulasi KPR</h2>
                 </div>
-                <form className="p-4 space-y-4" onSubmit={handleSubmitSimulasi}>
+                <form
+                  id="form-simulasi-kpr-desktop"
+                  className="p-4 space-y-4"
+                  onSubmit={handleSubmitSimulasi}
+                >
                   {/* Penghasilan Bulanan */}
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                    <label
+                      htmlFor="input-penghasilan-desktop"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
                       Penghasilan Bulanan
                     </label>
-                    <input
-                      type="text"
-                      value={gaji ? `Rp ${formatUang(gaji)}` : ""}
-                      onChange={(e) => setGaji(unformatUang(e.target.value))}
-                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    />
                     <p className="text-xs text-gray-500 mb-1">
                       *Masukkan total penghasilan menyeluruh
                     </p>
-                    {/* <input
-                      type="number"
+                    <input
+                      id="input-penghasilan-desktop"
+                      type="text"
+                      value={gaji ? `Rp ${formatRupiah(gaji)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setGaji(rawValue);
+                      }}
                       className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    /> */}
+                    />
                   </div>
 
                   {/* Cicilan Aktif */}
-                  <div>
+                  {/* <div>
                     <label className="block text-gray-700 text-sm font-medium mb-1">
                       Cicilan Bulanan Aktif
                     </label>
@@ -186,25 +324,67 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
                     <input
                       type="number"
                       value={tenor}
-                      onChange={(e) => setTenor(e.target.value)}
+                      onChange={(e) => {
+                        setTenor(e.target.value);
+                      }}
                       className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Kesanggupan Uang Muka */}
                   <div>
-                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                    <label
+                      htmlFor="input-kesanggupan-desktop"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
                       Kesanggupan Uang Muka
                     </label>
                     <input
+                      id="input-kesanggupan-desktop"
                       type="text"
-                      value={dp ? `Rp ${formatUang(dp)}` : ""}
-                      onChange={(e) => setDp(unformatUang(e.target.value))}
+                      value={dp ? `Rp ${formatRupiah(dp)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setDp(rawValue);
+                      }}
                       className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="input-tenor-desktop"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
+                      Tenor Angsuran
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="input-tenor-desktop"
+                        type="number"
+                        value={tenor}
+                        onChange={(e) => {
+                          setTenor(e.target.value);
+                        }}
+                        className="flex-1 px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className=" text-gray-700 text-sm">Tahun</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Bank dan Program KPR
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Refrensi Bank BRI : 2.99%"
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                      disabled
                     />
                   </div>
 
                   <button
+                    id="btn-submit-desktop"
                     type="submit"
                     className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg"
                   >
@@ -255,31 +435,207 @@ export default function Sidebar({onHitungKPR, onSimulasiKPR}) {
           />
         </div>
 
-        <div className="text-center mb-6">
+        <div className="flex flex-col items-center w-full gap-y-8 mt-12">
           <p>
             Tentukan Solusi biaya rumah yang sesuai dengan kemampuan dan
             finansial kamu!
           </p>
 
-          <button
-            onClick={() => {
-              setShowFormHitung(!showFormHitung);
-              setShowFormSimulasi(false);
-            }}
-            className="w-4/5 py-6 text-xl font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700"
-          >
-            Hitung KPR
-          </button>
+          {/* Tombol Hitung KPR Mobile */}
+          {/* <div className="flex flex-col items-center w-full">
+            <button
+              onClick={() => {
+                setShowFormHitung(!showFormHitung);
+                setShowFormSimulasi(false);
+              }}
+              className="w-4/5 py-6 text-xl font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700"
+            >
+              Hitung KPR
+            </button>
+            {showFormHitung && (
+              <div className="w-4/5 bg-gray-100 rounded-xl shadow-lg overflow-hidden mt-4">
+                <div className="bg-green-200 py-3 text-center">
+                  <h2 className="text-xl font-bold text-black">Hitung KPR</h2>
+                </div>
+                <form className="p-4 space-y-3" onSubmit={handleSubmit}>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Uang Muka (DP)
+                    </label>
+                    <input
+                      type="text"
+                      value={dp ? `Rp ${formatRupiah(dp)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setDp(rawValue);
+                      }}
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Tenor Angsuran
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={tenor}
+                        onChange={(e) => {
+                          setTenor(e.target.value);
+                        }}
+                        className="flex-1 px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="flex-shrink-0 text-gray-700 text-sm">
+                        Tahun
+                      </span>
+                    </div>
+                  </div>
 
-          <button
-            onClick={() => {
-              setShowFormSimulasi(!showFormSimulasi);
-              setShowFormHitung(false);
-            }}
-            className="w-4/5 py-6 text-xl font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700"
-          >
-            Simulasi KPR
-          </button>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Bank dan Program KPR
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Refrensi Bank BRI : 2.99%"
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg"
+                  >
+                    Hitung
+                  </button>
+                </form>
+              </div>
+            )}
+          </div> */}
+
+          {/* Tombol Simulasi KPR Mobile */}
+          <div className="flex flex-col items-center w-full">
+            <button
+              id="btn-simulasi-kpr-mobile"
+              onClick={() => {
+                setShowFormSimulasi(!showFormSimulasi);
+                setShowFormHitung(false);
+              }}
+              className="w-4/5 py-6 text-xl font-semibold text-white bg-green-600 rounded-xl hover:bg-green-700"
+            >
+              Simulasi KPR
+            </button>
+            {showFormSimulasi && (
+              <div className="w-4/5 bg-gray-100 rounded-xl shadow-lg overflow-hidden mt-4">
+                <div className="bg-green-200 py-3 text-center">
+                  <h2 className="text-xl font-bold text-black">Simulasi KPR</h2>
+                </div>
+                <form className="p-4 space-y-4" onSubmit={handleSubmitSimulasi}>
+                  {/* Penghasilan Bulanan */}
+                  <div>
+                    <label
+                      htmlFor="input-penghasilan-mobile"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
+                      Penghasilan Bulanan
+                    </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      *Masukkan total penghasilan menyeluruh
+                    </p>
+                    <input
+                      input="input-penghasilan-mobile"
+                      type="text"
+                      value={gaji ? `Rp ${formatRupiah(gaji)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setGaji(rawValue);
+                      }}
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Cicilan Aktif */}
+                  {/* <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Cicilan Bulanan Aktif
+                    </label>
+                    <p className="text-xs text-gray-500 mb-1">
+                      *Masukkan cicilan yang sedang aktif (isi 0 jika tidak
+                      ada).
+                    </p>
+                    <input
+                      type="number"
+                      value={tenor}
+                      onChange={(e) => {
+                        setTenor(e.target.value);
+                      }}
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div> */}
+
+                  {/* Kesanggupan Uang Muka */}
+                  <div>
+                    <label
+                      htmlFor="input-kesanggupan-mobile"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
+                      Kesanggupan Uang Muka
+                    </label>
+                    <input
+                      id="input-kesanggupan-mobile"
+                      type="text"
+                      value={dp ? `Rp ${formatRupiah(dp)}` : ""}
+                      onChange={(e) => {
+                        const rawValue = unformatRupiah(e.target.value);
+                        setDp(rawValue);
+                      }}
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="input-tenor-mobile"
+                      className="block text-gray-700 text-sm font-medium mb-1"
+                    >
+                      Tenor Angsuran
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="input-tenor-mobile"
+                        type="number"
+                        value={tenor}
+                        onChange={(e) => {
+                          setTenor(e.target.value);
+                        }}
+                        className="flex-1 px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className=" text-gray-700 text-sm">Tahun</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 text-sm font-medium mb-1">
+                      Bank dan Program KPR
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Refrensi Bank BRI : 2.99%"
+                      className="w-full px-3 py-2 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      readOnly
+                      disabled
+                    />
+                  </div>
+
+                  <button
+                    id="btn-submit-mobile"
+                    type="submit"
+                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg"
+                  >
+                    Hitung
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

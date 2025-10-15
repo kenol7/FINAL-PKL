@@ -74,7 +74,7 @@ export default function KprPage() {
 
   const handleSubmitSimulasi = async ({ dp, tenor, gaji }) => {
     const params = {
-      mode: "simulasi_kemampuan",
+      mode: "simulasi_kpr",
       dp,
       tenor,
       gaji,
@@ -82,12 +82,12 @@ export default function KprPage() {
     try {
       setLoadingSimulasi(true);
       const res = await axios.get(endPointFilter, { params });
-      setHasilSimulasi(res.data.simulasi);
-      console.log("Hasil Simulasi:", res.data.rekomendasi);
-      setDataRumah(res.data.rekomendasi);
+      setHasilSimulasi(res.data.ringkasan_kemampuan);
+      console.log("Hasil Simulasi:", res.data.rekomendasi_properti);
+      setDataRumah(res.data.rekomendasi_properti);
       setDisplayMode("simulasi");
       setCurrentPage(1);
-    } catch (err) {
+    } catch (err) { 
       console.error("Gagal simulasi:", err);
       alert("Gagal menghitung simulasi KPR");
     } finally {
@@ -137,23 +137,23 @@ export default function KprPage() {
               </a>
 
               <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
-                Maks Cicilan:
+                Kesanggupan Dp:
+                <span className="font-semibold ml-2">
+                  {hasilSimulasi ? hasilSimulasi.dp_tersedia : "0"}
+                </span>
+              </a>
+
+              <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
+                Batas Aman Cicilan:
                 <span className="font-semibold ml-2">
                   {hasilSimulasi ? hasilSimulasi.maks_cicilan : "0"}
                 </span>
               </a>
 
               <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
-                Estimasi Harga Rumah:
+                Rekomendasi Harga:
                 <span className="font-semibold ml-2">
                   {hasilSimulasi ? hasilSimulasi.estimasi_harga_rumah : "0"}
-                </span>
-              </a>
-
-              <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
-                DP Nominal:
-                <span className="font-semibold ml-2">
-                  {hasilSimulasi ? hasilSimulasi.dp_nominal : "0"}
                 </span>
               </a>
             </div>
@@ -273,7 +273,7 @@ export default function KprPage() {
                           </>
                         ) : (
                           <>
-                            <span className="block text-sm font-semibold text-gray-800 bg-yellow-400 px-3 rounded-lg">
+                            <span className="mb-2 block text-sm font-semibold text-gray-800 bg-yellow-400 px-3 rounded-lg">
                               Rp{" "}
                               {item.property_price
                                 ? new Intl.NumberFormat("id-ID").format(
@@ -281,11 +281,24 @@ export default function KprPage() {
                                   )
                                 : "N/A"}
                             </span>
-                            <p className="text-xs text-gray-600 mt-1">
-                              {displayMode === "simulasi"
-                                ? "Rekomendasi"
-                                : "Transaksi"}
-                            </p>
+                            {displayMode === "normal" ? (
+                              <p className="text-xs text-gray-600 mt-1">
+                                Transaksi
+                              </p>
+                            ) : (
+                              <p className="hidden"></p>
+                            )}
+                            {item.angsuran_bulanan_formatted === 0 ? (
+                              <p className="text-xs text-gray-600 mt-1">
+                                {displayMode === "simulasi"
+                                  ? "Rekomendasi"
+                                  : "Transaksi"}
+                              </p>
+                            ) : (
+                              <span className="block text-sm font-semibold text-gray-800 bg-green-400 px-3 rounded-lg">
+                                {item.angsuran_bulanan_formatted}
+                              </span>
+                            )}
                           </>
                         )}
                       </div>

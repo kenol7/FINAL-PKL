@@ -23,6 +23,7 @@
     "framer-motion": "^12.23.22",
     "gsap": "^3.13.0",
     "install": "^0.13.0",
+    "intro.js": "^8.3.2",
     "keen-slider": "^6.8.6",
     "leaflet": "^1.9.4",
     "libphonenumber": "^0.0.10",
