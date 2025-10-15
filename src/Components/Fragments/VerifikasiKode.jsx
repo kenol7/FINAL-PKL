@@ -164,57 +164,45 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
             return;
         }
 
-        if (code !== otpReal) {
-            setOtp(new Array(4).fill(""));
-            inputRefs.current[0]?.focus();
-            showToast('Kode OTP salah.', 'error');
-            return;
-        }
-
-        console.log("Data yang akan dikirim ke backend:", {
-            name: name,
-            email: email,
-            phone: phoneReal || phone,
-            password: password
-        });
-
         try {
             const response = await fetch(API.endpointregist, {
-                method: "POST",
+                method: "POST", // atau sesuaikan jika backend terima PUT/UPDATE via POST
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    mode: "POST",
-                    action: "register",
-                    name: name,
-                    email: email,
-                    phone: phoneReal || phone,
-                    password: password
+                    mode: "UPDATE",
+                    action: "otp",
+                    phone: phoneReal || phone, // pastikan ini adalah nomor E.164
+                    otp: code
                 })
             });
 
             const result = await response.json();
             if (result.status === "success") {
+                // Simpan data user ke localStorage
                 localStorage.setItem("auth_phone", phoneReal || phone);
                 localStorage.setItem("auth_email", email);
                 localStorage.setItem("auth_fullname", name);
 
-                showToast(`Halo, ${name}! Selamat datang.`, "success");
+                showToast(`Halo, ${name}! Akun Anda telah diverifikasi.`, "success");
                 setTimeout(() => {
                     if (typeof close === "function") close();
                     navigate("/");
                 }, 1000);
             } else {
-                throw new Error(result.message || "Registrasi gagal.");
+                throw new Error(result.message || "Verifikasi gagal.");
             }
         } catch (err) {
-            console.error("Registrasi gagal:", err);
-            showToast("Gagal membuat akun. " + err.message, "error");
+            console.error("Verifikasi gagal:", err);
+            showToast("Verifikasi gagal: " + err.message, "error");
+            // Reset input OTP
+            setOtp(new Array(4).fill(""));
+            inputRefs.current[0]?.focus();
         }
     };
 
 
     const handleResend = async () => {
-        if (isResending) return;
+        if (isResending || !phoneReal) return;
         setIsResending(true);
 
         try {
@@ -224,48 +212,19 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                 body: JSON.stringify({
                     mode: "POST",
                     action: "generate_otp",
-                    name: namaLengkap,
-                    email: userEmail,
-                    phone: phoneReal
+                    phone: phoneReal 
                 })
             });
 
             const result = await response.json();
             if (result.status === 'success') {
-                // 2. Ambil kode baru
-                const newKode = result.kode;
-
-                // 3. Decrypt untuk lihat OTP (opsional, hanya untuk debug)
-                try {
-                    const decryptRes = await axios.post(
-                        `${API.endpointregist}`,
-                        {
-                            mode: "POST",
-                            action: "decrypt",
-                            nomer_telepon: phoneReal || phone,
-                            email: userEmail || email,
-                            nama_lengkap: namaLengkap || name,
-                            kode: newKode,
-                        },
-                        {
-                            headers: { "Content-Type": "application/json" },
-                        }
-                    );
-
-                    const decrypted = decryptRes.data;
-                    if (decrypted && decrypted.otp) {
-                        console.log("🆕 OTP BARU YANG DIKIRIM:", decrypted.otp);
-                    }
-                } catch (decryptErr) {
-                    console.warn("Gagal decrypt OTP baru:", decryptErr);
-                }
                 setCount(120);
                 showToast('OTP baru dikirim!', 'success');
             } else {
                 showToast(result.message, 'error');
             }
         } catch (err) {
-            showToast('Gagal mengirim ulang.', 'error');
+            showToast('Gagal mengirim ulang OTP.', 'error');
         } finally {
             setIsResending(false);
         }
