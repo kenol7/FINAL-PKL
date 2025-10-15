@@ -46,6 +46,7 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [nomorTelepon, setNomorTelepon] = useState('');
     const [kataSandi, setKataSandi] = useState('');
 
+    // State untuk toast
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
@@ -142,8 +143,9 @@ const Register = ({ onRegisterSuccess, close }) => {
             phone: nomorTeleponE164,
             password: kataSandi,
             mode: 'POST',
-            action: 'register'
+            action: 'generate_otp'
         };
+
         fetch(endPoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
