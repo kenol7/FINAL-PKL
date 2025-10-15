@@ -46,10 +46,34 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [nomorTelepon, setNomorTelepon] = useState('');
     const [kataSandi, setKataSandi] = useState('');
 
-    // State untuk toast
+    const [countries, setCountries] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState('ID'); 
+    const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            try {
+                const response = await fetch(`${endPoint}?mode=get_countries`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    setCountries(data.countries);
+                } else {
+                    showToast("Gagal memuat daftar negara.");
+                }
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+                showToast("Terjadi kesalahan jaringan saat memuat negara.");
+            } finally {
+                setIsLoadingCountries(false);
+            }
+        };
+
+        fetchCountries();
+    }, [endPoint]);
 
     const showToast = (message, type = "error") => {
         setToast({ message, type, visible: true });
@@ -81,35 +105,21 @@ const Register = ({ onRegisterSuccess, close }) => {
         setEmail(e.target.value);
     };
 
-    const [normalizedPhone, setNormalizedPhone] = useState('');
-
     const handleNomorTeleponChange = (e) => {
         const rawInput = e.target.value;
         setNomorTelepon(rawInput);
 
         let normalized = null;
         try {
-            const phoneNumber = parsePhoneNumberFromString(rawInput, 'ID');
+            const phoneNumber = parsePhoneNumberFromString(rawInput, selectedCountry);
             if (phoneNumber && phoneNumber.isValid()) {
                 normalized = phoneNumber.format('E.164');
             }
         } catch (err) {
             console.error("Error parsing phone number:", err);
         }
-
         setNomorTeleponE164(normalized);
     };
-
-    function normalizePhone(input, defaultRegion = 'ID') {
-        try {
-            const phoneNumber = parsePhoneNumber(input, defaultRegion);
-            if (phoneNumber.isValid()) {
-                return phoneNumber.format('E.164');
-            }
-        } catch (err) {
-        }
-        return null;
-    }
 
     const handleKataSandiChange = (e) => {
         setKataSandi(e.target.value);
@@ -132,7 +142,7 @@ const Register = ({ onRegisterSuccess, close }) => {
             action: 'register',
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone: nomorTeleponE164,
+            phone: nomorTelepon,
             password: kataSandi
         };
 
