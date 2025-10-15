@@ -104,7 +104,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
 
         fetchDecrypt();
 
-    });
+    },[kode]);
 
     useEffect(() => {
         if (count <= 0) return;
@@ -112,7 +112,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
             setCount(prev => prev - 1);
         }, 1000);
         return () => clearInterval(intervalId);
-    }, [count]);
+    }, []);
 
     // useEffect(() => {
     //     console.log('OTP saat ini:', otp);
@@ -183,12 +183,10 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    mode: "POST",
-                    action: "register",
-                    name: name,
-                    email: email,
+                    mode: "UPDATE",
+                    action: 'otp',
                     phone: phoneReal || phone,
-                    password: password
+                    otp: code
                 })
             });
 
@@ -197,6 +195,8 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                 localStorage.setItem("auth_phone", phoneReal || phone);
                 localStorage.setItem("auth_email", email);
                 localStorage.setItem("auth_fullname", name);
+                localStorage.setItem("foto_profil", '/images/noprofile.png');
+
 
                 showToast(`Halo, ${name}! Selamat datang.`, "success");
                 setTimeout(() => {
@@ -232,10 +232,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
 
             const result = await response.json();
             if (result.status === 'success') {
-                // 2. Ambil kode baru
                 const newKode = result.kode;
-
-                // 3. Decrypt untuk lihat OTP (opsional, hanya untuk debug)
                 try {
                     const decryptRes = await axios.post(
                         `${API.endpointregist}`,
