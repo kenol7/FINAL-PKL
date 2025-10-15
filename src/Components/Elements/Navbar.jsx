@@ -115,6 +115,11 @@ export default function Navbar() {
     setShowVerifPopup(true);
   };
 
+  const handleBackToLogin = () => {
+    setShowLKSPopup(false);
+    setShowLoginPopup(true);
+  };
+
   const isActive = (path) =>
     location.pathname === path
       ? "text-gray-700 font-semibold"
@@ -365,10 +370,13 @@ export default function Navbar() {
       {showLKSPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
-            onClick={toggleLKSPopup}
+            onClick={handleBackToLogin} 
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
-          <HalamanLKS close={toggleLKSPopup} />
+          <HalamanLKS
+            close={handleBackToLogin}
+            onBackToLogin={handleBackToLogin}
+          />
         </div>
       )}
       {showVerifPopup && (
