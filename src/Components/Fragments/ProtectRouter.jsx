@@ -10,12 +10,11 @@ export default function ProtectedRoute({ children }) {
       const loginDate = new Date(loginTime);
       const now = new Date();
 
-      // Hitung selisih waktu dalam ms
+      // Hitung selisih waktu dalam jam
       const diff = now - loginDate;
-      const oneDays = 1 * 24 * 60 * 60 * 1000;
+      const oneDays =   1 * 60 * 1000;
 
       if (diff >= oneDays) {
-        // Expired → hapus data login
         localStorage.clear();
         alert("Sesi login Anda telah kedaluwarsa. Silakan login kembali.");
         window.location.href = "/"; 

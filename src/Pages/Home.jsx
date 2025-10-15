@@ -19,14 +19,14 @@ import Footer from "../Components/Elements/Footer";
 import Frame1 from "../assets/frame1.png";
 import Frame2 from "../assets/frame2.png";
 import Frame3 from "../assets/frame3.png";
-import Chatbotimg from "../assets/ChatBot.png"
-import Kprimg from "../assets/HitungKpr.png"
+import Chatbotimg from "../assets/ChatBot.png";
+import Kprimg from "../assets/HitungKpr.png";
 import { Pointer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF } from '@react-three/drei';
-import { Suspense } from 'react';
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Suspense } from "react";
 import introJs from "intro.js";
 import "intro.js/introjs.css";
 
@@ -60,7 +60,7 @@ export default function Home() {
   const hasRunTour = useRef(false);
 
   let ApiContribution =
-    `https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&latitude=${latitude}&longitude=${longitude}`;
+    "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&latitude=-6.208763&longitude=106.845599";
   //?latitude=-6.3474679&longitude=106.8246569&page=1
 
   const endpointImage =
@@ -78,7 +78,7 @@ export default function Home() {
       gsap.to(imgRefDesktop.current, {
         rotation: "+=360",
         duration: 1,
-        ease: "power2.out"
+        ease: "power2.out",
       });
     }
   };
@@ -88,16 +88,15 @@ export default function Home() {
       gsap.to(imgRefMobile.current, {
         rotation: "+=360",
         duration: 1,
-        ease: "power2.out"
+        ease: "power2.out",
       });
     }
   };
 
   function Model({ scale = 1 }) {
-    const { scene } = useGLTF('models/chatbot.glb');
+    const { scene } = useGLTF("models/chatbot.glb");
     return <primitive object={scene} scale={scale} />;
   }
-
 
   const GetData = async (lat, lng) => {
     await fetch(
@@ -200,59 +199,58 @@ export default function Home() {
     const hasSeenIntro = localStorage.getItem("hasSeenIntro");
     if (hasSeenIntro) return;
 
-    const timer =setTimeout(() => {
+    const timer = setTimeout(() => {
       const isMobile = window.innerWidth < 768;
+
       const desktopStepsCandidates = [
         {
           element: "#home",
           intro: "👋 Halo! Selamat datang di halaman utama.",
-      },
-    {
-      element: "#iklan",intro: "🖼️ Ini bagian iklan utama kami.",},
-    {
-      element: "#rumah_terdekat",intro: "🏠 Ini daftar rumah terdekat.",},
-    {
-      element: "#chatbot",
-      intro: "🤖 Ini chatbot yang siap membantu kamu.",
-      position: "bottom",
-    },
-    {
-      element: "#hitung_kpr",
-      intro: "💰 Ini fitur kalkulator KPR.",
-    }];
+        },
+        { element: "#iklan", 
+          intro: "🖼️ Ini bagian iklan utama kami." 
+        },
 
-    const mobileStepsCandidates = [
-      {
-        element: "#home",
-        intro: "👋 Halo! Selamat datang di halaman utama.",
-      },
-      {
-        element: "#iklan",
-        intro: "🖼️ Ini bagian iklan utama kami.",
-      },
-      {
-        element: "#rumah_terdekat",
-        intro: "🏠 Ini daftar rumah terdekat.",
-      },
-      {
-        element: "#responsive_chatbot",
-        intro: "🤖 Ini chatbot (mobile).",
-        position: "bottom",
-      },
-      {
-        element: "#responsive_hitung_kpr",
-        intro: "💰 Ini fitur kalkulator KPR.",
-      },
-    ];
-    const candidats = isMobile
-      ? mobileStepsCandidates
-      : desktopStepsCandidates;
+        { element: "#rumah_terdekat", 
+          intro: "🏠 Ini daftar rumah terdekat." },
+        {
+          element: "#chatbot",
+          intro: "🤖 Ini chatbot yang siap membantu kamu.",
+          position: "bottom",
+        },
+        { 
+          element: "#hitung_kpr", 
+          intro: "💰 Ini fitur kalkulator KPR." 
+        },
+      ];
 
-      const steps = candidats.map((s) => {
-        const el = document.querySelector(s.element);
-        const isVisible = el && el.offsetParent !== null;
-        return inVisible ? s : null;
-      }).filter(Boolean);
+      const mobileStepsCandidates = [
+        {
+          element: "#home",
+          intro: "👋 Halo! Selamat datang di halaman utama.",
+        },
+        { 
+          element: "#iklan", 
+          intro: "🖼️ Ini bagian iklan utama kami." 
+        },
+        { 
+          element: "#rumah_terdekat", 
+          intro: "🏠 Ini daftar rumah terdekat." 
+        },
+      ];
+
+      const candidates = isMobile
+        ? mobileStepsCandidates
+        : desktopStepsCandidates;
+
+      // Pastikan elemen target ada dan terlihat
+      const steps = candidates
+        .map((s) => {
+          const el = document.querySelector(s.element);
+          const isVisible = el && el.offsetParent !== null;
+          return isVisible ? s : null;
+        })
+        .filter(Boolean);
 
       if (!steps.length) {
         localStorage.setItem("hasSeenIntro", "true");
@@ -277,11 +275,11 @@ export default function Home() {
             const targetId = targetElement.id;
             // Tunggu sedikit supaya slider siap sebelum digeser
             setTimeout(() => {
-            if (targetId === "responsive_chatbot") {
-              sliderFitur.moveToIdx(0);
-            } else if (targetId === "responsive_hitung_kpr") {
-              sliderFitur.moveToIdx(1);
-            }
+              if (targetId === "responsive_chatbot") {
+                sliderFitur.moveToIdx(0);
+              } else if (targetId === "responsive_hitung_kpr") {
+                sliderFitur.moveToIdx(1);
+              }
             }, 200);
           }
         });
@@ -289,17 +287,18 @@ export default function Home() {
         intro.start();
         hasRunTour.current = true;
 
-        intro.oncomplete (() => {
+        intro.oncomplete(() => {
           localStorage.setItem("hasSeenIntro", "true");
         });
-        intro.onexit (() => {
+        intro.onexit(() => {
           localStorage.setItem("hasSeenIntro", "true");
-        })
+        });
       }
-    }, 1000);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [sliderFitur]);
+
   console.log(rumahTerdekat.error);
   return (
     <>
@@ -314,7 +313,7 @@ export default function Home() {
                 <img
                   src={frame.url}
                   alt={frame.alt}
-                  className="w-full h-[500px] object-cover"
+                  className="w-full h-auto max-h-[80vh] object-contain"
                 />
               </div>
             ))}
@@ -413,12 +412,13 @@ export default function Home() {
                         </div>
                         <div>
                           <h3 className="text-gray-800 rounded-lg font-semibold xl:text-lg lg:text-lg md:text-lg text-base bg-yellow-400 xl:px-8 lg:px-8 md:px-8 px-2 py-1.5">
-                            {`Rp${item.property_price
-                              ? new Intl.NumberFormat("id-ID").format(
-                                item.property_price
-                              )
-                              : "N/A"
-                              }
+                            {`Rp${
+                              item.property_price
+                                ? new Intl.NumberFormat("id-ID").format(
+                                    item.property_price
+                                  )
+                                : "N/A"
+                            }
                           `}
                           </h3>
                           <h3 className="text-gray-700 xl:text-sm lg:text-sm md:text-sm text-xs text-end">
@@ -438,7 +438,7 @@ export default function Home() {
           <div className="flex justify-center xl:gap-14 lg:gap-8 md:gap-2 gap-2">
             <div className="xl:w-[486px] lg:w-[386px] w-[286px] xl:h-[409px] lg:h-[309px] h-[209px] rounded-2xl overflow-hidden bg-gray-100">
               <Canvas
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: "100%", height: "100%" }}
                 camera={{ position: [0, 0, 3], fov: 40 }}
               >
                 <ambientLight intensity={0.6} />
@@ -488,8 +488,8 @@ export default function Home() {
                 alt="KprImg"
                 onClick={handleRotateDesktop}
                 style={{
-                  transformOrigin: 'center',
-                  transition: 'transform 0.3s ease'
+                  transformOrigin: "center",
+                  transition: "transform 0.3s ease",
                 }}
               />
             </div>
@@ -500,9 +500,12 @@ export default function Home() {
         {/* Mobile */}
         <div className="md:hidden block mx-5">
           <div className="keen-slider my-10" ref={sliderFiturRef}>
-            <div id="responsive_chatbot" className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
+            <div
+              id="responsive_chatbot"
+              className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg"
+            >
               <Canvas
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: "100%", height: "100%" }}
                 camera={{ position: [0, 0, 3], fov: 30 }}
               >
                 <ambientLight intensity={0.6} />
@@ -512,7 +515,10 @@ export default function Home() {
                 </Suspense>
                 <OrbitControls enableZoom={false} enablePan={false} />
               </Canvas>
-              <div id="chatbot" className="flex justify-center items-center text-center w-full md:w-auto">
+              <div
+                id="chatbot"
+                className="flex justify-center items-center text-center w-full md:w-auto"
+              >
                 <div className="space-y-5 mb-2">
                   <h3 className="text-xl">
                     Mau cari rekomendasi rumah yang cepat sesuai konsepmu?
@@ -527,7 +533,9 @@ export default function Home() {
               </div>
             </div>
             <div
-            id="responsive_hitung_kpr" className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg">
+              id="responsive_hitung_kpr"
+              className="keen-slider__slide flex flex-col md:flex-row justify-center items-center gap-8 bg-white p-5 rounded-2xl shadow-lg"
+            >
               <img
                 ref={imgRefMobile}
                 className="w-[50%] rounded-2xl cursor-pointer"
@@ -535,7 +543,10 @@ export default function Home() {
                 alt="KprImg"
                 onClick={handleRotateMobile}
               />
-              <div id="hitung_kpr" className="flex justify-center items-center text-center w-full md:w-auto">
+              <div
+                id="hitung_kpr"
+                className="flex justify-center items-center text-center w-full md:w-auto"
+              >
                 <div className="space-y-5 mb-2">
                   <h3 className="text-xl">
                     Mau hitung KPR rumah yang cepat dan sesuai?

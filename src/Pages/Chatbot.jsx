@@ -16,15 +16,14 @@ export default function ChatBot() {
   };
 
   const features = [
-    { icon: "💬", title: "Chat Cerdas", desc: "AI untuk rekomendasi properti" },
+    { title: "ChatBot", desc: "AI untuk rekomendasi properti" },
     {
-      icon: "🏠",
-      title: "Cari Rumah",
+      title: "Beli Rumah",
       desc: "Filter otomatis sesuai budget",
       link: "/beli",
     },
-    { icon: "📊", title: "Analisis KPR", desc: "Simulasi cicilan real-time", link: "/kpr" },
-    { icon: "📍", title: "Jual Rumah", desc: "Bisa Jual Rumah juga loh",link: "/jualrumah" },
+    { title: "Simulasi KPR", desc: "Simulasi cicilan real-time", link: "/kpr" },
+    { title: "Jual Rumah", desc: "Bisa Jual Rumah juga loh",link: "/jualrumah" },
   ];
 
   // Eye tracking
@@ -309,7 +308,7 @@ export default function ChatBot() {
 
           {/* Features Grid */}
           <motion.div
-            className="grid grid-cols-2 gap-4 mb-8"
+            className="grid grid-cols-2 gap-4 mb-8 font-bold"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -346,21 +345,21 @@ export default function ChatBot() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/beli")}
+              onClick={() => navigate("/search")}
               className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
             >
               <span>🏠</span>
               Jelajahi Properti
-            </motion.button>
+            </motion.button> */}
 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/")}
-              className="px-8 py-4 rounded-full border-2 border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+              className="px-8 py-4  rounded-full border-2 border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
             >
               <span>🏡</span>
               Kembali ke Beranda
@@ -389,7 +388,7 @@ export default function ChatBot() {
               />
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              Estimasi peluncuran: Q2 2025 🚀
+              Estimasi peluncuran: Season 2 🚀
             </p>
           </motion.div>
         </motion.div>
