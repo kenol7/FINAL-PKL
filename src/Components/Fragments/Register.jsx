@@ -158,7 +158,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                     setTimeout(() => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
-                                kode: response.kode,       // dari backend
+                                kode: response.kode,      
                                 name: namaLengkap.trim(),
                                 email: email.trim().toLowerCase(),
                                 phone: nomorTeleponE164,
@@ -206,10 +206,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
                                 kode: response.kode,
-                                name: namaLengkap.trim(),           // ✅ dari state lokal
-                                email: email.trim().toLowerCase(),  // ✅ dari state lokal
-                                phone: nomorTeleponE164,            // ✅ dari state lokal
-                                password: kataSandi                 // ✅ dari state lokal
+                                name: namaLengkap.trim(),         
+                                email: email.trim().toLowerCase(),  
+                                phone: nomorTeleponE164,            
+                                password: kataSandi                 
                             });
                         }
                     }, 1500);

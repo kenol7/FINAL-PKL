@@ -661,6 +661,148 @@ const JualRumah = () => {
                             </div>
 
                             <div>
+                                <h3 className="font-semibold mb-2">Kepemilikan</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="relative">
+                                        <label className="block text-sm mb-1">Dokumen</label>
+                                        <div
+                                            className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                            onClick={() => toggleArrow("Dokumen")}
+                                        >
+                                            <span>{dokumenProperti || "Pilih Dokumen"}</span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className={`h-5 w-5 transition-transform ${showArrowUp["Dokumen"] ? "rotate-180" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showArrowUp["Dokumen"] && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                                {documentList.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
+                                                        onClick={() => {
+                                                            setDokumenProperti(item.name);
+                                                            toggleArrow("Dokumen");
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-sm mb-1">Klasifikasi Bangunan</label>
+                                        <div
+                                            className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                            onClick={() => toggleArrow("Klasifikasi Bangunan")}
+                                        >
+                                            <span>{klasifikasiBangunan || "Pilih Klasifikasi"}</span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className={`h-5 w-5 transition-transform ${showArrowUp["Klasifikasi Bangunan"] ? "rotate-180" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showArrowUp["Klasifikasi Bangunan"] && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                                {classBuildingList.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
+                                                        onClick={() => {
+                                                            setKlasifikasiBangunan(item.name);
+                                                            toggleArrow("Klasifikasi Bangunan");
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-sm mb-1">Kategori Lahan</label>
+                                        <div
+                                            className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                            onClick={() => toggleArrow("Kategori Lahan")}
+                                        >
+                                            <span>{kategoriLahan || "Pilih Kategori Lahan"}</span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className={`h-5 w-5 transition-transform ${showArrowUp["Kategori Lahan"] ? "rotate-180" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showArrowUp["Kategori Lahan"] && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                                {conditionFieldList.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
+                                                        onClick={() => {
+                                                            setKategoriLahan(item.name);
+                                                            toggleArrow("Kategori Lahan");
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    <div className="relative">
+                                        <label className="block text-sm mb-1">Peruntukan</label>
+                                        <div
+                                            className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                            onClick={() => toggleArrow("Peruntukan")}
+                                        >
+                                            <span>{peruntukan || "Pilih Peruntukan"}</span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className={`h-5 w-5 transition-transform ${showArrowUp["Peruntukan"] ? "rotate-180" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showArrowUp["Peruntukan"] && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                                {allotmentList.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
+                                                        onClick={() => {
+                                                            setPeruntukan(item.name);
+                                                            toggleArrow("Peruntukan");
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
                                 <h3 className="font-semibold mb-2">Detail</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     {shouldShowLuasTanah() && (
