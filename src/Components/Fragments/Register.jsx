@@ -46,7 +46,6 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [nomorTelepon, setNomorTelepon] = useState('');
     const [kataSandi, setKataSandi] = useState('');
 
-    // State untuk toast
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
@@ -81,8 +80,6 @@ const Register = ({ onRegisterSuccess, close }) => {
         setEmail(e.target.value);
     };
 
-    const [normalizedPhone, setNormalizedPhone] = useState('');
-
     const handleNomorTeleponChange = (e) => {
         const rawInput = e.target.value;
         setNomorTelepon(rawInput);
@@ -99,17 +96,6 @@ const Register = ({ onRegisterSuccess, close }) => {
 
         setNomorTeleponE164(normalized);
     };
-
-    function normalizePhone(input, defaultRegion = 'ID') {
-        try {
-            const phoneNumber = parsePhoneNumber(input, defaultRegion);
-            if (phoneNumber.isValid()) {
-                return phoneNumber.format('E.164');
-            }
-        } catch (err) {
-        }
-        return null;
-    }
 
     const handleKataSandiChange = (e) => {
         setKataSandi(e.target.value);
@@ -148,7 +134,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                     setTimeout(() => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
-                                kode: response.kode,       // dari backend
+                                kode: response.kode,      
                                 name: namaLengkap.trim(),
                                 email: email.trim().toLowerCase(),
                                 phone: nomorTeleponE164,
@@ -196,10 +182,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
                                 kode: response.kode,
-                                name: namaLengkap.trim(),           // ✅ dari state lokal
-                                email: email.trim().toLowerCase(),  // ✅ dari state lokal
-                                phone: nomorTeleponE164,            // ✅ dari state lokal
-                                password: kataSandi                 // ✅ dari state lokal
+                                name: namaLengkap.trim(),         
+                                email: email.trim().toLowerCase(),  
+                                phone: nomorTeleponE164,            
+                                password: kataSandi                 
                             });
                         }
                     }, 1500);

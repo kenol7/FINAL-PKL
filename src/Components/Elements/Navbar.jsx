@@ -69,18 +69,21 @@ export default function Navbar() {
   };
 
   const updateUser = () => {
-    if (localStorage.getItem("auth_fullname")) {
+    const hasAuth = Boolean(
+      localStorage.getItem("auth_email") &&
+      localStorage.getItem("auth_fullname")
+    );
 
+    if (hasAuth && user !== "Profile") {
       setUser("Profile");
-      console.log(localStorage.getItem("foto_profil"))
       const savedImage = localStorage.getItem("foto_profil");
       if (savedImage) {
-        const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage}`;
+        const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage.trim()}`;
         setProfileImage(url);
       } else {
         setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
       }
-    } else {
+    } else if (!hasAuth && user !== null) {
       setUser(null);
       setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
     }
@@ -370,7 +373,7 @@ export default function Navbar() {
       {showLKSPopup && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
-            onClick={handleBackToLogin} 
+            onClick={handleBackToLogin}
             className="absolute inset-0 bg-black/35 backdrop-blur-md"
           />
           <HalamanLKS
