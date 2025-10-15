@@ -118,7 +118,6 @@ const Register = ({ onRegisterSuccess, close }) => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        const normalized = normalizePhone(nomorTelepon);
         if (!isChecked) {
             showToast("Anda harus menyetujui Syarat & Ketentuan (S&K).");
             return;
@@ -128,8 +127,43 @@ const Register = ({ onRegisterSuccess, close }) => {
             return;
         }
 
-        setNormalizedPhone(normalized);
-        setShowPopup(true);
+        const payload = {
+            mode: 'POST',
+            action: 'register',
+            name: namaLengkap.trim(),
+            email: email.trim().toLowerCase(),
+            phone: nomorTeleponE164,
+            password: kataSandi
+        };
+
+        fetch(endPoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === "success") {
+                    showToast("Kode OTP telah dikirim!", "success");
+                    setTimeout(() => {
+                        if (typeof onRegisterSuccess === 'function') {
+                            onRegisterSuccess({
+                                kode: response.kode,       // dari backend
+                                name: namaLengkap.trim(),
+                                email: email.trim().toLowerCase(),
+                                phone: nomorTeleponE164,
+                                password: kataSandi
+                            });
+                        }
+                    }, 1000);
+                } else {
+                    showToast(response.message || 'Pendaftaran gagal.');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showToast("Terjadi kesalahan jaringan. Silakan coba lagi.");
+            });
     };
 
 
