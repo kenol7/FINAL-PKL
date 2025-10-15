@@ -47,6 +47,9 @@ importers:
       install:
         specifier: ^0.13.0
         version: 0.13.0
+      intro.js:
+        specifier: ^8.3.2
+        version: 8.3.2
       keen-slider:
         specifier: ^6.8.6
         version: 6.8.6
@@ -2278,6 +2281,9 @@ packages:
   install@0.13.0:
     resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
     engines: {node: '>= 0.10'}
+
+  intro.js@8.3.2:
+    resolution: {integrity: sha512-+QsuU8P7Z/O7stAwZ8Uj6CPyKsY6xVx/7hKTVLjlIEPYHaT43XnEUUYHCln6Ehr7GlDuwczh6I8PD/HGf4EG0A==}
 
   invariant@2.2.4:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
@@ -5340,6 +5346,8 @@ snapshots:
   inherits@2.0.4: {}
 
   install@0.13.0: {}
+
+  intro.js@8.3.2: {}
 
   invariant@2.2.4:
     dependencies:

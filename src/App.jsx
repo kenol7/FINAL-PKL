@@ -18,7 +18,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home/>} />
           <Route path="/kpr" element={<KprPage/>} />
-          <Route path="/chatbot" element={<ProctectedRoute><ChatBot/> </ProctectedRoute>} />
+          <Route path="/chatbot" element={<ChatBot/>} />
           <Route path="/profile" element={<ProctectedRoute><Profile/> </ProctectedRoute>} />
           <Route path="/login" element={<HalamanLogin />} />
           <Route path="/register" element={<HalamanRegister />} />
