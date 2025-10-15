@@ -89,12 +89,12 @@ const Register = ({ onRegisterSuccess, close }) => {
 
         let normalized = null;
         try {
-            const phoneNumber = parsePhoneNumberFromString(rawInput);
+            const phoneNumber = parsePhoneNumberFromString(rawInput, 'ID');
             if (phoneNumber && phoneNumber.isValid()) {
                 normalized = phoneNumber.format('E.164');
             }
         } catch (err) {
-
+            console.error("Error parsing phone number:", err);
         }
 
         setNomorTeleponE164(normalized);
@@ -140,10 +140,10 @@ const Register = ({ onRegisterSuccess, close }) => {
         let payload = {
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone:  nomorTeleponE164,
+            phone: nomorTeleponE164,
             password: kataSandi,
             mode: 'POST',
-            action: 'register'
+            action: 'generate_otp'
         };
 
         fetch(endPoint, {
@@ -162,9 +162,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
                                 kode: response.kode,
-                                name: response.name,
-                                email: response.email,
-                                phone: nomorTelepon
+                                name: namaLengkap.trim(),           // ✅ dari state lokal
+                                email: email.trim().toLowerCase(),  // ✅ dari state lokal
+                                phone: nomorTeleponE164,            // ✅ dari state lokal
+                                password: kataSandi                 // ✅ dari state lokal
                             });
                         }
                     }, 1500);

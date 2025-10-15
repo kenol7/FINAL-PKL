@@ -57,6 +57,18 @@ const JualRumah = () => {
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
 
+    const shouldShowLuasTanah = () => {
+        return !["Rusun", "Apartemen"].includes(kategoriAset);
+    };
+
+    const shouldShowLuasBangunan = () => {
+        return !["Perkebunan", "Pertanian/Perikanan"].includes(kategoriAset);
+    };
+
+    const shouldShowTotalLantai = () => {
+        return !["Perkebunan", "Pertanian/Perikanan"].includes(kategoriAset);
+    };
+
     const toggleArrow = (field) => {
         setShowArrowUp((prev) => {
             const newState = {};
@@ -649,53 +661,90 @@ const JualRumah = () => {
                             </div>
 
                             <div>
-                                <h3 className="font-semibold mb-2">Kepemilikan</h3>
+                                <h3 className="font-semibold mb-2">Detail</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {[
-                                        { label: "Dokumen", list: documentList, state: dokumenProperti, setter: setDokumenProperti },
-                                        { label: "Klasifikasi", list: classBuildingList, state: klasifikasiBangunan, setter: setKlasifikasiBangunan },
-                                        { label: "Kategori Lahan", list: conditionFieldList, state: kategoriLahan, setter: setKategoriLahan },
-                                        { label: "Peruntukan", list: allotmentList, state: peruntukan, setter: setPeruntukan },
-                                    ].map(({ label, list, state, setter }) => (
-                                        <div key={label} className="relative">
-                                            <label className="block text-sm mb-1">{label}</label>
-                                            <div
-                                                className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
-                                                onClick={() => toggleArrow(label)}
-                                            >
-                                                <span>{state || `Pilih ${label}`}</span>
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className={`h-5 w-5 transition-transform ${showArrowUp[label] ? "rotate-180" : ""}`}
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </div>
-                                            {showArrowUp[label] && (
-                                                <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
-                                                    {list.map((item, i) => (
-                                                        <li
-                                                            key={i}
-                                                            className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
-                                                            onClick={() => {
-                                                                setter(item.name);
-                                                                toggleArrow(label);
-                                                            }}
-                                                        >
-                                                            {item.name}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
+                                    {shouldShowLuasTanah() && (
+                                        <div className="relative">
+                                            <label className="block text-sm mb-1">Luas Tanah</label>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                className="w-full p-2 rounded bg-white text-black"
+                                                placeholder="Contoh: 120"
+                                                value={luasTanah}
+                                                onChange={(e) => handleNumericInput(e, setLuasTanah)}
+                                            />
                                         </div>
-                                    ))}
+                                    )}
+
+                                    {shouldShowLuasBangunan() && (
+                                        <div className="relative">
+                                            <label className="block text-sm mb-1">Luas Bangunan</label>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                className="w-full p-2 rounded bg-white text-black"
+                                                placeholder="Contoh: 80"
+                                                value={luasBangunan}
+                                                onChange={(e) => handleNumericInput(e, setLuasBangunan)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {shouldShowTotalLantai() && (
+                                        <div className="relative">
+                                            <label className="block text-sm mb-1">Total Lantai</label>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                className="w-full p-2 rounded bg-white text-black"
+                                                placeholder="Contoh: 2"
+                                                value={totalLantai}
+                                                onChange={(e) => handleNumericInput(e, setTotalLantai)}
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="relative">
+                                        <label className="block text-sm mb-1">Status Transaksi</label>
+                                        <div
+                                            className="relative w-full p-2 rounded bg-white text-black cursor-pointer flex justify-between items-center"
+                                            onClick={() => toggleArrow("Status Transaksi")}
+                                        >
+                                            <span>{statusTransaksi || "Pilih Status Transaksi"}</span>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className={`h-5 w-5 transition-transform ${showArrowUp["Status Transaksi"] ? "rotate-180" : ""}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                        {showArrowUp["Status Transaksi"] && (
+                                            <ul className="absolute z-10 mt-1 w-full bg-white border rounded shadow max-h-40 overflow-y-auto">
+                                                {statusDataList.map((item, i) => (
+                                                    <li
+                                                        key={i}
+                                                        className="p-2 text-gray-800 hover:bg-blue-100 hover:text-white cursor-pointer transition-colors"
+                                                        onClick={() => {
+                                                            setStatusTransaksi(item.name);
+                                                            toggleArrow("Status Transaksi");
+                                                        }}
+                                                    >
+                                                        {item.name}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-
-                            <div>
+                            {/* <div>
                                 <h3 className="font-semibold mb-2">Detail</h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     {[
@@ -754,7 +803,7 @@ const JualRumah = () => {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {[

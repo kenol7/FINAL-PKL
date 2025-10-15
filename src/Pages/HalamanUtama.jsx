@@ -96,6 +96,7 @@ const HalamanVerif = ({ data, close, onUpdateUser }) => {
             kode={verifData.kode}
             name={verifData.name}
             email={verifData.email}
+            password={verifData.password}
             close={close}
             onUpdateUser={onUpdateUser}
           />
