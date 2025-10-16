@@ -169,12 +169,10 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    mode: "POST",
-                    action: "register",
-                    name: name,
-                    email: email,
+                    mode: "UPDATE",
+                    action: "otp",
                     phone: phoneReal || phone,
-                    password: password
+                    otp: code
                 })
             });
 
@@ -288,6 +286,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                         {
                             headers: { "Content-Type": "application/json" },
                         }
+                        
                     );
 
                     const decrypted = decryptRes.data;
