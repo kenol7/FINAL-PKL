@@ -60,9 +60,8 @@ export default function Home() {
   const hasRunTour = useRef(false);
 
   let ApiContribution =
-    "https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&latitude=-6.208763&longitude=106.845599";
-  //?latitude=-6.3474679&longitude=106.8246569&page=1
-
+    `https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&`;
+  
   const endpointImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
@@ -100,7 +99,7 @@ export default function Home() {
 
   const GetData = async (lat, lng) => {
     await fetch(
-      ApiContribution + "?latitude=" + lat + "&longitude=" + lng + "&page=1"
+      ApiContribution + "latitude=" + lat + "&longitude=" + lng + "&page=1"
     )
       .then((res) => res.json())
       .then((response) => {

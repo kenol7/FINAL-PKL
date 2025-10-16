@@ -104,7 +104,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
 
         fetchDecrypt();
 
-    });
+    }, [kode]);
 
     useEffect(() => {
         if (count <= 0) return;
@@ -112,7 +112,7 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
             setCount(prev => prev - 1);
         }, 1000);
         return () => clearInterval(intervalId);
-    }, [count]);
+    }, []);
 
     // useEffect(() => {
     //     console.log('OTP saat ini:', otp);
@@ -166,39 +166,89 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
 
         try {
             const response = await fetch(API.endpointregist, {
-                method: "POST", // atau sesuaikan jika backend terima PUT/UPDATE via POST
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     mode: "UPDATE",
                     action: "otp",
-                    phone: phoneReal || phone, // pastikan ini adalah nomor E.164
+                    phone: phoneReal || phone,
                     otp: code
                 })
             });
 
             const result = await response.json();
+
             if (result.status === "success") {
-                // Simpan data user ke localStorage
-                localStorage.setItem("auth_phone", phoneReal || phone);
                 localStorage.setItem("auth_email", email);
                 localStorage.setItem("auth_fullname", name);
+                localStorage.setItem("auth_phone", phoneReal || phone);
+                if (result.foto_profil) {
+                    localStorage.setItem("foto_profil", '/images/noprofile.png');
+                }
 
                 showToast(`Halo, ${name}! Akun Anda telah diverifikasi.`, "success");
                 setTimeout(() => {
+                    if (typeof onUpdateUser === "function") onUpdateUser();
                     if (typeof close === "function") close();
                     navigate("/");
                 }, 1000);
             } else {
-                throw new Error(result.message || "Verifikasi gagal.");
+                throw new Error(result.message || "Kode OTP salah.");
             }
         } catch (err) {
             console.error("Verifikasi gagal:", err);
             showToast("Verifikasi gagal: " + err.message, "error");
-            // Reset input OTP
             setOtp(new Array(4).fill(""));
             inputRefs.current[0]?.focus();
         }
     };
+
+    // const handleSubmit = async () => {
+    //     const code = otp.join('').trim();
+    //     if (!code || code.length !== 4) {
+    //         showToast('Masukkan kode OTP lengkap.', 'error');
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await fetch(API.endpointregist, {
+    //             method: "POST", // atau sesuaikan jika backend terima PUT/UPDATE via POST
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({
+    //                 mode: "POST",
+    //                 action: "register",
+    //                 name: name,
+    //                 email: email,
+    //                 phone: phoneReal || phone,
+    //                 password: password
+    //             })
+    //         });
+
+    //         const result = await response.json();
+    //         if (result.status === "success") {
+    //             // Simpan data user ke localStorage
+    //             localStorage.setItem("auth_phone", phoneReal || phone);
+    //             localStorage.setItem("auth_email", email);
+    //             localStorage.setItem("auth_fullname", name);
+    //             localStorage.setItem("foto_profil", '/images/noprofile.png');
+
+
+    //             showToast(`Halo, ${name}! Akun Anda telah diverifikasi.`, "success");
+    //             setTimeout(() => {
+    //                 if (typeof close === "function") close();
+    //                 navigate("/");
+    //             }, 1000);
+    //         } else {
+    //             throw new Error(result.message || "Verifikasi gagal.");
+    //         }
+    //     } catch (err) {
+    //         console.error("Verifikasi gagal:", err);
+    //         showToast("Verifikasi gagal: " + err.message, "error");
+    //         // Reset input OTP
+    //         setOtp(new Array(4).fill(""));
+    //         inputRefs.current[0]?.focus();
+    //     }
+    // };
 
 
     const handleResend = async () => {
@@ -212,12 +262,40 @@ const OTPInput = ({ kode, name, email, password, close, onUpdateUser }) => {
                 body: JSON.stringify({
                     mode: "POST",
                     action: "generate_otp",
-                    phone: phoneReal 
+                    phone: phoneReal
                 })
             });
 
             const result = await response.json();
             if (result.status === 'success') {
+                // 2. Ambil kode baru
+                const newKode = result.kode;
+
+                // 3. Decrypt untuk lihat OTP (opsional, hanya untuk debug)
+                try {
+                    const decryptRes = await axios.post(
+                        `${API.endpointregist}`,
+                        {
+                            mode: "POST",
+                            action: "decrypt",
+                            nomer_telepon: phoneReal || phone,
+                            email: userEmail || email,
+                            nama_lengkap: namaLengkap || name,
+                            kode: newKode,
+                        },
+                        {
+                            headers: { "Content-Type": "application/json" },
+                        }
+                        
+                    );
+
+                    const decrypted = decryptRes.data;
+                    if (decrypted && decrypted.otp) {
+                        console.log("🆕 OTP BARU YANG DIKIRIM:", decrypted.otp);
+                    }
+                } catch (decryptErr) {
+                    console.warn("Gagal decrypt OTP baru:", decryptErr);
+                }
                 setCount(120);
                 showToast('OTP baru dikirim!', 'success');
             } else {

@@ -46,10 +46,34 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [nomorTelepon, setNomorTelepon] = useState('');
     const [kataSandi, setKataSandi] = useState('');
 
-    // State untuk toast
+    const [countries, setCountries] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState('ID'); 
+    const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
 
     const [nomorTeleponE164, setNomorTeleponE164] = useState("");
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            try {
+                const response = await fetch(`${endPoint}?mode=get_countries`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    setCountries(data.countries);
+                } else {
+                    showToast("Gagal memuat daftar negara.");
+                }
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+                showToast("Terjadi kesalahan jaringan saat memuat negara.");
+            } finally {
+                setIsLoadingCountries(false);
+            }
+        };
+
+        fetchCountries();
+    }, []);
 
     const showToast = (message, type = "error") => {
         setToast({ message, type, visible: true });
@@ -81,35 +105,21 @@ const Register = ({ onRegisterSuccess, close }) => {
         setEmail(e.target.value);
     };
 
-    const [normalizedPhone, setNormalizedPhone] = useState('');
-
     const handleNomorTeleponChange = (e) => {
         const rawInput = e.target.value;
         setNomorTelepon(rawInput);
 
         let normalized = null;
         try {
-            const phoneNumber = parsePhoneNumberFromString(rawInput, 'ID');
+            const phoneNumber = parsePhoneNumberFromString(rawInput, selectedCountry);
             if (phoneNumber && phoneNumber.isValid()) {
                 normalized = phoneNumber.format('E.164');
             }
         } catch (err) {
-            console.error("Error parsing phone number:", err);
+            // console.error("Error parsing phone number:", err);
         }
-
         setNomorTeleponE164(normalized);
     };
-
-    function normalizePhone(input, defaultRegion = 'ID') {
-        try {
-            const phoneNumber = parsePhoneNumber(input, defaultRegion);
-            if (phoneNumber.isValid()) {
-                return phoneNumber.format('E.164');
-            }
-        } catch (err) {
-        }
-        return null;
-    }
 
     const handleKataSandiChange = (e) => {
         setKataSandi(e.target.value);
@@ -132,7 +142,8 @@ const Register = ({ onRegisterSuccess, close }) => {
             action: 'register',
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone: nomorTeleponE164,
+            phone: nomorTelepon, 
+            country_code: selectedCountry, 
             password: kataSandi
         };
 
@@ -148,7 +159,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                     setTimeout(() => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
-                                kode: response.kode,       // dari backend
+                                kode: response.kode,      
                                 name: namaLengkap.trim(),
                                 email: email.trim().toLowerCase(),
                                 phone: nomorTeleponE164,
@@ -196,10 +207,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
                                 kode: response.kode,
-                                name: namaLengkap.trim(),           // ✅ dari state lokal
-                                email: email.trim().toLowerCase(),  // ✅ dari state lokal
-                                phone: nomorTeleponE164,            // ✅ dari state lokal
-                                password: kataSandi                 // ✅ dari state lokal
+                                name: namaLengkap.trim(),         
+                                email: email.trim().toLowerCase(),  
+                                phone: response.full_phone,            
+                                password: kataSandi                 
                             });
                         }
                     }, 1500);
@@ -251,15 +262,35 @@ const Register = ({ onRegisterSuccess, close }) => {
 
                     <div>
                         <label className="font-jakarta text-xs">No Telepon</label>
+                        <div className="flex items-center w-full= h-[29px] rounded-full border border-[#F4D77B] bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#2067C5]">
+                        <select
+                                value={selectedCountry}
+                                onChange={(e) => {
+                                    setSelectedCountry(e.target.value);
+                                    handleNomorTeleponChange({ target: { value: nomorTelepon } });
+                                }}
+                                disabled={isLoadingCountries}
+                                className="h-full w-1/3 bg-transparent border-0 border-r border-gray-300 pl-3 pr-2 text-sm text-gray-700 focus:outline-none focus:ring-0">
+                                {isLoadingCountries ? (
+                                    <option>Memuat...</option>
+                                ) : (
+                                    countries.map((country) => (
+                                        <option key={country.code} value={country.code}>
+                                            {country.code} (+{country.phone})
+                                        </option>
+                                    ))
+                                )}
+                            </select>
                         <Input
                             type="text"
                             inputMode="numeric"
                             name="nomer_telepon"
                             value={nomorTelepon}
-                            className="font-jakarta text-xs text-black"
+                            className="font-jakarta text-xs text-black h-full bg-transparent border-0 px-2 focus:outline-none focus:ring-0"
                             maxLength="15"
                             onChange={handleNomorTeleponChange}
                         />
+                        </div>
                     </div>
 
                     <div>

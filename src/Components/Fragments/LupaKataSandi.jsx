@@ -34,7 +34,7 @@ const ToastAlert = ({ message, type, isVisible, onClose }) => {
     );
 };
 
-const LKS = ({ close }) => {
+const LKS = ({ close, onBackToLogin }) => {
     const [email21, setEmail21] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -50,10 +50,11 @@ const LKS = ({ close }) => {
         setToast((prev) => ({ ...prev, visible: false }));
     };
 
-    const handleEmailChange = (newValue) => {
-        setEmail21(newValue);
-        if (error) setError(""); // reset error saat user mengetik
+    const handleEmailChange = (e) => {
+        setEmail21(e.target.value); // Ambil nilai string dari event
+        if (error) setError("");
     };
+
 
     const lksSubmit = async (e) => {
         e.preventDefault();
@@ -136,7 +137,10 @@ const LKS = ({ close }) => {
 
                     <button
                         type="button"
-                        onClick={close}
+                        onClick={() => {
+                            close(); 
+                            if (onBackToLogin) onBackToLogin(); 
+                        }}
                         className="text-xs text-black-500 mt-4 block mx-auto hover:underline"
                     >
                         Batal
