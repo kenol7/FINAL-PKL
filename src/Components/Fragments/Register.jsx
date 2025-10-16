@@ -47,7 +47,7 @@ const Register = ({ onRegisterSuccess, close }) => {
     const [kataSandi, setKataSandi] = useState('');
 
     const [countries, setCountries] = useState([]);
-    const [selectedCountry, setSelectedCountry] = useState('ID'); 
+    const [selectedCountry, setSelectedCountry] = useState('ID');
     const [isLoadingCountries, setIsLoadingCountries] = useState(true);
 
     const [toast, setToast] = useState({ message: "", type: "error", visible: false });
@@ -142,8 +142,8 @@ const Register = ({ onRegisterSuccess, close }) => {
             action: 'register',
             name: namaLengkap.trim(),
             email: email.trim().toLowerCase(),
-            phone: nomorTelepon, 
-            country_code: selectedCountry, 
+            phone: nomorTelepon,
+            country_code: selectedCountry,
             password: kataSandi
         };
 
@@ -159,7 +159,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                     setTimeout(() => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
-                                kode: response.kode,      
+                                kode: response.kode,
                                 name: namaLengkap.trim(),
                                 email: email.trim().toLowerCase(),
                                 phone: nomorTeleponE164,
@@ -207,10 +207,10 @@ const Register = ({ onRegisterSuccess, close }) => {
                         if (typeof onRegisterSuccess === 'function') {
                             onRegisterSuccess({
                                 kode: response.kode,
-                                name: namaLengkap.trim(),         
-                                email: email.trim().toLowerCase(),  
-                                phone: response.full_phone,            
-                                password: kataSandi                 
+                                name: namaLengkap.trim(),
+                                email: email.trim().toLowerCase(),
+                                phone: response.full_phone,
+                                password: kataSandi
                             });
                         }
                     }, 1500);
@@ -234,7 +234,7 @@ const Register = ({ onRegisterSuccess, close }) => {
             />
 
             <form
-                className={`w-full flex flex-col items-center gap-6 transition-all duration-200 ${showPopup || showPopuptrue ? "blur-sm" : ""}`}
+                className={`w-full mx-auto  flex flex-col items-center gap-6 transition-all duration-200 ${showPopup || showPopuptrue ? "blur-sm" : ""}`}
                 onSubmit={handleSubmit}
             >
                 <div className="mt-10 flex flex-col gap-5 ml-5">
@@ -262,15 +262,16 @@ const Register = ({ onRegisterSuccess, close }) => {
 
                     <div>
                         <label className="font-jakarta text-xs">No Telepon</label>
-                        <div className="flex items-center w-full= h-[29px] rounded-full border border-[#F4D77B] bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#2067C5]">
-                        <select
+                        <div className="flex items-center w-full h-[35px] rounded-full border border-[#F4D77B] bg-white focus-within:ring-2 focus-within:ring-[#2067C5] overflow-hidden">
+                            <select
                                 value={selectedCountry}
                                 onChange={(e) => {
                                     setSelectedCountry(e.target.value);
                                     handleNomorTeleponChange({ target: { value: nomorTelepon } });
                                 }}
                                 disabled={isLoadingCountries}
-                                className="h-full w-1/3 bg-transparent border-0 border-r border-gray-300 pl-3 pr-2 text-sm text-gray-700 focus:outline-none focus:ring-0">
+                                className="h-full flex items-center bg-transparent border-r border-gray-300 text-sm text-gray-700 focus:outline-none focus:ring-0 appearance-none px-3"
+                            >
                                 {isLoadingCountries ? (
                                     <option>Memuat...</option>
                                 ) : (
@@ -281,15 +282,15 @@ const Register = ({ onRegisterSuccess, close }) => {
                                     ))
                                 )}
                             </select>
-                        <Input
-                            type="text"
-                            inputMode="numeric"
-                            name="nomer_telepon"
-                            value={nomorTelepon}
-                            className="font-jakarta text-xs text-black h-full bg-transparent border-0 px-2 focus:outline-none focus:ring-0"
-                            maxLength="15"
-                            onChange={handleNomorTeleponChange}
-                        />
+                            <input
+                                type="text"
+                                inputMode="numeric"
+                                name="nomer_telepon"
+                                value={nomorTelepon}
+                                className="flex-1 h-full px-3 text-sm bg-transparent focus:outline-none font-jakarta text-black"
+                                maxLength="15"
+                                onChange={handleNomorTeleponChange}
+                            />
                         </div>
                     </div>
 
@@ -306,7 +307,7 @@ const Register = ({ onRegisterSuccess, close }) => {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute top-1/2 right-0 -translate-y-1/2 h-full px-3 flex items-center"
+                                className="absolute inset-y-0 right-3 flex items-center"
                             >
                                 <img
                                     src="/Component 2.png"
