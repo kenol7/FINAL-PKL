@@ -84,8 +84,7 @@ const Login = ({ route, onClose }) => {
       await fetch(API.endpointlogin + '&email=' + document.getElementById('email').value + '&password=' + document.getElementById('kata_sandi').value)
         .then(res => res.json())
         .then(response => {
-
-
+          console.log(response);
           if (response.status === "success") {
             showToast(`Hello, ${response.user.nama_lengkap}`, "success");
             const fotoProfil =
@@ -97,6 +96,22 @@ const Login = ({ route, onClose }) => {
             localStorage.setItem("auth_fullname", response.user.nama_lengkap);
             localStorage.setItem("foto_profil", fotoProfil);
             localStorage.setItem("tipe_time", new Date().toISOString());
+            
+            if(response.user.isProfile == 1){
+              localStorage.setItem("profile_intro_seen", "true");
+            }
+            else{
+              localStorage.setItem("profile_intro_seen", "false");
+
+            }
+            if(response.user.isSell == 1){
+              localStorage.setItem("hasSeenIntroJual", "true");
+            }
+            else{
+              localStorage.setItem("hasSeenIntroJual", "false");
+
+            }
+
             window.dispatchEvent(new Event("storage"));
             setTimeout(() => {
               onClose();

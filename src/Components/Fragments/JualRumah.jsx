@@ -127,6 +127,7 @@ const JualRumah = () => {
   const [tingkatHunian, setTingkatHunian] = useState("");
 
   // Data dari API
+  const APIuser = API.endpointregist
   const [provinsiList, setProvinsiList] = useState([]);
   const [kotaList, setKotaList] = useState([]);
   const [kecamatanList, setKecamatanList] = useState([]);
@@ -147,151 +148,182 @@ const JualRumah = () => {
   const [occupancyList, setOccupancyList] = useState([]);
 
   const [isEditMode, setIsEditMode] = useState(false);
+  const handleTooltips = async() => {
+    const email = localStorage.getItem("auth_email");
+    try{
+      const payload ={
+        mode : 'UPDATE',
+        action : 'tooltipsSell',
+        email: email
+      };
+      fetch(APIuser, {
+        method : 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload) 
+      })
+      .then(res => res.json())
+    } catch{
+      console.error("Gagal:", error);
+    }
+  }
+
+  const checkIntroStatus = () => {
+    const seen = 
+      localStorage.getItem("hasSeenIntroJual");
+      return seen === "true"
+  };
+  const runIntro =() => {
+    const intro = introJs();
+    intro.setOptions({
+      steps: [
+        {
+          element: "#btn-upload-gambar",
+          intro: "Mulai dengan upload foto rumah Anda (maksimal 5 foto).",
+        },
+        {
+          element: "#section-peta",
+          intro:
+            "Geser penanda di peta untuk menentukan lokasi rumah secara akurat.",
+        },
+        {
+          element: "#input-nama-rumah",
+          intro: "Masukkan nama rumah atau apartemen yang dijual.",
+        },
+        {
+          element: "#input-nama-pemilik",
+          intro: "Isi nama pemilik rumah sesuai dokumen kepemilikan.",
+        },
+        {
+          element: "#select-kategori-pemilik",
+          intro:
+            "Pilih kategori pemilik, misalnya perorangan atau developer.",
+        },
+        {
+          element: "#input-harga",
+          intro: "Masukkan harga jual rumah dalam rupiah.",
+        },
+        {
+          element: "#input-telepon",
+          intro:
+            "Masukkan nomor telepon aktif untuk dihubungi calon pembeli.",
+        },
+        {
+          element: "#input-alamat",
+          intro: "Tulis alamat lengkap rumah Anda.",
+        },
+        {
+          element: "#select-provinsi",
+          intro: "Pilih provinsi lokasi rumah.",
+        },
+        {
+          element: "#select-kota",
+          intro: "Pilih kota atau kabupaten lokasi rumah.",
+        },
+        {
+          element: "#select-kecamatan",
+          intro: "Pilih kecamatan lokasi rumah.",
+        },
+        {
+          element: "#select-kelurahan",
+          intro: "Pilih kelurahan lokasi rumah.",
+        },
+        {
+          element: "#select-dokumen",
+          intro: "Pilih jenis dokumen kepemilikan properti.",
+        },
+        {
+          element: "#select-klasifikasi-bangunan",
+          intro:
+            "Pilih klasifikasi bangunan (misalnya rumah tinggal, ruko, dsb).",
+        },
+        {
+          element: "#select-kategori-lahan",
+          intro: "Pilih kategori lahan, misalnya perumahan atau komersial.",
+        },
+        {
+          element: "#select-peruntukan",
+          intro: "Pilih peruntukan lahan properti Anda.",
+        },
+        {
+          element: "#input-luas-tanah",
+          intro: "Masukkan luas tanah dalam meter persegi (m²).",
+        },
+        {
+          element: "#input-luas-bangunan",
+          intro: "Masukkan luas bangunan dalam meter persegi (m²).",
+        },
+        {
+          element: "#input-total-lantai",
+          intro: "Masukkan jumlah lantai bangunan.",
+        },
+        {
+          element: "#select-status-transaksi",
+          intro: "Pilih status transaksi (dijual, disewakan, dll).",
+        },
+        {
+          element: "#select-kategori-aset",
+          intro: "Pilih kategori aset (residensial, komersial, dsb).",
+        },
+        {
+          element: "#select-tipe-aset",
+          intro: "Pilih tipe aset (rumah, apartemen, tanah kosong, dll).",
+        },
+        {
+          element: "#select-kondisi-bangunan",
+          intro: "Pilih kondisi bangunan (baru, bekas, renovasi, dll).",
+        },
+        {
+          element: "#select-klasifikasi-jalan",
+          intro:
+            "Pilih klasifikasi jalan di depan rumah (utama, lingkungan, gang, dll).",
+        },
+        {
+          element: "#select-jalur-lalu-lintas",
+          intro:
+            "Pilih tingkat kepadatan jalur lalu lintas di depan properti.",
+        },
+        {
+          element: "#select-potensi-banjir",
+          intro: "Pilih potensi banjir di sekitar lokasi.",
+        },
+        {
+          element: "#select-tingkat-hunian",
+          intro: "Pilih tingkat hunian di lingkungan sekitar.",
+        },
+        {
+          element: "#input-diskon",
+          intro: "Masukkan diskon yang ingin diberikan (opsional).",
+        },
+        {
+          element: "#btn-verifikasi",
+          intro:
+            "Klik tombol ini untuk memverifikasi semua data sebelum dikirim.",
+        },
+      ],
+      disableInteraction: true,
+      showProgress: true,
+      showBullets: false,
+      nextLabel: "Lanjut →",
+      prevLabel: "← Kembali",
+      doneLabel: "Selesai",
+    });
+
+    setTimeout(() => intro.start(), 800);
+
+    intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
+    intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
+  
+  }
+  const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
+  
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem("hasSeenIntroJual");
-    if (!hasSeenIntro) {
-      const intro = introJs();
-      intro.setOptions({
-        steps: [
-          {
-            element: "#btn-upload-gambar",
-            intro: "Mulai dengan upload foto rumah Anda (maksimal 5 foto).",
-          },
-          {
-            element: "#section-peta",
-            intro:
-              "Geser penanda di peta untuk menentukan lokasi rumah secara akurat.",
-          },
-          {
-            element: "#input-nama-rumah",
-            intro: "Masukkan nama rumah atau apartemen yang dijual.",
-          },
-          {
-            element: "#input-nama-pemilik",
-            intro: "Isi nama pemilik rumah sesuai dokumen kepemilikan.",
-          },
-          {
-            element: "#select-kategori-pemilik",
-            intro:
-              "Pilih kategori pemilik, misalnya perorangan atau developer.",
-          },
-          {
-            element: "#input-harga",
-            intro: "Masukkan harga jual rumah dalam rupiah.",
-          },
-          {
-            element: "#input-telepon",
-            intro:
-              "Masukkan nomor telepon aktif untuk dihubungi calon pembeli.",
-          },
-          {
-            element: "#input-alamat",
-            intro: "Tulis alamat lengkap rumah Anda.",
-          },
-          {
-            element: "#select-provinsi",
-            intro: "Pilih provinsi lokasi rumah.",
-          },
-          {
-            element: "#select-kota",
-            intro: "Pilih kota atau kabupaten lokasi rumah.",
-          },
-          {
-            element: "#select-kecamatan",
-            intro: "Pilih kecamatan lokasi rumah.",
-          },
-          {
-            element: "#select-kelurahan",
-            intro: "Pilih kelurahan lokasi rumah.",
-          },
-          {
-            element: "#select-dokumen",
-            intro: "Pilih jenis dokumen kepemilikan properti.",
-          },
-          {
-            element: "#select-klasifikasi-bangunan",
-            intro:
-              "Pilih klasifikasi bangunan (misalnya rumah tinggal, ruko, dsb).",
-          },
-          {
-            element: "#select-kategori-lahan",
-            intro: "Pilih kategori lahan, misalnya perumahan atau komersial.",
-          },
-          {
-            element: "#select-peruntukan",
-            intro: "Pilih peruntukan lahan properti Anda.",
-          },
-          {
-            element: "#input-luas-tanah",
-            intro: "Masukkan luas tanah dalam meter persegi (m²).",
-          },
-          {
-            element: "#input-luas-bangunan",
-            intro: "Masukkan luas bangunan dalam meter persegi (m²).",
-          },
-          {
-            element: "#input-total-lantai",
-            intro: "Masukkan jumlah lantai bangunan.",
-          },
-          {
-            element: "#select-status-transaksi",
-            intro: "Pilih status transaksi (dijual, disewakan, dll).",
-          },
-          {
-            element: "#select-kategori-aset",
-            intro: "Pilih kategori aset (residensial, komersial, dsb).",
-          },
-          {
-            element: "#select-tipe-aset",
-            intro: "Pilih tipe aset (rumah, apartemen, tanah kosong, dll).",
-          },
-          {
-            element: "#select-kondisi-bangunan",
-            intro: "Pilih kondisi bangunan (baru, bekas, renovasi, dll).",
-          },
-          {
-            element: "#select-klasifikasi-jalan",
-            intro:
-              "Pilih klasifikasi jalan di depan rumah (utama, lingkungan, gang, dll).",
-          },
-          {
-            element: "#select-jalur-lalu-lintas",
-            intro:
-              "Pilih tingkat kepadatan jalur lalu lintas di depan properti.",
-          },
-          {
-            element: "#select-potensi-banjir",
-            intro: "Pilih potensi banjir di sekitar lokasi.",
-          },
-          {
-            element: "#select-tingkat-hunian",
-            intro: "Pilih tingkat hunian di lingkungan sekitar.",
-          },
-          {
-            element: "#input-diskon",
-            intro: "Masukkan diskon yang ingin diberikan (opsional).",
-          },
-          {
-            element: "#btn-verifikasi",
-            intro:
-              "Klik tombol ini untuk memverifikasi semua data sebelum dikirim.",
-          },
-        ],
-        disableInteraction: true,
-        showProgress: true,
-        showBullets: false,
-        nextLabel: "Lanjut →",
-        prevLabel: "← Kembali",
-        doneLabel: "Selesai",
-      });
+    const hasSeenIntroJual = checkIntroStatus();
+    if (!hasSeenIntroJual) {
+    runIntro();
+    handleTooltips()
 
-      setTimeout(() => intro.start(), 800);
-
-      intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
-      intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
-    }
-  }, []);
+  }}, []);
 
   // Fetch data awal
   useEffect(() => {

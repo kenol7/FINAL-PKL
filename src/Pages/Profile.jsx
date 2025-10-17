@@ -21,6 +21,7 @@ export default function Profile(props) {
     profil: "",
   });
 
+  const endPoint = API.endpointregist
   const ProfileImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
   const fotoProfil = profile.profil
@@ -47,62 +48,75 @@ export default function Profile(props) {
 
   const hasRunIntro = useRef(false);
 
-  useEffect(() => {
-    const hasSeenIntro = localStorage.getItem("hasSeenIntroProfile");
+  const checkIntroStatus = () => {
+    const seen = 
+      localStorage.getItem("profile_intro_seen");
+      return seen === "true"
+  };
 
-    // hanya jalankan intro jika belum pernah dilihat
+  const runIntro = () => {
+    const intro = introJs();
+    intro.setOptions({
+      steps: [
+        {
+          element: "#btn-edit-foto",
+          intro: "Klik di sini untuk mengganti foto profil Anda.",
+          position: "bottom",
+        },
+        {
+          element: "#card-data-profil",
+          intro:
+            "Di sini Anda dapat melihat data profil seperti nama, email, lokasi, dan nomor HP.",
+          position: "right",
+        },
+        {
+          element: "#btn-ubah-data",
+          intro:
+            "Gunakan tombol ini untuk memperbarui data profil Anda seperti nama atau nomor telepon.",
+          position: "bottom",
+        },
+        {
+          element: "#btn-ubah-password",
+          intro: "Gunakan tombol ini untuk mengganti password akun Anda.",
+          position: "bottom",
+        },
+      ],
+      disableInteraction: true,
+      showProgress: true,
+      showBullets: false,
+      nextLabel: "Lanjut →",
+      prevLabel: "← Kembali",
+      doneLabel: "Selesai",
+    });
+
+    // Jalankan setelah sedikit delay agar DOM siap
+    setTimeout(() => {
+      intro.start();
+    }, 800);
+
+    // Saat user selesai atau skip → simpan status ke localStorage
+    intro.oncomplete(() => {
+      localStorage.setItem("profile_intro_seen", "true");
+      handleTooltips()
+    });
+    
+    intro.onexit(() => {
+      localStorage.setItem("profile_intro_seen", "true");
+      handleTooltips()
+    });
+  }
+
+  const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
+
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("profile_intro_seen");
+
     if (!hasRunIntro.current && !hasSeenIntro) {
       hasRunIntro.current = true;
-
-      const intro = introJs();
-      intro.setOptions({
-        steps: [
-          {
-            element: "#btn-edit-foto",
-            intro: "Klik di sini untuk mengganti foto profil Anda.",
-            position: "bottom",
-          },
-          {
-            element: "#card-data-profil",
-            intro:
-              "Di sini Anda dapat melihat data profil seperti nama, email, lokasi, dan nomor HP.",
-            position: "right",
-          },
-          {
-            element: "#btn-ubah-data",
-            intro:
-              "Gunakan tombol ini untuk memperbarui data profil Anda seperti nama atau nomor telepon.",
-            position: "bottom",
-          },
-          {
-            element: "#btn-ubah-password",
-            intro: "Gunakan tombol ini untuk mengganti password akun Anda.",
-            position: "bottom",
-          },
-        ],
-        disableInteraction: true,
-        showProgress: true,
-        showBullets: false,
-        nextLabel: "Lanjut →",
-        prevLabel: "← Kembali",
-        doneLabel: "Selesai",
-      });
-
-      // Jalankan setelah sedikit delay agar DOM siap
-      setTimeout(() => {
-        intro.start();
-      }, 800);
-
-      // Saat user selesai atau skip → simpan status ke localStorage
-      intro.oncomplete(() => {
-        localStorage.setItem("profile_intro_seen", "true");
-      });
-
-      intro.onexit(() => {
-        localStorage.setItem("profile_intro_seen", "true");
-      });
-    }
-  }, []);
+      runIntro();
+      setHasSeenIntro(true);
+}
+}, [hasSeenIntro]);
 
   const maskPhone = (phone) => {
     if (!phone) return "";
@@ -159,16 +173,43 @@ export default function Profile(props) {
 
   const handlePasswordUpdate = () => {};
 
+  const handleTooltips = async () => {
+    const email = localStorage.getItem("auth_email");
+    try{
+      const payload = {
+        mode : 'UPDATE',
+        action : 'tooltipsProfile',
+        email: email
+      };
+      fetch(endPoint, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload) 
+      })
+      .then(res => res.json())
+    } catch{
+      console.error("Gagal:", error);
+    }
+  }
+
   const handleLogout = async () => {
     const email = localStorage.getItem("auth_email");
-
     try {
-      if (email) {
-        await axios.get(
-          `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
-        );
-      }
-
+        const payload = {
+          mode: 'POST',
+          action: 'logout',
+          email: email
+        };
+        fetch(endPoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload) 
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.status === "success") {
+            alert("Berhasil Logout!", "success");
+        }})
       // Hanya hapus data auth, BUKAN favorites
       localStorage.removeItem("auth_email");
       localStorage.removeItem("auth_fullname");
