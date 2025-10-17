@@ -57,13 +57,12 @@ export default function Sidebar({ onHitungKPR, onSimulasiKPR }) {
       const intro = introJs();
       intro.setOptions({
         steps,
-        disableInteraction: false,
+        disableInteraction: true,
+        showProgress: true,
+        showBullets: false,
         nextLabel: "Lanjut →",
         prevLabel: "← Kembali",
         doneLabel: "Selesai",
-        showStepNumbers: false,
-        scrollToElement: true,
-        exitOnOverlayClick: false,
       });
 
       const finish = () =>
@@ -139,7 +138,7 @@ export default function Sidebar({ onHitungKPR, onSimulasiKPR }) {
     return () => clearTimeout(timer);
   }, []);
 
-  //  Handler Hitung KPR 
+  //  Handler Hitung KPR
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!dp || !tenor) {
@@ -157,7 +156,7 @@ export default function Sidebar({ onHitungKPR, onSimulasiKPR }) {
     }
   };
 
-  //  Handler Simulasi KPR 
+  //  Handler Simulasi KPR
   const handleSubmitSimulasi = (e) => {
     e.preventDefault();
     if (!dp || !tenor || !gaji) {
@@ -175,7 +174,7 @@ export default function Sidebar({ onHitungKPR, onSimulasiKPR }) {
     }
   };
 
-  //  Format Rupiah 
+  //  Format Rupiah
   const formatRupiah = (value) => {
     if (!value) return "";
     const numberString = value.toString().replace(/\D/g, "");

@@ -132,7 +132,7 @@ export default function Beli() {
         steps: visibleSteps,
         disableInteraction: false,
         showProgress: true,
-        showBullets: true,
+        showBullets: false,
         nextLabel: "Lanjut →",
         prevLabel: "← Kembali",
         doneLabel: "Selesai",
