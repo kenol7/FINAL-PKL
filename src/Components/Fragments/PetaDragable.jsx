@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 
-const PetaDragable = ({ initialPosition, onPositionChange, mapId = 'jualrumah_map', zoom = 14, width = '100%', height = '240px', isDraggable = true }) => {
+const PetaDragable = ({
+    initialPosition,
+    onPositionChange,
+    mapId = 'jualrumah_map',
+    zoom = 14,
+    width = '100%',
+    height = '240px',
+    isDraggable = true
+}) => {
     const [position, setPosition] = useState(initialPosition);
 
     useEffect(() => {
@@ -11,7 +19,7 @@ const PetaDragable = ({ initialPosition, onPositionChange, mapId = 'jualrumah_ma
     const handleMarkerDragEnd = (event) => {
         const newPosition = {
             lat: event.latLng.lat(),
-            lng: event.latLng.lng()
+            lng: event.latLng.lng(),
         };
         setPosition(newPosition);
         if (onPositionChange) {
@@ -24,13 +32,13 @@ const PetaDragable = ({ initialPosition, onPositionChange, mapId = 'jualrumah_ma
             <APIProvider apiKey="AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo">
                 <Map
                     mapId={mapId}
-                    defaultCenter={position}
-                    defaultZoom={zoom}
+                    center={position}     
+                    zoom={zoom}
                     style={{ width: '100%', height: '100%' }}
                 >
                     <Marker
                         position={position}
-                        draggable={isDraggable} 
+                        draggable={isDraggable}
                         onDragEnd={handleMarkerDragEnd}
                     />
                 </Map>
