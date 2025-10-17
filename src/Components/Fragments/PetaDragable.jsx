@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { APIProvider, Map, Marker, useMap } from "@vis.gl/react-google-maps";
 
 const InnerMap = ({ position, onPositionChange, zoom, isDraggable }) => {
-    const map = useMap(); 
+    const map = useMap();
     const markerRef = useRef(null);
 
     useEffect(() => {
