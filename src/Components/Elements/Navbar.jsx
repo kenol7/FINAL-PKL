@@ -436,7 +436,8 @@ export default function Navbar() {
           <HalamanVerif
             close={closeVerifPopup}
             data={verifData}
-            onUpdateUser={updateUser}
+            onUpdateUser={() => {
+              window.dispatchEvent(new Event("storage"))}}
             isForgotPassword={true}
           />
         </div>
