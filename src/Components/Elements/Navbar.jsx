@@ -71,7 +71,7 @@ export default function Navbar() {
   const updateUser = () => {
     const hasAuth = Boolean(
       localStorage.getItem("auth_email") &&
-      localStorage.getItem("auth_fullname")
+        localStorage.getItem("auth_fullname")
     );
 
     if (hasAuth && user !== "Profile") {
@@ -81,11 +81,15 @@ export default function Navbar() {
         const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage.trim()}`;
         setProfileImage(url);
       } else {
-        setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
+        setProfileImage(
+          "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg"
+        );
       }
     } else if (!hasAuth && user !== null) {
       setUser(null);
-      setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
+      setProfileImage(
+        "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg"
+      );
     }
   };
 
@@ -256,8 +260,9 @@ export default function Navbar() {
 
       {/* Sidebar Mobile */}
       <div
-        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
-          } lg:hidden md:block`}
+        className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        } lg:hidden md:block`}
       >
         <div className="flex justify-end p-4">
           <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
