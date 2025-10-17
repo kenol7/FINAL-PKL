@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import * as exifr from "exifr";
+import EXIF from "exif-js";
 import PetaDragable from "./PetaDragable";
 import introJs from "intro.js";
 import "intro.js/minified/introjs.min.css";
@@ -127,6 +127,7 @@ const JualRumah = () => {
   const [tingkatHunian, setTingkatHunian] = useState("");
 
   // Data dari API
+  const APIuser = API.endpointregist
   const [provinsiList, setProvinsiList] = useState([]);
   const [kotaList, setKotaList] = useState([]);
   const [kecamatanList, setKecamatanList] = useState([]);
@@ -147,151 +148,182 @@ const JualRumah = () => {
   const [occupancyList, setOccupancyList] = useState([]);
 
   const [isEditMode, setIsEditMode] = useState(false);
+  const handleTooltips = async() => {
+    const email = localStorage.getItem("auth_email");
+    try{
+      const payload ={
+        mode : 'UPDATE',
+        action : 'tooltipsSell',
+        email: email
+      };
+      fetch(APIuser, {
+        method : 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload) 
+      })
+      .then(res => res.json())
+    } catch{
+      console.error("Gagal:", error);
+    }
+  }
+
+  const checkIntroStatus = () => {
+    const seen = 
+      localStorage.getItem("hasSeenIntroJual");
+      return seen === "true"
+  };
+  const runIntro =() => {
+    const intro = introJs();
+    intro.setOptions({
+      steps: [
+        {
+          element: "#btn-upload-gambar",
+          intro: "Mulai dengan upload foto rumah Anda (maksimal 5 foto).",
+        },
+        {
+          element: "#section-peta",
+          intro:
+            "Geser penanda di peta untuk menentukan lokasi rumah secara akurat.",
+        },
+        {
+          element: "#input-nama-rumah",
+          intro: "Masukkan nama rumah atau apartemen yang dijual.",
+        },
+        {
+          element: "#input-nama-pemilik",
+          intro: "Isi nama pemilik rumah sesuai dokumen kepemilikan.",
+        },
+        {
+          element: "#select-kategori-pemilik",
+          intro:
+            "Pilih kategori pemilik, misalnya perorangan atau developer.",
+        },
+        {
+          element: "#input-harga",
+          intro: "Masukkan harga jual rumah dalam rupiah.",
+        },
+        {
+          element: "#input-telepon",
+          intro:
+            "Masukkan nomor telepon aktif untuk dihubungi calon pembeli.",
+        },
+        {
+          element: "#input-alamat",
+          intro: "Tulis alamat lengkap rumah Anda.",
+        },
+        {
+          element: "#select-provinsi",
+          intro: "Pilih provinsi lokasi rumah.",
+        },
+        {
+          element: "#select-kota",
+          intro: "Pilih kota atau kabupaten lokasi rumah.",
+        },
+        {
+          element: "#select-kecamatan",
+          intro: "Pilih kecamatan lokasi rumah.",
+        },
+        {
+          element: "#select-kelurahan",
+          intro: "Pilih kelurahan lokasi rumah.",
+        },
+        {
+          element: "#select-dokumen",
+          intro: "Pilih jenis dokumen kepemilikan properti.",
+        },
+        {
+          element: "#select-klasifikasi-bangunan",
+          intro:
+            "Pilih klasifikasi bangunan (misalnya rumah tinggal, ruko, dsb).",
+        },
+        {
+          element: "#select-kategori-lahan",
+          intro: "Pilih kategori lahan, misalnya perumahan atau komersial.",
+        },
+        {
+          element: "#select-peruntukan",
+          intro: "Pilih peruntukan lahan properti Anda.",
+        },
+        {
+          element: "#input-luas-tanah",
+          intro: "Masukkan luas tanah dalam meter persegi (m²).",
+        },
+        {
+          element: "#input-luas-bangunan",
+          intro: "Masukkan luas bangunan dalam meter persegi (m²).",
+        },
+        {
+          element: "#input-total-lantai",
+          intro: "Masukkan jumlah lantai bangunan.",
+        },
+        {
+          element: "#select-status-transaksi",
+          intro: "Pilih status transaksi (dijual, disewakan, dll).",
+        },
+        {
+          element: "#select-kategori-aset",
+          intro: "Pilih kategori aset (residensial, komersial, dsb).",
+        },
+        {
+          element: "#select-tipe-aset",
+          intro: "Pilih tipe aset (rumah, apartemen, tanah kosong, dll).",
+        },
+        {
+          element: "#select-kondisi-bangunan",
+          intro: "Pilih kondisi bangunan (baru, bekas, renovasi, dll).",
+        },
+        {
+          element: "#select-klasifikasi-jalan",
+          intro:
+            "Pilih klasifikasi jalan di depan rumah (utama, lingkungan, gang, dll).",
+        },
+        {
+          element: "#select-jalur-lalu-lintas",
+          intro:
+            "Pilih tingkat kepadatan jalur lalu lintas di depan properti.",
+        },
+        {
+          element: "#select-potensi-banjir",
+          intro: "Pilih potensi banjir di sekitar lokasi.",
+        },
+        {
+          element: "#select-tingkat-hunian",
+          intro: "Pilih tingkat hunian di lingkungan sekitar.",
+        },
+        {
+          element: "#input-diskon",
+          intro: "Masukkan diskon yang ingin diberikan (opsional).",
+        },
+        {
+          element: "#btn-verifikasi",
+          intro:
+            "Klik tombol ini untuk memverifikasi semua data sebelum dikirim.",
+        },
+      ],
+      disableInteraction: true,
+      showProgress: true,
+      showBullets: false,
+      nextLabel: "Lanjut →",
+      prevLabel: "← Kembali",
+      doneLabel: "Selesai",
+    });
+
+    setTimeout(() => intro.start(), 800);
+
+    intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
+    intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
+  
+  }
+  const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
+  
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem("hasSeenIntroJual");
-    if (!hasSeenIntro) {
-      const intro = introJs();
-      intro.setOptions({
-        steps: [
-          {
-            element: "#btn-upload-gambar",
-            intro: "Mulai dengan upload foto rumah Anda (maksimal 5 foto).",
-          },
-          {
-            element: "#section-peta",
-            intro:
-              "Geser penanda di peta untuk menentukan lokasi rumah secara akurat.",
-          },
-          {
-            element: "#input-nama-rumah",
-            intro: "Masukkan nama rumah atau apartemen yang dijual.",
-          },
-          {
-            element: "#input-nama-pemilik",
-            intro: "Isi nama pemilik rumah sesuai dokumen kepemilikan.",
-          },
-          {
-            element: "#select-kategori-pemilik",
-            intro:
-              "Pilih kategori pemilik, misalnya perorangan atau developer.",
-          },
-          {
-            element: "#input-harga",
-            intro: "Masukkan harga jual rumah dalam rupiah.",
-          },
-          {
-            element: "#input-telepon",
-            intro:
-              "Masukkan nomor telepon aktif untuk dihubungi calon pembeli.",
-          },
-          {
-            element: "#input-alamat",
-            intro: "Tulis alamat lengkap rumah Anda.",
-          },
-          {
-            element: "#select-provinsi",
-            intro: "Pilih provinsi lokasi rumah.",
-          },
-          {
-            element: "#select-kota",
-            intro: "Pilih kota atau kabupaten lokasi rumah.",
-          },
-          {
-            element: "#select-kecamatan",
-            intro: "Pilih kecamatan lokasi rumah.",
-          },
-          {
-            element: "#select-kelurahan",
-            intro: "Pilih kelurahan lokasi rumah.",
-          },
-          {
-            element: "#select-dokumen",
-            intro: "Pilih jenis dokumen kepemilikan properti.",
-          },
-          {
-            element: "#select-klasifikasi-bangunan",
-            intro:
-              "Pilih klasifikasi bangunan (misalnya rumah tinggal, ruko, dsb).",
-          },
-          {
-            element: "#select-kategori-lahan",
-            intro: "Pilih kategori lahan, misalnya perumahan atau komersial.",
-          },
-          {
-            element: "#select-peruntukan",
-            intro: "Pilih peruntukan lahan properti Anda.",
-          },
-          {
-            element: "#input-luas-tanah",
-            intro: "Masukkan luas tanah dalam meter persegi (m²).",
-          },
-          {
-            element: "#input-luas-bangunan",
-            intro: "Masukkan luas bangunan dalam meter persegi (m²).",
-          },
-          {
-            element: "#input-total-lantai",
-            intro: "Masukkan jumlah lantai bangunan.",
-          },
-          {
-            element: "#select-status-transaksi",
-            intro: "Pilih status transaksi (dijual, disewakan, dll).",
-          },
-          {
-            element: "#select-kategori-aset",
-            intro: "Pilih kategori aset (residensial, komersial, dsb).",
-          },
-          {
-            element: "#select-tipe-aset",
-            intro: "Pilih tipe aset (rumah, apartemen, tanah kosong, dll).",
-          },
-          {
-            element: "#select-kondisi-bangunan",
-            intro: "Pilih kondisi bangunan (baru, bekas, renovasi, dll).",
-          },
-          {
-            element: "#select-klasifikasi-jalan",
-            intro:
-              "Pilih klasifikasi jalan di depan rumah (utama, lingkungan, gang, dll).",
-          },
-          {
-            element: "#select-jalur-lalu-lintas",
-            intro:
-              "Pilih tingkat kepadatan jalur lalu lintas di depan properti.",
-          },
-          {
-            element: "#select-potensi-banjir",
-            intro: "Pilih potensi banjir di sekitar lokasi.",
-          },
-          {
-            element: "#select-tingkat-hunian",
-            intro: "Pilih tingkat hunian di lingkungan sekitar.",
-          },
-          {
-            element: "#input-diskon",
-            intro: "Masukkan diskon yang ingin diberikan (opsional).",
-          },
-          {
-            element: "#btn-verifikasi",
-            intro:
-              "Klik tombol ini untuk memverifikasi semua data sebelum dikirim.",
-          },
-        ],
-        disableInteraction: true,
-        showProgress: true,
-        showBullets: false,
-        nextLabel: "Lanjut →",
-        prevLabel: "← Kembali",
-        doneLabel: "Selesai",
-      });
+    const hasSeenIntroJual = checkIntroStatus();
+    if (!hasSeenIntroJual) {
+    runIntro();
+    handleTooltips()
 
-      setTimeout(() => intro.start(), 800);
-
-      intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
-      intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
-    }
-  }, []);
+  }}, []);
 
   // Fetch data awal
   useEffect(() => {
@@ -456,24 +488,26 @@ const JualRumah = () => {
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files).slice(0, 5);
     setUploadedFiles(files);
-
     if (files.length > 0) {
       setActiveIndex(0);
 
-            try {
-                const coords = await readImageMetadata(files[0]);
-                console.log("Koordinat dari EXIF:", coords);
-                setMapPosition(coords);
-                setIsDraggable(false);
-                showToast(`Koordinat berhasil dibaca (${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)})`, "success");
-            } catch (error) {
-                console.warn("Gagal baca metadata:", error.message);
-                setIsDraggable(true);
-                showToast("Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.", "info");
-            }
-        }
-    };
-
+      // Coba baca metadata dari gambar pertama
+      try {
+        const coords = await readImageMetadata(files[0]);
+        setMapPosition(coords);
+        setIsDraggable(false); // Jika berhasil baca, marker tidak bisa di-drag
+        showToast("Koordinat berhasil dibaca dari gambar.", "success");
+      } catch (error) {
+        console.warn("Gagal baca metadata:", error.message);
+        // Jika gagal, biarkan marker bisa di-drag
+        setIsDraggable(true);
+        showToast(
+          "Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.",
+          "info"
+        );
+      }
+    }
+  };
 
   const handleNumericInput = (e, setter) => {
     const value = e.target.value;
@@ -482,44 +516,55 @@ const JualRumah = () => {
     }
   };
 
-    const readImageMetadata = async (file) => {
-        try {
-            const exifData = await exifr.parse(file); 
-            console.log("EXIF data:", exifData);
+  // Fungsi untuk membaca metadata EXIF dari gambar
+  const readImageMetadata = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            EXIF.getData(img, function () {
+              const lat = EXIF.getTag(this, "GPSLatitude");
+              const lng = EXIF.getTag(this, "GPSLongitude");
+              const latRef = EXIF.getTag(this, "GPSLatitudeRef");
+              const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
 
-            const { GPSLatitude, GPSLongitude, GPSLatitudeRef, GPSLongitudeRef } = exifData;
+              if (lat && lng && latRef && lngRef) {
+                const decimalLat = convertDMSToDD(lat, latRef);
+                const decimalLng = convertDMSToDD(lng, lngRef);
+                resolve({ lat: decimalLat, lng: decimalLng });
+              } else {
+                reject(new Error("Tidak ada data GPS di gambar."));
+              }
+            });
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error("Gagal memuat gambar."));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error("Gagal membaca file."));
+      reader.readAsDataURL(file);
+    });
+  };
 
-            if (GPSLatitude && GPSLongitude) {
-                const lat = Array.isArray(GPSLatitude)
-                    ? GPSLatitude[0] + GPSLatitude[1] / 60 + GPSLatitude[2] / 3600
-                    : GPSLatitude;
-                const lng = Array.isArray(GPSLongitude)
-                    ? GPSLongitude[0] + GPSLongitude[1] / 60 + GPSLongitude[2] / 3600
-                    : GPSLongitude;
+  const convertDMSToDD = (dms, ref) => {
+    if (!dms || !ref) return null;
 
-                const finalLat = GPSLatitudeRef === "S" ? -lat : lat;
-                const finalLng = GPSLongitudeRef === "W" ? -lng : lng;
+    const degrees = dms[0];
+    const minutes = dms[1];
+    const seconds = dms[2];
 
-                return { lat: finalLat, lng: finalLng };
-            } else {
-                throw new Error("Tidak ada data GPS di gambar.");
-            }
-        } catch (error) {
-            throw error;
-        }
-    };
+    let dd = degrees + minutes / 60 + seconds / 3600;
 
+    if (ref === "S" || ref === "W") {
+      dd = dd * -1;
+    }
 
-
-    const convertDMSToDD = (dms, ref) => {
-        if (!dms || !ref) return null;
-        const degrees = dms[0];
-        const minutes = dms[1];
-        const seconds = dms[2];
-        let dd = degrees + minutes / 60 + seconds / 3600;
-        if (ref === "S" || ref === "W") dd = dd * -1;
-        return dd;
-    };
+    return dd;
+  };
 
   const handlePhoneChange = (e) => {
     const rawInput = e.target.value;

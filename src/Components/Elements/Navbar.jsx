@@ -6,6 +6,7 @@ import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API from "../../Config/Endpoint"
 import { useUserProfile } from "../../hooks/useUserProfile";
 
 import {
@@ -31,6 +32,7 @@ export default function Navbar() {
   // const [profileImage, setProfileImage] = useState();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
+  const endPoint = API.endpointregist
 
   const [profile, setProfile] = useState({
     nama: "",
@@ -44,12 +46,21 @@ export default function Navbar() {
     const email = localStorage.getItem("auth_email");
 
     try {
-      if (email) {
-        await axios.get(
-          `https://smataco.my.id/dev/unez/CariRumahAja/routes/user.php?mode=logout&email=${email}`
-        );
-      }
-
+      const payload = {
+        mode: 'POST',
+        action: 'logout',
+        email: email
+      };
+      fetch(endPoint, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload) 
+      })
+      .then(res => res.json())
+      .then(response => {
+        if (response.status === "success") {
+          alert("Berhasil Logout!", "success");
+    }});
       localStorage.removeItem("auth_email");
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
