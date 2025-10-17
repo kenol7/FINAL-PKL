@@ -2,10 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { APIProvider, Map, Marker, useMap } from "@vis.gl/react-google-maps";
 
 const InnerMap = ({ position, onPositionChange, zoom, isDraggable }) => {
-    const map = useMap(); // akses instance map
+    const map = useMap(); 
     const markerRef = useRef(null);
 
-    // kalau koordinat dari luar berubah → pan map ke lokasi baru
     useEffect(() => {
         if (map && position) {
             map.panTo(position);
@@ -51,7 +50,7 @@ const PetaDragable = ({
             <APIProvider apiKey="AIzaSyDtRAmlhx3Ada5pVl5ilzeHP67TLxO6pyo">
                 <Map
                     mapId={mapId}
-                    defaultCenter={position} // ✅ biar bisa zoom/pan bebas
+                    defaultCenter={position} 
                     defaultZoom={zoom}
                     style={{ width: "100%", height: "100%" }}
                 >

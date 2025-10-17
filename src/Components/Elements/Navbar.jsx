@@ -50,16 +50,13 @@ export default function Navbar() {
         );
       }
 
-      // Hapus data login
       localStorage.removeItem("auth_email");
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
       localStorage.removeItem("foto_profil");
 
-      // Trigger perubahan global user
       window.dispatchEvent(new Event("storage"));
 
-      // Reset profil dan redirect
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
       navigate("/");
     } catch (error) {
