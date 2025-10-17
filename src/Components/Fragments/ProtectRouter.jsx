@@ -36,7 +36,7 @@ export default function ProtectedRoute({ children }) {
       const loginDate = new Date(loginTime);
       const now = new Date();
       const diff = now - loginDate;
-      const oneDays =   1 * 60 * 1000;
+      const oneDays =   10 * 60 * 1000;
 
       if (diff >= oneDays) {
         handleLogout();

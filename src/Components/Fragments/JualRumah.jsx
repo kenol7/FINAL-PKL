@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import EXIF from "exif-js";
+import * as exifr from "exifr";
 import PetaDragable from "./PetaDragable";
 import introJs from "intro.js";
 import "intro.js/minified/introjs.min.css";
@@ -456,26 +456,24 @@ const JualRumah = () => {
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files).slice(0, 5);
     setUploadedFiles(files);
+
     if (files.length > 0) {
       setActiveIndex(0);
 
-      // Coba baca metadata dari gambar pertama
-      try {
-        const coords = await readImageMetadata(files[0]);
-        setMapPosition(coords);
-        setIsDraggable(false); // Jika berhasil baca, marker tidak bisa di-drag
-        showToast("Koordinat berhasil dibaca dari gambar.", "success");
-      } catch (error) {
-        console.warn("Gagal baca metadata:", error.message);
-        // Jika gagal, biarkan marker bisa di-drag
-        setIsDraggable(true);
-        showToast(
-          "Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.",
-          "info"
-        );
-      }
-    }
-  };
+            try {
+                const coords = await readImageMetadata(files[0]);
+                console.log("Koordinat dari EXIF:", coords);
+                setMapPosition(coords);
+                setIsDraggable(false);
+                showToast(`Koordinat berhasil dibaca (${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)})`, "success");
+            } catch (error) {
+                console.warn("Gagal baca metadata:", error.message);
+                setIsDraggable(true);
+                showToast("Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.", "info");
+            }
+        }
+    };
+
 
   const handleNumericInput = (e, setter) => {
     const value = e.target.value;
@@ -484,55 +482,44 @@ const JualRumah = () => {
     }
   };
 
-  // Fungsi untuk membaca metadata EXIF dari gambar
-  const readImageMetadata = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            EXIF.getData(img, function () {
-              const lat = EXIF.getTag(this, "GPSLatitude");
-              const lng = EXIF.getTag(this, "GPSLongitude");
-              const latRef = EXIF.getTag(this, "GPSLatitudeRef");
-              const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+    const readImageMetadata = async (file) => {
+        try {
+            const exifData = await exifr.parse(file); 
+            console.log("EXIF data:", exifData);
 
-              if (lat && lng && latRef && lngRef) {
-                const decimalLat = convertDMSToDD(lat, latRef);
-                const decimalLng = convertDMSToDD(lng, lngRef);
-                resolve({ lat: decimalLat, lng: decimalLng });
-              } else {
-                reject(new Error("Tidak ada data GPS di gambar."));
-              }
-            });
-          } catch (err) {
-            reject(err);
-          }
-        };
-        img.onerror = () => reject(new Error("Gagal memuat gambar."));
-        img.src = e.target.result;
-      };
-      reader.onerror = () => reject(new Error("Gagal membaca file."));
-      reader.readAsDataURL(file);
-    });
-  };
+            const { GPSLatitude, GPSLongitude, GPSLatitudeRef, GPSLongitudeRef } = exifData;
 
-  const convertDMSToDD = (dms, ref) => {
-    if (!dms || !ref) return null;
+            if (GPSLatitude && GPSLongitude) {
+                const lat = Array.isArray(GPSLatitude)
+                    ? GPSLatitude[0] + GPSLatitude[1] / 60 + GPSLatitude[2] / 3600
+                    : GPSLatitude;
+                const lng = Array.isArray(GPSLongitude)
+                    ? GPSLongitude[0] + GPSLongitude[1] / 60 + GPSLongitude[2] / 3600
+                    : GPSLongitude;
 
-    const degrees = dms[0];
-    const minutes = dms[1];
-    const seconds = dms[2];
+                const finalLat = GPSLatitudeRef === "S" ? -lat : lat;
+                const finalLng = GPSLongitudeRef === "W" ? -lng : lng;
 
-    let dd = degrees + minutes / 60 + seconds / 3600;
+                return { lat: finalLat, lng: finalLng };
+            } else {
+                throw new Error("Tidak ada data GPS di gambar.");
+            }
+        } catch (error) {
+            throw error;
+        }
+    };
 
-    if (ref === "S" || ref === "W") {
-      dd = dd * -1;
-    }
 
-    return dd;
-  };
+
+    const convertDMSToDD = (dms, ref) => {
+        if (!dms || !ref) return null;
+        const degrees = dms[0];
+        const minutes = dms[1];
+        const seconds = dms[2];
+        let dd = degrees + minutes / 60 + seconds / 3600;
+        if (ref === "S" || ref === "W") dd = dd * -1;
+        return dd;
+    };
 
   const handlePhoneChange = (e) => {
     const rawInput = e.target.value;
