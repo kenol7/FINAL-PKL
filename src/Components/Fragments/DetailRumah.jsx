@@ -110,53 +110,48 @@ const DetailRumah = () => {
     }, [detail?.ref_id]);
 
     const toggleFavorit = async () => {
-        const toggleFavorit = async () => {
-            if (!detail?.ref_id) {
-                console.warn("ref_id tidak tersedia");
-                return;
-            }
+        if (!detail?.ref_id) {
+            console.warn("ref_id tidak tersedia");
+            return;
+        }
 
-            const email = localStorage.getItem("auth_email");
-            if (!email || !email.trim()) {
-                showToast("Anda harus login terlebih dahulu.", "error");
-                return;
-            }
+        const email = localStorage.getItem("auth_email");
+        if (!email || !email.trim()) {
+            showToast("Anda harus login terlebih dahulu.", "error");
+            return;
+        }
 
-            const newFavoritStatus = !favorit;
-            setFavorit(newFavoritStatus); // optimistic UI update
+        const newFavoritStatus = !favorit;
+        setFavorit(newFavoritStatus);
 
-            const mode = newFavoritStatus ? "add" : "delete";
-            const payload = {
-                mode,
-                email: email.trim(),
-                ref_id: detail.ref_id,
-            };
-
-            try {
-                const res = await fetch(apibook, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                });
-
-                const result = await res.json();
-
-                showToast(
-                    newFavoritStatus
-                        ? "Properti berhasil ditambahkan ke favorit."
-                        : "Properti berhasil dihapus dari favorit."
-                );
-
-                // Opsional: refresh status dari server untuk pastikan sinkron
-                // fetchFavoriteStatus(); // Anda bisa uncomment ini jika ingin ekstra aman
-
-            } catch (error) {
-                console.error("Error toggle favorit:", error);
-                setFavorit(!newFavoritStatus); // rollback UI
-                showToast(error.message, "error");
-            }
+        const mode = newFavoritStatus ? "add" : "delete";
+        const payload = {
+            mode,
+            email: email.trim(),
+            ref_id: detail.ref_id,
         };
+
+        try {
+            const res = await fetch(apibook, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await res.json();
+
+            showToast(
+                newFavoritStatus
+                    ? "Properti berhasil ditambahkan ke favorit."
+                    : "Properti berhasil dihapus dari favorit."
+            );
+        } catch (error) {
+            console.error("Error toggle favorit:", error);
+            setFavorit(!newFavoritStatus); // rollback UI
+            showToast(error.message, "error");
+        }
     };
+
 
     const GetContributionImage = async (refid) => {
         try {
