@@ -6,6 +6,7 @@ import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ProtectedRoute from "../Fragments/protectedRoute";
 
 import {
   HalamanLogin,
@@ -53,7 +54,9 @@ export default function Navbar() {
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
       localStorage.removeItem("foto_profil");
-
+      localStorage.removeItem("isProfile");
+      localStorage.removeItem("isSell");
+      window.dispatchEvent(new Event("storage"));
       setUser(null);
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
       navigate("/");
@@ -64,6 +67,9 @@ export default function Navbar() {
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
       localStorage.removeItem("foto_profil");
+      localStorage.removeItem("isProfile");
+      localStorage.removeItem("isSell");
+      window.dispatchEvent(new Event("storage"));
       navigate("/");
     }
   };
