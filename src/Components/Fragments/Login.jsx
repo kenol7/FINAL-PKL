@@ -88,10 +88,14 @@ const Login = ({ route, onClose }) => {
 
           if (response.status === "success") {
             showToast(`Hello, ${response.user.nama_lengkap}`, "success");
+            const fotoProfil =
+              response.user.image && response.user.image.trim() !== ""
+                ? response.user.image
+                : "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
             localStorage.setItem("auth_phone", response.user.nomer_telepon);
             localStorage.setItem("auth_email", response.user.email);
             localStorage.setItem("auth_fullname", response.user.nama_lengkap);
-            localStorage.setItem("foto_profil", response.user.image);
+            localStorage.setItem("foto_profil", fotoProfil);
             localStorage.setItem("tipe_time", new Date().toISOString());
             window.dispatchEvent(new Event("storage"));
             setTimeout(() => {
@@ -139,8 +143,8 @@ const Login = ({ route, onClose }) => {
           label="Email"
           type="email"
           name="email"
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <div className="flex flex-col items-start w-[278px]">
@@ -149,7 +153,7 @@ const Login = ({ route, onClose }) => {
             <Input
               type={showPassword ? "text" : "password"}
               name="kata_sandi"
-              value={kataSandi} 
+              value={kataSandi}
               onChange={(e) => setKataSandi(e.target.value)}
               className="w-full h-[29px] rounded-full border border-[#F4D77B] px-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#2067C5] bg-white"
             />

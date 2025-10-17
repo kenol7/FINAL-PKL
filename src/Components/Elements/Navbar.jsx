@@ -6,6 +6,7 @@ import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useUserProfile } from "../../hooks/useUserProfile";
 
 import {
   HalamanLogin,
@@ -20,13 +21,14 @@ export default function Navbar() {
   const [showDaftarPopup, setShowDaftarPopup] = useState(false);
   const [showLKSPopup, setShowLKSPopup] = useState(false);
   const [showVerifPopup, setShowVerifPopup] = useState(false);
+  const user = useUserProfile();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [verifData, setVerifData] = useState(null);
   const location = useLocation();
 
-  const [profileImage, setProfileImage] = useState();
+  // const [profileImage, setProfileImage] = useState();
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -48,54 +50,58 @@ export default function Navbar() {
         );
       }
 
-      // Hanya hapus data auth, BUKAN favorites
+      // Hapus data login
       localStorage.removeItem("auth_email");
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
       localStorage.removeItem("foto_profil");
 
-      setUser(null);
+      // Trigger perubahan global user
+      window.dispatchEvent(new Event("storage"));
+
+      // Reset profil dan redirect
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
       navigate("/");
     } catch (error) {
       console.error("Gagal logout dari server:", error);
-      // Tetap hapus auth data saja
       localStorage.removeItem("auth_email");
       localStorage.removeItem("auth_fullname");
       localStorage.removeItem("auth_phone");
       localStorage.removeItem("foto_profil");
+      window.dispatchEvent(new Event("storage"));
       navigate("/");
     }
   };
 
-  const updateUser = () => {
-    const hasAuth = Boolean(
-      localStorage.getItem("auth_email") &&
-      localStorage.getItem("auth_fullname")
-    );
 
-    if (hasAuth && user !== "Profile") {
-      setUser("Profile");
-      const savedImage = localStorage.getItem("foto_profil");
-      if (savedImage) {
-        const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage.trim()}`;
-        setProfileImage(url);
-      } else {
-        setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
-      }
-    } else if (!hasAuth && user !== null) {
-      setUser(null);
-      setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
-    }
-  };
+  // const updateUser = () => {
+  //   const hasAuth = Boolean(
+  //     localStorage.getItem("auth_email") &&
+  //     localStorage.getItem("auth_fullname")
+  //   );
 
-  useEffect(() => {
-    updateUser();
-    window.addEventListener("storage", updateUser);
-    return () => {
-      window.removeEventListener("storage", updateUser);
-    };
-  }, []);
+  //   if (hasAuth && user !== "Profile") {
+  //     setUser("Profile");
+  //     const savedImage = localStorage.getItem("foto_profil");
+  //     if (savedImage) {
+  //       const url = `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${savedImage.trim()}`;
+  //       setProfileImage(url);
+  //     } else {
+  //       setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
+  //     }
+  //   } else if (!hasAuth && user !== null) {
+  //     setUser(null);
+  //     setProfileImage("https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg");
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   updateUser();
+  //   window.addEventListener("storage", updateUser);
+  //   return () => {
+  //     window.removeEventListener("storage", updateUser);
+  //   };
+  // }, []);
 
   const toggleLoginPopup = () => setShowLoginPopup(!showLoginPopup);
   const toggleDaftarPopup = () => setShowDaftarPopup(!showDaftarPopup);
@@ -178,20 +184,26 @@ export default function Navbar() {
               </Link>
             </li>
 
-            {/* Profil atau Login/Register */}
-            {user ? (
+            {user.email ? (
               <li>
                 <div className="relative">
                   <div
                     className="flex items-center cursor-pointer"
                     onClick={toggleDropdown}
                   >
-                    {/* ✅ Gunakan profileImage yang diambil dari localStorage */}
                     <img
-                      src={profileImage}
+                      src={
+                        user.foto?.startsWith("http")
+                          ? user.foto
+                          : `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${user.foto}`
+                      }
                       alt="Profile"
-                      className="rounded-full w-8"
-                      onError={(e) => (e.currentTarget.src = profileImage)}
+                      className="rounded-full w-8 h-8 object-cover"
+                      onError={(e) => {
+                        if (e.currentTarget.src !== "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg") {
+                          e.currentTarget.src = "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
+                        }
+                      }}
                     />
                   </div>
 
@@ -259,94 +271,130 @@ export default function Navbar() {
         className={`fixed top-0 right-0 z-50 h-full w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
           } lg:hidden md:block`}
       >
+        {/* Tombol close */}
         <div className="flex justify-end p-4">
-          <div onClick={() => setMenuOpen(false)} aria-label="Close Menu">
+          <button onClick={() => setMenuOpen(false)} aria-label="Close Menu">
             <img src={Close} width="40" height="40" alt="Close" />
-          </div>
+          </button>
         </div>
+
+        {/* Isi menu mobile */}
         <div className="flex flex-col space-y-6 p-6 font-medium">
           <Link
             to="/chatbot"
             className={`hover:text-gray-900 ${isActive("/chatbot")}`}
+            onClick={() => setMenuOpen(false)}
           >
             Chatbot
           </Link>
           <Link
             to="/beli"
             className={`hover:text-gray-900 ${isActive("/beli")}`}
+            onClick={() => setMenuOpen(false)}
           >
             Beli Rumah
           </Link>
           <Link
             to="/jualrumah"
             className={`hover:text-gray-900 ${isActive("/jualrumah")}`}
+            onClick={() => setMenuOpen(false)}
           >
             Jual Rumah
           </Link>
-          <Link to="/kpr" className={`hover:text-gray-900 ${isActive("/kpr")}`}>
+          <Link
+            to="/kpr"
+            className={`hover:text-gray-900 ${isActive("/kpr")}`}
+            onClick={() => setMenuOpen(false)}
+          >
             Simulasi KPR
           </Link>
 
-          {/* Mobile: Profil atau Login/Register */}
-          {user ? (
-            <div className="relative">
-              <div
-                className="flex items-center cursor-pointer"
-                onClick={toggleDropdown}
-              >
-                {/* ✅ Gunakan profileImage */}
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className="rounded-full w-8"
-                  onError={(e) => (e.currentTarget.src = profileImage)}
-                />
-              </div>
-
-              {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200">
-                  <ul className="py-2">
-                    <li>
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      >
-                        Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <a
-                        onClick={handleLogout}
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        Logout
-                      </a>
-                    </li>
-                  </ul>
+          <div className="mt-6">
+            {user.email ? (
+              <div className="relative">
+                {/* Avatar */}
+                <div
+                  className="flex items-center cursor-pointer"
+                  onClick={toggleDropdown}
+                >
+                  <img
+                    src={
+                      user.foto?.startsWith("http")
+                        ? user.foto
+                        : `https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/${user.foto}`
+                    }
+                    alt="Profile"
+                    className="rounded-full w-8 h-8 object-cover"
+                    onError={(e) => {
+                      if (e.currentTarget.src !== "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg") {
+                        e.currentTarget.src = "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
+                      }
+                    }}
+                  />
+                  <span className="ml-3 font-semibold text-gray-800">
+                    {user.name || "User"}
+                  </span>
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex gap-5">
-              <Link
-                to=""
-                onClick={toggleLoginPopup}
-                className={`hover:text-gray-900 ${isActive("/login")}`}
-              >
-                Masuk
-              </Link>
-              <div className="bg-black w-0.5 h-7" />
-              <Link
-                to=""
-                onClick={toggleDaftarPopup}
-                className={`hover:text-gray-900 ${isActive("/register")}`}
-              >
-                Daftar
-              </Link>
-            </div>
-          )}
+
+                {/* Dropdown mobile */}
+                {isOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg border border-gray-200">
+                    <ul className="py-2">
+                      <li>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setIsOpen(false);
+                          }}
+                        >
+                          Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setMenuOpen(false);
+                            setIsOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => {
+                    toggleLoginPopup();
+                    setMenuOpen(false);
+                  }}
+                  className={`hover:text-gray-900 ${isActive("/login")}`}
+                >
+                  Masuk
+                </button>
+                <div className="bg-black w-0.5 h-7" />
+                <button
+                  onClick={() => {
+                    toggleDaftarPopup();
+                    setMenuOpen(false);
+                  }}
+                  className={`hover:text-gray-900 ${isActive("/register")}`}
+                >
+                  Daftar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
 
       {/* Popups */}
       {showLoginPopup && (
