@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThreeCircles } from "react-loader-spinner";
 import API from "../../Config/Endpoint";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import EXIF from "exif-js";
+import * as exifr from 'exifr';
 import PetaDragable from "./PetaDragable";
 import introJs from "intro.js";
 import "intro.js/minified/introjs.min.css";
@@ -148,31 +148,31 @@ const JualRumah = () => {
   const [occupancyList, setOccupancyList] = useState([]);
 
   const [isEditMode, setIsEditMode] = useState(false);
-  const handleTooltips = async() => {
+  const handleTooltips = async () => {
     const email = localStorage.getItem("auth_email");
-    try{
-      const payload ={
-        mode : 'UPDATE',
-        action : 'tooltipsSell',
+    try {
+      const payload = {
+        mode: 'UPDATE',
+        action: 'tooltipsSell',
         email: email
       };
       fetch(APIuser, {
-        method : 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload) 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       })
-      .then(res => res.json())
-    } catch{
+        .then(res => res.json())
+    } catch {
       console.error("Gagal:", error);
     }
   }
 
   const checkIntroStatus = () => {
-    const seen = 
+    const seen =
       localStorage.getItem("hasSeenIntroJual");
-      return seen === "true"
+    return seen === "true"
   };
-  const runIntro =() => {
+  const runIntro = () => {
     const intro = introJs();
     intro.setOptions({
       steps: [
@@ -312,20 +312,20 @@ const JualRumah = () => {
 
     intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
     intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
-  
+
   }
   const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
-  
+
 
   useEffect(() => {
     const hasSeenIntroJual = checkIntroStatus();
     if (!hasSeenIntroJual) {
-    runIntro();
-    handleTooltips()
+      runIntro();
+      handleTooltips()
 
-  }}, []);
+    }
+  }, []);
 
-  // Fetch data awal
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -488,26 +488,39 @@ const JualRumah = () => {
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files).slice(0, 5);
     setUploadedFiles(files);
-    if (files.length > 0) {
-      setActiveIndex(0);
+    if (files.length === 0) return;
 
-      // Coba baca metadata dari gambar pertama
+    setActiveIndex(0);
+
+    let foundCoords = null;
+    let firstValidFile = null;
+
+    for (const file of files) {
       try {
-        const coords = await readImageMetadata(files[0]);
-        setMapPosition(coords);
-        setIsDraggable(false); // Jika berhasil baca, marker tidak bisa di-drag
-        showToast("Koordinat berhasil dibaca dari gambar.", "success");
+        const coords = await readImageMetadata(file);
+        if (coords && typeof coords.lat === 'number' && typeof coords.lng === 'number') {
+          foundCoords = coords;
+          firstValidFile = file;
+          break;
+        }
       } catch (error) {
-        console.warn("Gagal baca metadata:", error.message);
-        // Jika gagal, biarkan marker bisa di-drag
-        setIsDraggable(true);
-        showToast(
-          "Tidak ada koordinat di gambar. Silakan tarik marker ke lokasi yang benar.",
-          "info"
-        );
+        console.warn("File tanpa koordinat:", file.name, error.message);
       }
     }
+
+    if (foundCoords) {
+      setMapPosition(foundCoords);
+      setIsDraggable(false);
+      showToast(
+        `Koordinat berhasil dibaca (${foundCoords.lat.toFixed(6)}, ${foundCoords.lng.toFixed(6)})`,
+        "success"
+      );
+    } else {
+      setIsDraggable(true);
+      showToast("Tidak ada koordinat di semua gambar. Silakan tarik marker ke lokasi yang benar.", "info");
+    }
   };
+
 
   const handleNumericInput = (e, setter) => {
     const value = e.target.value;
@@ -516,39 +529,33 @@ const JualRumah = () => {
     }
   };
 
-  // Fungsi untuk membaca metadata EXIF dari gambar
-  const readImageMetadata = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          try {
-            EXIF.getData(img, function () {
-              const lat = EXIF.getTag(this, "GPSLatitude");
-              const lng = EXIF.getTag(this, "GPSLongitude");
-              const latRef = EXIF.getTag(this, "GPSLatitudeRef");
-              const lngRef = EXIF.getTag(this, "GPSLongitudeRef");
+  const readImageMetadata = async (file) => {
+    try {
+      const exifData = await exifr.parse(file);
+      console.log("EXIF data:", exifData);
 
-              if (lat && lng && latRef && lngRef) {
-                const decimalLat = convertDMSToDD(lat, latRef);
-                const decimalLng = convertDMSToDD(lng, lngRef);
-                resolve({ lat: decimalLat, lng: decimalLng });
-              } else {
-                reject(new Error("Tidak ada data GPS di gambar."));
-              }
-            });
-          } catch (err) {
-            reject(err);
-          }
-        };
-        img.onerror = () => reject(new Error("Gagal memuat gambar."));
-        img.src = e.target.result;
-      };
-      reader.onerror = () => reject(new Error("Gagal membaca file."));
-      reader.readAsDataURL(file);
-    });
+      const { GPSLatitude, GPSLongitude, GPSLatitudeRef, GPSLongitudeRef } = exifData;
+
+      if (GPSLatitude && GPSLongitude) {
+        const lat = Array.isArray(GPSLatitude)
+          ? GPSLatitude[0] + GPSLatitude[1] / 60 + GPSLatitude[2] / 3600
+          : GPSLatitude;
+        const lng = Array.isArray(GPSLongitude)
+          ? GPSLongitude[0] + GPSLongitude[1] / 60 + GPSLongitude[2] / 3600
+          : GPSLongitude;
+
+        const finalLat = GPSLatitudeRef === "S" ? -lat : lat;
+        const finalLng = GPSLongitudeRef === "W" ? -lng : lng;
+
+        return { lat: finalLat, lng: finalLng };
+      } else {
+        throw new Error("Tidak ada data GPS di gambar.");
+      }
+    } catch (error) {
+      throw error;
+    }
   };
+
 
   const convertDMSToDD = (dms, ref) => {
     if (!dms || !ref) return null;
@@ -576,13 +583,18 @@ const JualRumah = () => {
       if (phoneNumber && phoneNumber.isValid()) {
         normalized = phoneNumber.format("E.164");
       }
-    } catch (err) {}
+    } catch (err) { }
 
     setNomorTeleponE164(normalized);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("selectedProvinsi:", selectedProvinsi);
+    console.log("selectedKota:", selectedKota);
+    console.log("hargaRaw:", hargaRaw); 
+    console.log("nomorTelepon:", nomorTelepon);
+    console.log("nomorTeleponE164:", nomorTeleponE164);
     if (!selectedProvinsi || !selectedKota || !hargaRaw || !nomorTeleponE164) {
       showToast(
         "Harap lengkapi field wajib: Provinsi, Kota, Harga, dan Nomor Telepon"
@@ -666,7 +678,7 @@ const JualRumah = () => {
       />
 
       {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-30 z-50">
           <ThreeCircles
             height="80"
             width="80"
@@ -714,11 +726,10 @@ const JualRumah = () => {
                     <button
                       key={idx}
                       onClick={() => setActiveIndex(idx)}
-                      className={`w-6 h-6 rounded border ${
-                        activeIndex === idx
-                          ? "border-yellow-400 bg-yellow-100"
-                          : "border-gray-400"
-                      }`}
+                      className={`w-6 h-6 rounded border ${activeIndex === idx
+                        ? "border-yellow-400 bg-yellow-100"
+                        : "border-gray-400"
+                        }`}
                     >
                       <img
                         src={URL.createObjectURL(_)}
@@ -801,9 +812,8 @@ const JualRumah = () => {
                     <span>{kategoriPemilik || "Pilih Kategori Pemilik"}</span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className={`h-5 w-5 transition-transform ${
-                        showArrowUp["Kategori Pemilik"] ? "rotate-180" : ""
-                      }`}
+                      className={`h-5 w-5 transition-transform ${showArrowUp["Kategori Pemilik"] ? "rotate-180" : ""
+                        }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -857,7 +867,7 @@ const JualRumah = () => {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   className="w-full p-2 rounded bg-white text-black"
-                  placeholder="Contoh: 081234567890"
+                  placeholder="Contoh: +6281234567890 selain kode negara gabisa"
                   value={nomorTelepon}
                   onChange={handlePhoneChange}
                 />
@@ -913,9 +923,8 @@ const JualRumah = () => {
                       <span>{value || `Pilih ${label}`}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp[label] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp[label] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -958,9 +967,8 @@ const JualRumah = () => {
                       <span>{dokumenProperti || "Pilih Dokumen"}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp["Dokumen"] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp["Dokumen"] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1002,11 +1010,10 @@ const JualRumah = () => {
                       <span>{klasifikasiBangunan || "Pilih Klasifikasi"}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp["Klasifikasi Bangunan"]
-                            ? "rotate-180"
-                            : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp["Klasifikasi Bangunan"]
+                          ? "rotate-180"
+                          : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1046,9 +1053,8 @@ const JualRumah = () => {
                       <span>{kategoriLahan || "Pilih Kategori Lahan"}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp["Kategori Lahan"] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp["Kategori Lahan"] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1088,9 +1094,8 @@ const JualRumah = () => {
                       <span>{peruntukan || "Pilih Peruntukan"}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp["Peruntukan"] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp["Peruntukan"] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1188,9 +1193,8 @@ const JualRumah = () => {
                       <span>{statusTransaksi || "Pilih Status Transaksi"}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp["Status Transaksi"] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp["Status Transaksi"] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1262,9 +1266,8 @@ const JualRumah = () => {
                       <span>{state || `Pilih ${label}`}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp[label] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp[label] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1330,9 +1333,8 @@ const JualRumah = () => {
                       <span>{state || `Pilih ${label}`}</span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-5 w-5 transition-transform ${
-                          showArrowUp[label] ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 transition-transform ${showArrowUp[label] ? "rotate-180" : ""
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
