@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-// import ProfileImage from "../../assets/profile.jpg"; // fallback jika tidak ada foto
 import Logo from "../../assets/logo.png";
 import Menu from "../../assets/menu.png";
 import Close from "../../assets/close.png";
@@ -8,13 +7,15 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import API from "../../Config/Endpoint"
 import { useUserProfile } from "../../hooks/useUserProfile";
+// import ProtectedRoute from "../Fragments/protectedRoute";
 
 import {
   HalamanLogin,
-  HalamanRegister,
+  HalamanRegister,  
   HalamanLKS,
   HalamanVerif,
 } from "../../Pages/HalamanUtama";
+
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -61,10 +62,11 @@ export default function Navbar() {
         if (response.status === "success") {
           alert("Berhasil Logout!", "success");
     }});
-      localStorage.removeItem("auth_email");
-      localStorage.removeItem("auth_fullname");
-      localStorage.removeItem("auth_phone");
-      localStorage.removeItem("foto_profil");
+    localStorage.clear();
+      // localStorage.removeItem("auth_email");
+      // localStorage.removeItem("auth_fullname");
+      // localStorage.removeItem("auth_phone");
+      // localStorage.removeItem("foto_profil");
 
       window.dispatchEvent(new Event("storage"));
 

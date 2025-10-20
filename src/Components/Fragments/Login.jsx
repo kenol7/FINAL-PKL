@@ -95,6 +95,8 @@ const Login = ({ route, onClose }) => {
             localStorage.setItem("auth_email", response.user.email);
             localStorage.setItem("auth_fullname", response.user.nama_lengkap);
             localStorage.setItem("foto_profil", fotoProfil);
+            // localStorage.setItem("isProfile", response.user.isProfile);
+            // localStorage.setItem("isSell", response.user.isSell);
             localStorage.setItem("tipe_time", new Date().toISOString());
             
             if(response.user.isProfile == 1){

@@ -21,7 +21,7 @@ export default function Profile(props) {
     profil: "",
   });
 
-  const endPoint = API.endpointregist
+  const endPoint = API.endpointregist;
   const ProfileImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/ProfilePicture/noProfilePict/noprofile_pict.jpeg";
   const fotoProfil = profile.profil
@@ -48,7 +48,12 @@ export default function Profile(props) {
 
   const hasRunIntro = useRef(false);
 
-  const checkIntroStatus = () => {
+  // const checkIntroStatus = () => {
+  //   const seen = localStorage.getItem("isProfile");
+  //   return seen === "true";
+  // };
+
+    const checkIntroStatus = () => {
     const seen = 
       localStorage.getItem("profile_intro_seen");
       return seen === "true"
@@ -97,26 +102,33 @@ export default function Profile(props) {
     // Saat user selesai atau skip → simpan status ke localStorage
     intro.oncomplete(() => {
       localStorage.setItem("profile_intro_seen", "true");
-      handleTooltips()
+      handleTooltips();
     });
-    
+
     intro.onexit(() => {
       localStorage.setItem("profile_intro_seen", "true");
-      handleTooltips()
+      handleTooltips();
     });
-  }
+  };
 
   const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem("profile_intro_seen");
+    // const hasSeenIntro = localStorage.getItem("isProfile"); ainol
+     const hasSeenIntro = localStorage.getItem("profile_intro_seen");
+    //      if (!hasRunIntro.current && hasSeenIntro !== "1") {
+    //       hasRunIntro.current = true;
+    //       runIntro();
+    //       setHasSeenIntro(true);
+    // }
+    // }, [hasSeenIntro]); // ainol
 
-    if (!hasRunIntro.current && !hasSeenIntro) {
-      hasRunIntro.current = true;
+    if (hasSeenIntro === "false") {
       runIntro();
       setHasSeenIntro(true);
-}
-}, [hasSeenIntro]);
+      handleTooltips();
+    }
+  }, []); //dika
 
   const maskPhone = (phone) => {
     if (!phone) return "";
@@ -175,46 +187,47 @@ export default function Profile(props) {
 
   const handleTooltips = async () => {
     const email = localStorage.getItem("auth_email");
-    try{
+    try {
       const payload = {
-        mode : 'UPDATE',
-        action : 'tooltipsProfile',
-        email: email
+        mode: "UPDATE",
+        action: "tooltipsProfile",
+        email: email,
       };
       fetch(endPoint, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload) 
-      })
-      .then(res => res.json())
-    } catch{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).then((res) => res.json());
+    } catch {
       console.error("Gagal:", error);
     }
-  }
+  };
 
   const handleLogout = async () => {
     const email = localStorage.getItem("auth_email");
     try {
-        const payload = {
-          mode: 'POST',
-          action: 'logout',
-          email: email
-        };
-        fetch(endPoint, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload) 
-        })
-        .then(res => res.json())
-        .then(response => {
+      const payload = {
+        mode: "POST",
+        action: "logout",
+        email: email,
+      };
+      fetch(endPoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then((res) => res.json())
+        .then((response) => {
           if (response.status === "success") {
             alert("Berhasil Logout!", "success");
-        }})
+          }
+        });
       // Hanya hapus data auth, BUKAN favorites
-      localStorage.removeItem("auth_email");
-      localStorage.removeItem("auth_fullname");
-      localStorage.removeItem("auth_phone");
-      localStorage.removeItem("foto_profil");
+      localStorage.clear();
+      // localStorage.removeItem("auth_email");
+      // localStorage.removeItem("auth_fullname");
+      // localStorage.removeItem("auth_phone");
+      // localStorage.removeItem("foto_profil");
 
       setUser(null);
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
