@@ -169,7 +169,7 @@ const JualRumah = () => {
 
   const checkIntroStatus = () => {
     const seen =
-      localStorage.getItem("hasSeenIntroJual");
+      localStorage.getItem("isSell");
     return seen === "true"
   };
   const runIntro = () => {
@@ -310,21 +310,31 @@ const JualRumah = () => {
 
     setTimeout(() => intro.start(), 800);
 
-    intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
-    intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
+    // intro.oncomplete(() => localStorage.setItem("hasSeenIntroJual", "true"));
+    // intro.onexit(() => localStorage.setItem("hasSeenIntroJual", "true"));
 
+    // Saat user selesai atau skip → simpan status ke localStorage
+    intro.oncomplete(() => {
+      localStorage.setItem("isSell", "true");
+      handleTooltips()
+    });
+    
+    intro.onexit(() => {
+      localStorage.setItem("isSell", "true");
+      handleTooltips()
+    });
   }
   const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
 
 
   useEffect(() => {
-    const hasSeenIntroJual = checkIntroStatus();
-    if (!hasSeenIntroJual) {
+    const hasSeenIntro = localStorage.getItem("isSell");
+    if (hasSeenIntro !== "1") {
       runIntro();
       handleTooltips()
 
     }
-  }, []);
+  }, [hasSeenIntro]);
 
   useEffect(() => {
     const fetchData = async () => {
