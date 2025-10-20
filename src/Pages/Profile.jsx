@@ -96,12 +96,12 @@ export default function Profile(props) {
 
     // Saat user selesai atau skip → simpan status ke localStorage
     intro.oncomplete(() => {
-      localStorage.setItem("profile_intro_seen", "true");
+      localStorage.setItem("isProfile", "true");
       handleTooltips()
     });
     
     intro.onexit(() => {
-      localStorage.setItem("profile_intro_seen", "true");
+      localStorage.setItem("isProfile", "true");
       handleTooltips()
     });
   }
