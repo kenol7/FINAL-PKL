@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Hand from "../assets/hand.png";
 import Sidebar from "../Components/Elements/Sidebar";
 import Navbar from "../Components/Elements/Navbar";
 import Footer from "../Components/Elements/Footer";
@@ -87,7 +88,7 @@ export default function KprPage() {
       setDataRumah(res.data.rekomendasi_properti);
       setDisplayMode("simulasi");
       setCurrentPage(1);
-    } catch (err) { 
+    } catch (err) {
       console.error("Gagal simulasi:", err);
       alert("Gagal menghitung simulasi KPR");
     } finally {
@@ -128,7 +129,23 @@ export default function KprPage() {
 
         <main className="flex-1 p-6 bg-white">
           {displayMode === "simulasi" && hasilSimulasi && (
-            <div className="gap-3 flex flex-wrap justify-center mb-10">
+            <div className="gap-3 flex flex-wrap justify-center items-center mb-10">
+              <style>
+                {`
+                  @keyframes float {
+                    0%, 100% {
+                      transform: translateY(0);
+                    }
+                    50% {
+                      transform: translateY(-8px);
+                    }
+                  }
+                `}
+              </style>
+              <img
+                src={Hand}
+                className="h-7 animate-[float_3s_ease-in-out_infinite]"
+              />
               <a className="bg-white border-2 border-gray-600/50 text-black px-5 py-1 rounded-full">
                 Gaji Bulanan:
                 <span className="font-semibold ml-2">

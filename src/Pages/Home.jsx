@@ -29,6 +29,8 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Suspense } from "react";
 import introJs from "intro.js";
 import "intro.js/introjs.css";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -59,9 +61,25 @@ export default function Home() {
   const navigate = useNavigate();
   const hasRunTour = useRef(false);
 
-  let ApiContribution =
-    `https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&`;
-  
+  useEffect(() => {
+    AOS.init({
+      duration: 1200,
+      easing: "ease-in-out",
+      once: false,
+    });
+
+    const handleScroll = () => {
+      AOS.refresh();
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  let ApiContribution = `https://smataco.my.id/dev/unez/CariRumahAja/routes/contribution.php?mode=nearby&`;
+
   const endpointImage =
     "https://smataco.my.id/dev/unez/CariRumahAja/foto/rumah.jpg";
 
@@ -205,21 +223,27 @@ export default function Home() {
         {
           element: "#home",
           intro: "👋 Halo! Selamat datang di halaman utama.",
+          position: "bottom",
         },
-        { element: "#iklan", 
-          intro: "🖼️ Ini bagian iklan utama kami." 
+        {
+          element: "#iklan",
+          intro: "🖼️ Ini bagian iklan utama kami.",
+          position: "bottom",
         },
-
-        { element: "#rumah_terdekat", 
-          intro: "🏠 Ini daftar rumah terdekat." },
+        {
+          element: "#rumah_terdekat",
+          intro: "🏠 Ini daftar rumah terdekat.",
+          position: "top",
+        },
         {
           element: "#chatbot",
           intro: "🤖 Ini chatbot yang siap membantu kamu.",
-          position: "bottom",
+          position: "top",
         },
-        { 
-          element: "#hitung_kpr", 
-          intro: "💰 Ini fitur kalkulator KPR." 
+        {
+          element: "#hitung_kpr",
+          intro: "💰 Ini fitur kalkulator KPR.",
+          position: "top",
         },
       ];
 
@@ -227,14 +251,17 @@ export default function Home() {
         {
           element: "#home",
           intro: "👋 Halo! Selamat datang di halaman utama.",
+          position: "bottom",
         },
-        { 
-          element: "#iklan", 
-          intro: "🖼️ Ini bagian iklan utama kami." 
+        {
+          element: "#iklan",
+          intro: "🖼️ Ini bagian iklan utama kami.",
+          position: "bottom",
         },
-        { 
-          element: "#rumah_terdekat", 
-          intro: "🏠 Ini daftar rumah terdekat." 
+        {
+          element: "#rumah_terdekat",
+          intro: "🏠 Ini daftar rumah terdekat.",
+          position: "top",
         },
       ];
 
@@ -293,7 +320,7 @@ export default function Home() {
           localStorage.setItem("hasSeenIntro", "true");
         });
       }
-    }, 100);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [sliderFitur]);
@@ -332,7 +359,12 @@ export default function Home() {
         </div>
 
         <div id="rumah_terdekat" className="mt-30 mx-10">
-          <div className="flex justify-between items-center">
+          <div
+            className="flex justify-between items-center"
+            data-aos="fade-up"
+            data-aos-delay="500"
+            data-aos-offset="200"
+          >
             <div className="w-1 h-1 md:block hidden" />
             <div className="">
               <h3 className="font-semibold xl:text-2xl lg:text-2xl md:text-2xl text-lg">
@@ -356,7 +388,12 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="flex justify-center mt-20">
+          <div
+            className="flex justify-center mt-20"
+            data-aos="fade-up"
+            data-aos-delay="500"
+            data-aos-offset="200"
+          >
             {rumahTerdekat.error ? (
               <p className="text-gray-600 md:text-2xl text-lg text-center">
                 Tidak ada rumah ditemukan di wilayah Anda.
@@ -448,7 +485,12 @@ export default function Home() {
                 <OrbitControls enableZoom={false} enablePan={false} />
               </Canvas>
             </div>
-            <div className="flex justify-center items-center text-center">
+            <div
+              className="flex justify-center items-center text-center"
+              data-aos="fade-left"
+              data-aos-delay="500"
+              data-aos-offset="200"
+            >
               <div className="xl:space-y-20 space-y-8">
                 <h3 className="xl:text-3xl lg:text-3xl text-xl xl:w-[600px] w-auto">
                   Mau cari rekomendasi rumah yang cepat sesuai konsepmu?
@@ -466,7 +508,12 @@ export default function Home() {
 
         <div id="hitung_kpr" className="my-30 mx-10 md:block hidden">
           <div className="flex justify-center xl:gap-14 lg:gap-8 md:gap-2 gap-2">
-            <div className="flex justify-center items-center text-center">
+            <div
+              className="flex justify-center items-center text-center"
+              data-aos="fade-right"
+              data-aos-delay="500"
+              data-aos-offset="200"
+            >
               <div className="xl:space-y-20 space-y-8">
                 <h3 className="xl:text-3xl lg:text-3xl text-xl xl:w-[600px] w-auto">
                   Mau hitung KPR rumah yang cepat dan sesuai?

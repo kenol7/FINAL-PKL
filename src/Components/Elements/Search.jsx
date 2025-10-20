@@ -16,6 +16,17 @@ export default function Search() {
   const [showFilter, setShowFilter] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
 
+
+  const handleToggleProvince = () => {
+     setIsOpenProvince(!isOpenProvince);
+     setIsOpenCity(false); // Tutup dropdown kota
+   };
+
+   const handleToggleCity = () => {
+     setIsOpenCity(!isOpenCity);
+     setIsOpenProvince(false); // Tutup dropdown provinsi
+   };
+
   const navigate = useNavigate(); 
   const location = useLocation();
 
@@ -81,7 +92,7 @@ export default function Search() {
       filterParams.append("province", selectedProvince);
     if (selectedCity && selectedCity !== "Kota")
       filterParams.append("city", selectedCity);
-    if (sortOrder) filterParams.append("sort_order", sortOrder); // ✅ Tetap kirim sort_order
+    if (sortOrder) filterParams.append("sort_order", sortOrder);
     return filterParams.toString();
   };
 
@@ -213,7 +224,7 @@ export default function Search() {
               {/* Dropdown Provinsi */}
               <div className="relative mb-3">
                 <button
-                  onClick={() => setIsOpenProvince(!isOpenProvince)}
+                  onClick={handleToggleProvince}
                   className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 cursor-grab active:cursor-grabbing"
                 >
                   {selectedProvince}
@@ -260,7 +271,7 @@ export default function Search() {
               {/* Dropdown Kota */}
               <div className="relative mb-3">
                 <button
-                  onClick={() => setIsOpenCity(!isOpenCity)}
+                  onClick={handleToggleCity}
                   disabled={dataKota.length === 0}
                   className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-grabbing"
                 >

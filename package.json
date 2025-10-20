@@ -16,6 +16,7 @@
     "@react-three/fiber": "^9.3.0",
     "@tailwindcss/vite": "^4.1.13",
     "@vis.gl/react-google-maps": "^1.5.5",
+    "aos": "^2.3.4",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "exifr": "^7.1.3",

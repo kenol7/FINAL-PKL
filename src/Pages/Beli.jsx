@@ -210,6 +210,8 @@ export default function Beli() {
         // Simpan summary
         if (res.data && res.data.summary) {
           setSummaryData(res.data.summary);
+        } else {
+          setSummaryData(0);
         }
 
         // ❌ HAPUS sorting di sini - biar di client side aja

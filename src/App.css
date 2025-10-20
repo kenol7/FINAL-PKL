@@ -15,3 +15,42 @@
     transform: scale(1);
   }
 }
+
+/* Tambahkan di file CSS global atau buat file intro-custom.css */
+
+.customTooltip {
+  max-width: 400px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+.customHighlight {
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.3) !important;
+}
+
+.introjs-tooltip {
+  min-width: 300px;
+}
+
+.introjs-tooltiptext {
+  padding: 15px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.introjs-fixedTooltip {
+  position: fixed !important;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+  .customTooltip {
+    max-width: 90vw !important;
+    min-width: 280px !important;
+  }
+  
+  .introjs-tooltiptext {
+    font-size: 14px;
+  }
+}
