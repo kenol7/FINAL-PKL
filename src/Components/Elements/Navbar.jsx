@@ -62,11 +62,10 @@ export default function Navbar() {
         if (response.status === "success") {
           alert("Berhasil Logout!", "success");
     }});
-    localStorage.clear();
-      // localStorage.removeItem("auth_email");
-      // localStorage.removeItem("auth_fullname");
-      // localStorage.removeItem("auth_phone");
-      // localStorage.removeItem("foto_profil");
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
 
       window.dispatchEvent(new Event("storage"));
 

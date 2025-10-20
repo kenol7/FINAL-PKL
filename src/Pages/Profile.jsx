@@ -114,21 +114,21 @@ export default function Profile(props) {
   const [hasSeenIntro, setHasSeenIntro] = useState(checkIntroStatus());
 
   useEffect(() => {
-    // const hasSeenIntro = localStorage.getItem("isProfile"); ainol
-     const hasSeenIntro = localStorage.getItem("profile_intro_seen");
-    //      if (!hasRunIntro.current && hasSeenIntro !== "1") {
-    //       hasRunIntro.current = true;
-    //       runIntro();
-    //       setHasSeenIntro(true);
-    // }
-    // }, [hasSeenIntro]); // ainol
-
-    if (hasSeenIntro === "false") {
-      runIntro();
-      setHasSeenIntro(true);
-      handleTooltips();
+    const hasSeenIntro = localStorage.getItem("isProfile");
+    //  const hasSeenIntro = localStorage.getItem("profile_intro_seen");
+         if (!hasRunIntro.current && hasSeenIntro !== "1") {
+          hasRunIntro.current = true;
+          runIntro();
+          setHasSeenIntro(true);
     }
-  }, []); //dika
+    }, [hasSeenIntro]);
+
+  //   if (hasSeenIntro === "false") {
+  //     runIntro();
+  //     setHasSeenIntro(true);
+  //     handleTooltips();
+  //   }
+  // }, []); 
 
   const maskPhone = (phone) => {
     if (!phone) return "";
@@ -223,11 +223,10 @@ export default function Profile(props) {
           }
         });
       // Hanya hapus data auth, BUKAN favorites
-      localStorage.clear();
-      // localStorage.removeItem("auth_email");
-      // localStorage.removeItem("auth_fullname");
-      // localStorage.removeItem("auth_phone");
-      // localStorage.removeItem("foto_profil");
+      localStorage.removeItem("auth_email");
+      localStorage.removeItem("auth_fullname");
+      localStorage.removeItem("auth_phone");
+      localStorage.removeItem("foto_profil");
 
       setUser(null);
       setProfile({ nama: "", lokasi: "", email: "", phone: "" });
