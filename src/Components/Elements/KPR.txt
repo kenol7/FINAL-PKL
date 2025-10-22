@@ -16,7 +16,18 @@ export default function Search() {
   const [showFilter, setShowFilter] = useState(false);
   const [sortOrder, setSortOrder] = useState("asc");
 
-  const navigate = useNavigate();
+
+  const handleToggleProvince = () => {
+     setIsOpenProvince(!isOpenProvince);
+     setIsOpenCity(false); // Tutup dropdown kota
+   };
+
+   const handleToggleCity = () => {
+     setIsOpenCity(!isOpenCity);
+     setIsOpenProvince(false); // Tutup dropdown provinsi
+   };
+
+  const navigate = useNavigate(); 
   const location = useLocation();
 
   useEffect(() => {
@@ -85,16 +96,6 @@ export default function Search() {
     return filterParams.toString();
   };
 
-  const handleSearchEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      const queryString = buildQueryParams();
-      navigate(`/beli?${queryString}`);
-      setShowFilter(false);
-    }
-  };
-
   const handleFilterSubmit = () => {
     const queryString = buildQueryParams();
     if (location.pathname === "/beli") {
@@ -107,7 +108,7 @@ export default function Search() {
 
   const formatRupiah = (value) => {
     if (!value) return "";
-    const numberString = value.toString().replace(/\D/g, "");
+    const numberString = value.toString().replace(/\D/g, ""); 
     const number = parseInt(numberString, 10);
     if (isNaN(number)) return "";
     return new Intl.NumberFormat("id-ID").format(number);
@@ -115,17 +116,6 @@ export default function Search() {
 
   const unformatRupiah = (value) => {
     return value.replace(/\D/g, "");
-  };
-
-  // Fungsi untuk toggle dropdown dengan menutup yang lain
-  const handleToggleProvince = () => {
-    setIsOpenProvince(!isOpenProvince);
-    setIsOpenCity(false); // Tutup dropdown kota
-  };
-
-  const handleToggleCity = () => {
-    setIsOpenCity(!isOpenCity);
-    setIsOpenProvince(false); // Tutup dropdown provinsi
   };
 
   return (
@@ -136,14 +126,13 @@ export default function Search() {
           <input
             type="text"
             placeholder="Filter Pencarian…"
-            className="w-full rounded-full border border-yellow-500 px-6 py-3 pl-20 focus:outline-none focus:ring-2 focus:ring-yellow-700 bg-gray-50 shadow-lg"
+            className="w-full rounded-full border border-yellow-500 px-6 py-3 pl-20 focus:outline-none focus:ring-2 focus:ring-yellow-700 bg-gray-50 shadow-lg cursor-pointer"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={handleSearchEnter}
+            readOnly
+            onClick={() => setShowFilter(true)}
           />
           <div
-            className="absolute inset-y-0 left-9 flex items-center cursor-pointer"
-            onClick={() => setShowFilter(true)}
+            className="absolute inset-y-0 left-9 flex items-center cursor-pointer pointer-events-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +166,7 @@ export default function Search() {
               </h2>
               <button
                 onClick={() => setShowFilter(false)}
-                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700"
+                className="absolute top-3 right-4 text-gray-500 hover:text-gray-700 cursor-pointer"
               >
                 ✕
               </button>
@@ -226,7 +215,7 @@ export default function Search() {
               <div className="relative mb-3">
                 <button
                   onClick={handleToggleProvince}
-                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800"
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 cursor-grab active:cursor-grabbing"
                 >
                   {selectedProvince}
                   <svg
@@ -274,7 +263,7 @@ export default function Search() {
                 <button
                   onClick={handleToggleCity}
                   disabled={dataKota.length === 0}
-                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-between text-black items-center rounded-lg border border-blue-500 bg-white px-4 py-2 text-left shadow focus:outline-none focus:ring-2 focus:ring-blue-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-grabbing"
                 >
                   {selectedCity}
                   <svg

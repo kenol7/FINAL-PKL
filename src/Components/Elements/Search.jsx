@@ -96,14 +96,14 @@ export default function Search() {
     return filterParams.toString();
   };
 
-  const handleSearchEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const queryString = buildQueryParams();
-      navigate(`/beli?${queryString}`);
-      setShowFilter(false);
-    }
-  };
+  // const handleSearchEnter = (e) => {
+  //   if (e.key === "Enter") {
+  //     e.preventDefault();
+  //     const queryString = buildQueryParams();
+  //     navigate(`/beli?${queryString}`);
+  //     setShowFilter(false);
+  //   }
+  // };
 
   const handleFilterSubmit = () => {
     const queryString = buildQueryParams();
@@ -137,12 +137,11 @@ export default function Search() {
             placeholder="Filter Pencarian…"
             className="w-full rounded-full border border-yellow-500 px-6 py-3 pl-20 focus:outline-none focus:ring-2 focus:ring-yellow-700 bg-gray-50 shadow-lg"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={handleSearchEnter}
+            readOnly
+            onClick={() => setShowFilter(true)}
           />
           <div
-            className="absolute inset-y-0 left-9 flex items-center cursor-pointer"
-            onClick={() => setShowFilter(true)}
+            className="absolute inset-y-0 left-9 flex items-center cursor-pointer pointer-events-none"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -314,33 +313,6 @@ export default function Search() {
                   </ul>
                 )}
               </div>
-
-              {/* SORT ORDER SUDAH ADA - tidak perlu diubah */}
-              {/* <div className="mb-4">
-                <p className="text-gray-700 mb-2 font-medium">Urutkan Harga:</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSortOrder("asc")}
-                    className={`flex-1 py-2 rounded-lg border ${
-                      sortOrder === "asc"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-                    }`}
-                  >
-                    Termurah ⬆️
-                  </button>
-                  <button
-                    onClick={() => setSortOrder("desc")}
-                    className={`flex-1 py-2 rounded-lg border ${
-                      sortOrder === "desc"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-                    }`}
-                  >
-                    Termahal ⬇️
-                  </button>
-                </div>
-              </div> */}
 
               {/* Tombol Terapkan Filter */}
               <button
